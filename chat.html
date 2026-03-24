@@ -7,72 +7,70 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background: #0e1621; color: #fff; height: 100vh; display: flex; overflow: hidden; }
-        /* Боковая панель как в ТГ */
-        .side { width: 80px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; }
-        .room-btn { width: 50px; height: 50px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
-        .room-btn.active { border: 2px solid #5288c1; }
-        
+        body { background: #0e1621; color: #fff; height: 100vh; display: flex; }
+        .side { width: 70px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 15px; }
+        .r-btn { width: 45px; height: 45px; border-radius: 15px; background: #2b5278; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+        .r-btn.active { border: 2px solid #5288c1; background: #5288c1; }
         .main { flex: 1; display: flex; flex-direction: column; background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
-        .h { background: #17212b; padding: 15px; font-weight: bold; border-bottom: 1px solid #0e1621; display: flex; justify-content: space-between; }
-        .ms { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .m { padding: 10px 14px; border-radius: 15px; max-width: 80%; position: relative; }
+        .h { background: #17212b; padding: 15px; font-weight: bold; border-bottom: 1px solid #0e1621; display: flex; justify-content: space-between; align-items: center; }
+        .ms { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .m { padding: 10px 14px; border-radius: 15px; max-width: 80%; line-height: 1.4; }
         .s { align-self: flex-end; background: #2b5278; border-bottom-right-radius: 2px; }
         .r { align-self: flex-start; background: #182533; border-bottom-left-radius: 2px; }
-        .u { font-size: 11px; color: #88b7e8; margin-bottom: 3px; display: block; font-weight: bold; }
-        .im { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+        .u-n { font-size: 11px; color: #88b7e8; font-weight: bold; margin-bottom: 2px; display: block; }
+        .im { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; }
         .b { background: #17212b; padding: 10px; display: flex; gap: 10px; align-items: center; }
-        input[type="text"] { flex: 1; padding: 12px 18px; border-radius: 25px; border: none; background: #0e1621; color: #fff; outline: none; }
-        .btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #708499; }
+        input[type="text"] { flex: 1; padding: 10px 15px; border-radius: 20px; border: none; background: #0e1621; color: #fff; outline: none; }
+        .ic { background: none; border: none; font-size: 20px; cursor: pointer; color: #708499; }
     </style>
 </head>
 <body>
     <div class="side">
-        <div class="room-btn active" onclick="chR('global')">🌐</div>
-        <div class="room-btn" onclick="chR('secret')">🔒</div>
+        <div class="r-btn active" onclick="chR('global', this)">🌐</div>
+        <div class="r-btn" onclick="chR('secret', this)">🔒</div>
+        <div class="r-btn" onclick="chR('work', this)">📁</div>
     </div>
     <div class="main">
-        <div class="h"><span id="rt">Global Chat</span> <span onclick="location.href='/'" style="cursor:pointer">🚪</span></div>
+        <div class="h"><span id="rt">Общий чат</span> <span onclick="location.href='/'" style="font-size: 12px; opacity: 0.5;">Выйти</span></div>
         <div class="ms" id="box"></div>
         <div class="b">
-            <button class="btn" onclick="document.getElementById('fi').click()">📎</button>
+            <button class="ic" onclick="document.getElementById('fi').click()">📎</button>
             <input type="file" id="fi" hidden accept="image/*" onchange="si()">
             <input type="text" id="inp" placeholder="Написать..." autocomplete="off">
-            <button class="btn" style="color:#5288c1" onclick="sm()">➜</button>
+            <button class="ic" style="color:#5288c1" onclick="sm()">➜</button>
         </div>
     </div>
-
     <script>
-        const u = localStorage.getItem('du') || 'User';
-        let r = 'global'; 
+        const u = localStorage.getItem('du') || 'Аноним';
+        let room = 'global'; 
         const socket = io();
 
-        function chR(newR) {
-            r = newR;
-            document.getElementById('rt').innerText = r === 'global' ? 'Global Chat' : 'Secret Room';
-            document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            socket.emit('join', r);
+        function chR(nR, el) {
+            room = nR;
+            document.getElementById('rt').innerText = nR === 'global' ? 'Общий чат' : (nR === 'secret' ? 'Секрет' : 'Работа');
+            document.querySelectorAll('.r-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            socket.emit('join', room);
         }
 
-        socket.on('connect', () => socket.emit('join', r));
-        socket.on('history', (h) => { document.getElementById('box').innerHTML = ''; h.forEach(m => rm(m)); sd(); });
-        socket.on('msg', (m) => { rm(m); sd(); });
+        socket.on('connect', () => socket.emit('join', room));
+        socket.on('history', (h) => { document.getElementById('box').innerHTML = ''; h.forEach(m => add(m)); scroll(); });
+        socket.on('msg', (m) => { add(m); scroll(); });
 
-        function rm(d) {
+        function add(d) {
             const v = document.createElement('div');
             v.className = `m ${d.u === u ? 's' : 'r'}`;
-            let c = `<span class="u">${d.u}</span>`;
-            if(d.t === 'img') c += `<img src="${d.c}" class="im">`;
-            else c += `<div>${d.c}</div>`;
-            v.innerHTML = c;
+            let content = `<span class="u-n">${d.u}</span>`;
+            if(d.t === 'img') content += `<img src="${d.c}" class="im">`;
+            else content += `<div>${d.c}</div>`;
+            v.innerHTML = content;
             document.getElementById('box').appendChild(v);
         }
 
         function sm() {
             const i = document.getElementById('inp');
             if(i.value.trim()) {
-                socket.emit('msg', { u, t: 'txt', c: i.value, r: r });
+                socket.emit('msg', { u, t: 'txt', c: i.value, r: room });
                 i.value = '';
             }
         }
@@ -80,11 +78,11 @@
         function si() {
             const f = document.getElementById('fi').files[0];
             const reader = new FileReader();
-            reader.onload = (e) => socket.emit('msg', { u, t: 'img', c: e.target.result, r: r });
+            reader.onload = (e) => socket.emit('msg', { u, t: 'img', c: e.target.result, r: room });
             if(f) reader.readAsDataURL(f);
         }
 
-        function sd() { const x = document.getElementById('box'); x.scrollTop = x.scrollHeight; }
+        function scroll() { const b = document.getElementById('box'); b.scrollTop = b.scrollHeight; }
         document.getElementById('inp').onkeypress = (e) => { if(e.key === 'Enter') sm(); };
     </script>
 </body>
