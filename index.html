@@ -3,141 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 5.0 Aura</title>
+    <title>DoveGram 5.5</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        :root { --bg: #050505; --card: #151515; --text: #eee; --accent: #fff; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, system-ui, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        :root { --bg: #000; --card: #121212; --text: #fff; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Авторизация */
-        #auth { position: fixed; inset:0; background:#000; z-index:1000; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px; transition: 0.5s; }
-        input { width:100%; max-width:320px; padding:16px; border-radius:14px; border:1px solid #222; background:#111; color:#fff; margin-bottom:12px; outline:none; font-size:16px; }
-        .btn { width:100%; max-width:320px; padding:16px; border-radius:14px; border:none; background:#fff; color:#000; font-weight:bold; cursor:pointer; font-size:16px; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
+        #auth { position: fixed; inset:0; background:#000; z-index:1000; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px; }
+        input { width:100%; max-width:300px; padding:15px; border-radius:14px; border:1px solid #333; background:#111; color:#fff; margin-bottom:12px; outline:none; }
+        .btn { width:100%; max-width:300px; padding:15px; border-radius:14px; border:none; background:#fff; color:#000; font-weight:bold; cursor:pointer; }
 
-        /* Шапка */
-        .h { height:65px; border-bottom:1px solid #1a1a1a; display:flex; align-items:center; padding:0 20px; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); justify-content:space-between; z-index:10; }
-        
-        /* Чат */
+        .h { height:65px; border-bottom:1px solid #222; display:flex; align-items:center; padding:0 20px; background:#000; justify-content:space-between; z-index:10; }
         #bx { flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; gap:12px; background-size:cover; background-position:center; }
-        .mw { max-width:82%; padding:12px 16px; border-radius:18px; background: rgba(20,20,20,0.85); backdrop-filter:blur(8px); align-self:flex-start; border:1px solid #222; position:relative; animation: slideUp 0.3s ease; }
-        .mw.me { align-self:flex-end; background:#fff; color:#000; border:none; }
-        @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         
-        /* Профиль и Инфо */
-        .av-m { width:32px; height:32px; border-radius:50%; object-fit:cover; margin-right:10px; cursor:pointer; }
-        #u_view { position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:1100; display:none; align-items:center; justify-content:center; padding:20px; }
-        .u-card { background:#111; width:100%; max-width:300px; padding:30px; border-radius:24px; text-align:center; border:1px solid #222; }
+        .mw { max-width:85%; padding:12px; border-radius:18px; background: rgba(30,30,30,0.9); backdrop-filter:blur(10px); align-self:flex-start; border:1px solid #333; position:relative; }
+        .mw.me { align-self:flex-end; background:#fff; color:#000; border:none; }
+        .av-m { width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px; cursor:pointer; }
+        
+        /* Голосовые */
+        audio { height: 35px; width: 220px; filter: invert(1); margin-top: 5px; }
+        .mw.me audio { filter: none; }
 
         /* Реакции */
-        .re-box { display:flex; gap:4px; margin-top:6px; flex-wrap:wrap; }
-        .re-btn { background:rgba(255,255,255,0.1); border:none; border-radius:10px; padding:2px 6px; cursor:pointer; font-size:12px; color:#fff; }
-        .mw.me .re-btn { background:rgba(0,0,0,0.1); color:#000; }
-        .re-sel { position:absolute; bottom:-30px; left:0; display:none; background:#222; padding:5px; border-radius:12px; gap:8px; z-index:50; }
+        .re-box { display:flex; gap:4px; margin-top:8px; }
+        .re-btn { background:rgba(255,255,255,0.1); border-radius:10px; padding:2px 7px; font-size:12px; color:#fff; cursor:pointer; }
+        .re-sel { position:absolute; bottom:-35px; left:0; display:none; background:#222; padding:6px; border-radius:15px; gap:8px; z-index:100; box-shadow: 0 4px 15px #000; }
         .mw:hover .re-sel { display:flex; }
 
-        /* Ввод */
-        .b { padding:15px; background:rgba(0,0,0,0.9); border-top:1px solid #1a1a1a; display:flex; gap:10px; align-items:center; }
-        .btn-up { width:48px; height:48px; border-radius:50%; background:#1a1a1a; border:1px solid #333; color:#fff; font-size:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-        #ty { font-size:12px; color:#666; padding:0 20px 5px; height:18px; }
+        #st { position:fixed; right:-100%; top:0; bottom:0; width:300px; background:#111; z-index:500; transition:0.3s; padding:20px; border-left:1px solid #222; }
+        #st.o { right:0; }
+
+        .b { padding:15px; background:#000; border-top:1px solid #222; display:flex; gap:10px; align-items:center; }
+        .rec-btn { width:45px; height:45px; border-radius:50%; background:#ff3b30; border:none; color:#fff; cursor:pointer; font-size:20px; }
+        .rec-btn.active { animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity:1; } 50% { opacity:0.5; } 100% { opacity:1; } }
     </style>
 </head>
 <body>
 
-<div id="u_view" onclick="this.style.display='none'">
-    <div class="u-card" onclick="event.stopPropagation()">
-        <img id="v_av" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px; border:2px solid #fff">
-        <h2 id="v_n">Имя</h2>
-        <p id="v_p" style="color:#666; font-size:14px; margin-bottom:15px"></p>
-        <div id="v_bio" style="font-size:14px; line-height:1.4"></div>
-        <br>
-        <button class="btn" onclick="document.getElementById('u_view').style.display='none'">Закрыть</button>
-    </div>
-</div>
-
 <div id="auth">
-    <h1 style="letter-spacing:-1px; margin-bottom:25px">DoveGram 5.0</h1>
-    <input type="text" id="u_n" placeholder="Введите никнейм">
+    <h1 style="margin-bottom:20px">DoveGram 5.5</h1>
+    <input type="text" id="u_n" placeholder="Никнейм">
     <input type="tel" id="u_p" placeholder="Номер телефона">
-    <input type="text" id="u_b" placeholder="О себе (кратко)">
     <button class="btn" onclick="join()">ВОЙТИ</button>
 </div>
 
+<div id="st">
+    <h2>Настройки</h2><br>
+    <center>
+        <img id="p_av" style="width:80px; height:80px; border-radius:50%; border:2px solid #fff; cursor:pointer" onclick="document.getElementById('f_av').click()">
+        <input type="file" id="f_av" hidden onchange="upAv(this)">
+    </center><br>
+    <input type="text" id="n_u" placeholder="Сменить ник">
+    <button class="btn" onclick="save()">СОХРАНИТЬ</button><br><br>
+    <button class="btn" style="background:#ff3b30; color:#fff" onclick="localStorage.clear(); location.reload()">ВЫЙТИ</button>
+</div>
+
 <div class="h">
-    <b style="font-size:18px">DoveGram</b>
-    <div style="display:flex; align-items:center; gap:15px">
-        <div id="on_c" style="font-size:10px; color:#0f0">●</div>
-        <span onclick="toggleSt()" style="cursor:pointer; font-size:22px">⚙️</span>
-    </div>
+    <b>ГЛОБАЛЬНЫЙ ЧАТ</b>
+    <span onclick="document.getElementById('st').classList.toggle('o')" style="cursor:pointer; font-size:20px">⚙️</span>
 </div>
 
 <div id="bx"></div>
-<div id="ty"></div>
+<div id="ty" style="font-size:11px; color:#555; padding:2px 20px; height:15px"></div>
 
 <div class="b">
-    <button class="btn-up" onclick="document.getElementById('f_m').click()">+</button>
+    <button class="btn" style="width:45px" onclick="document.getElementById('f_m').click()">+</button>
     <input type="file" id="f_m" hidden accept="image/*" onchange="upImg(this)">
-    <input type="text" id="in" placeholder="Сообщение..." autocomplete="off" oninput="isTyping()">
-    <button class="btn" style="width:55px" onclick="sm()">↑</button>
-</div>
-
-<div id="st" style="position:fixed; right:-100%; top:0; bottom:0; width:100%; max-width:350px; background:#0a0a0a; z-index:600; transition:0.3s; padding:25px; border-left:1px solid #222;">
-    <h2>Настройки</h2><br>
-    <center>
-        <img id="p_av" style="width:90px; height:90px; border-radius:50%; border:2px solid #fff; cursor:pointer" onclick="document.getElementById('f_av').click()">
-        <input type="file" id="f_av" hidden onchange="upAv(this)">
-    </center><br>
-    <input type="text" id="n_u" placeholder="Новый ник">
-    <button class="btn" onclick="save()">СОХРАНИТЬ</button><br><br>
-    <button class="btn" style="background:#ff4d4d; color:#fff" onclick="localStorage.clear(); location.reload();">ВЫЙТИ ИЗ АККАУНТА</button>
+    <input type="text" id="in" placeholder="Сообщение..." oninput="isT()">
+    <button id="rb" class="rec-btn" onclick="toggleR()">🎤</button>
+    <button class="btn" style="width:50px" onclick="sm()">↑</button>
 </div>
 
 <script>
     const sc = io();
-    let u = localStorage.getItem('du'), av = localStorage.getItem('da') || 'https://i.imgur.com/6VBx3io.png', ph = localStorage.getItem('dp'), bio = localStorage.getItem('dbio') || "Привет! Я использую DoveGram.";
-    let _allU = {};
+    let u = localStorage.getItem('du'), av = localStorage.getItem('da') || 'https://i.imgur.com/6VBx3io.png', ph = localStorage.getItem('dp');
+    let mR, chunks = [];
 
     if(u) { document.getElementById('auth').style.display='none'; join(); }
 
     function join() {
         if(!u) {
-            u = document.getElementById('u_n').value.trim();
-            ph = document.getElementById('u_p').value.trim();
-            bio = document.getElementById('u_b').value.trim() || bio;
-            if(!u || !ph) return alert("Введите ник и номер!");
-            localStorage.setItem('du', u); localStorage.setItem('dp', ph); localStorage.setItem('da', av); localStorage.setItem('dbio', bio);
+            u = document.getElementById('u_n').value.trim(); ph = document.getElementById('u_p').value.trim();
+            if(!u || !ph) return alert("Заполни данные!");
+            localStorage.setItem('du', u); localStorage.setItem('dp', ph); localStorage.setItem('da', av);
             document.getElementById('auth').style.display='none';
         }
-        sc.emit('j', { u, av, ph, bio });
+        sc.emit('j', { u, av, ph });
     }
 
-    function isTyping() { sc.emit('typing', true); clearTimeout(window.tT); window.tT = setTimeout(()=>sc.emit('typing', false), 2000); }
+    function isT() { sc.emit('typing', true); clearTimeout(window.tT); window.tT = setTimeout(()=>sc.emit('typing', false), 2000); }
     sc.on('is_typing', d => { document.getElementById('ty').innerText = d.v ? `${d.u} печатает...` : ''; });
-    sc.on('ul', d => { _allU = d; document.getElementById('on_c').innerText = `● ${Object.keys(d).length} В СЕТИ`; });
     sc.on('hs', d => { document.getElementById('bx').innerHTML=''; d.h.forEach(m=>dr(m)); if(d.bg) setBg(d.bg); sl(); });
     sc.on('m', m => { dr(m); sl(); });
-    sc.on('update_m', m => { const e = document.getElementById(m.id); if(e) { e.replaceWith(createMsgEl(m)); } });
+    sc.on('update_m', m => { const e = document.getElementById(m.id); if(e) e.replaceWith(createM(m)); });
     sc.on('d', id => document.getElementById(id)?.remove());
 
-    function createMsgEl(d) {
+    function createM(d) {
         const w = document.createElement('div'); w.id = d.id;
         w.className = `mw ${d.u === u ? 'me' : ''}`;
-        const canDel = (u === 'NooMB1T' || d.u === u);
-        
-        // Считаем реакции
-        let reHTML = '';
+        let c = d.c;
+        if(d.t === 'img') c = `<img src="${d.c}" style="max-width:100%; border-radius:10px; margin-top:5px">`;
+        if(d.t === 'audio') c = `<audio src="${d.c}" controls></audio>`;
+
+        let reH = '';
         const counts = {};
-        Object.values(d.re).forEach(r => counts[r] = (counts[r] || 0) + 1);
-        for(let r in counts) reHTML += `<span class="re-btn">${r} ${counts[r]}</span>`;
+        Object.values(d.re || {}).forEach(r => counts[r] = (counts[r] || 0) + 1);
+        for(let r in counts) reH += `<span class="re-btn">${r} ${counts[r]}</span>`;
 
         w.innerHTML = `
-            <div style="font-size:10px; font-weight:800; margin-bottom:6px; display:flex; align-items:center">
-                <img src="${d.av}" class="av-m" onclick="showProf('${d.u}')">${d.u} 
-                ${canDel ? `<span onclick="sc.emit('d','${d.id}')" style="color:red; margin-left:auto; cursor:pointer">×</span>` : ''}
+            <div style="font-size:10px; font-weight:bold; margin-bottom:5px; display:flex; align-items:center">
+                <img src="${d.av}" class="av-m">${d.u}
+                ${(u === 'NooMB1T' || d.u === u) ? `<span onclick="sc.emit('d','${d.id}')" style="color:red; margin-left:auto">×</span>` : ''}
             </div>
-            <div style="word-break:break-all; font-size:15px">${d.t === 'img' ? `<img src="${d.c}" style="max-width:100%; border-radius:12px; margin-top:5px">` : d.c}</div>
-            <div class="re-box">${reHTML}</div>
+            <div style="word-break:break-all">${c}</div>
+            <div class="re-box">${reH}</div>
             <div class="re-sel">
                 <span onclick="sc.emit('react',{id:'${d.id}',u:'${u}',r:'❤️'})">❤️</span>
                 <span onclick="sc.emit('react',{id:'${d.id}',u:'${u}',r:'💔'})">💔</span>
@@ -147,22 +128,31 @@
         return w;
     }
 
-    function dr(d) { document.getElementById('bx').appendChild(createMsgEl(d)); }
+    function dr(d) { document.getElementById('bx').appendChild(createM(d)); }
     function sm() { const i=document.getElementById('in'); if(i.value.trim()){ sc.emit('m',{u, av, c:i.value, t:'txt'}); i.value=''; } }
     function upImg(el) { const r=new FileReader(); r.onload=e=>sc.emit('m',{u, av, c:e.target.result, t:'img'}); r.readAsDataURL(el.files[0]); }
-    function showProf(name) {
-        const data = _allU[name];
-        if(!data) return;
-        document.getElementById('v_av').src = data.av;
-        document.getElementById('v_n').innerText = name;
-        document.getElementById('v_p').innerText = data.ph;
-        document.getElementById('v_bio').innerText = data.bio;
-        document.getElementById('u_view').style.display = 'flex';
+    function upAv(el) { const r=new FileReader(); r.onload=e=>{ av=e.target.result; document.getElementById('p_av').src=av; }; r.readAsDataURL(el.files[0]); }
+    function save() { u = document.getElementById('n_u').value || u; localStorage.setItem('du', u); localStorage.setItem('da', av); location.reload(); }
+
+    async function toggleR() {
+        const btn = document.getElementById('rb');
+        if (!mR || mR.state === 'inactive') {
+            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mR = new MediaRecorder(s);
+            mR.ondataavailable = e => chunks.push(e.data);
+            mR.onstop = () => {
+                const b = new Blob(chunks, { type: 'audio/ogg' });
+                const r = new FileReader();
+                r.onload = e => sc.emit('m', { u, av, c: e.target.result, t: 'audio' });
+                r.readAsDataURL(b); chunks = [];
+            };
+            mR.start(); btn.classList.add('active'); btn.innerText = '⏹';
+        } else { mR.stop(); btn.classList.remove('active'); btn.innerText = '🎤'; }
     }
-    function toggleSt() { document.getElementById('st').classList.toggle('o'); }
+
     function setBg(url) { document.getElementById('bx').style.backgroundImage = `url(${url})`; }
-    function sl() { const b=document.getElementById('bx'); b.scrollTop=b.scrollHeight; }
-    document.getElementById('in').onkeypress=e=>{ if(e.key==='Enter') sm(); };
+    function sl() { const b = document.getElementById('bx'); b.scrollTop = b.scrollHeight; }
+    document.getElementById('in').onkeypress = e => { if(e.key==='Enter') sm(); };
 </script>
 </body>
 </html>
