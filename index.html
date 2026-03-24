@@ -3,40 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DoveGram 0.19</title>
+    <title>DoveGram 0.20</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; --msg-my: #2563eb; --msg-other: #1a1a1a; }
         body.light { --bg: #f0f2f5; --panel: #fff; --text: #000; --msg-other: #e4e6eb; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; transition: 0.2s; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
+        /* Конструкція */
         .app-container { display: flex; height: 100vh; width: 100vw; }
         .main-view { flex: 1; display: flex; flex-direction: column; border-right: 1px solid rgba(128,128,128,0.1); }
-        .side-icons { width: 70px; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 35px; background: var(--panel); }
+        .side-icons { width: 70px; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 35px; background: var(--panel); border-left: 1px solid rgba(128,128,128,0.1); }
         .side-icons i { font-size: 22px; color: #555; cursor: pointer; padding: 10px; }
-        .side-icons i:hover, .side-icons i.active { color: var(--accent); }
+        .side-icons i.active, .side-icons i:hover { color: var(--accent); }
 
         .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; }
         .screen.active { display: flex; }
 
-        .chat-card { padding: 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(128,128,128,0.05); cursor: pointer; }
-        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; margin: 4px 0; position: relative; word-wrap: break-word; }
+        .chat-card { padding: 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(128,128,128,0.1); cursor: pointer; }
+        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; margin: 4px 0; position: relative; word-wrap: break-word; font-size: 15px; }
         .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
         .bubble.other { align-self: flex-start; background: var(--msg-other); border-bottom-left-radius: 4px; }
         
-        .react-badge { position: absolute; bottom: -12px; right: 5px; background: var(--panel); border-radius: 10px; padding: 2px 6px; font-size: 13px; border: 1px solid rgba(128,128,128,0.2); z-index: 2; }
+        .react-badge { position: absolute; bottom: -12px; right: 5px; background: var(--panel); border-radius: 10px; padding: 2px 6px; font-size: 13px; border: 1px solid rgba(128,128,128,0.2); }
         .input-ui { width: 100%; padding: 14px; background: var(--panel); border: 1px solid rgba(128,128,128,0.2); border-radius: 12px; color: var(--text); outline: none; }
         .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: #fff; }
 
-        #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 5px; }
+        #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 4px; }
     </style>
 </head>
 <body class="dark">
 
 <div id="scr-auth" class="screen active" style="justify-content: center; align-items: center;">
     <div style="width: 100%; max-width: 320px; text-align: center;">
-        <h2 style="margin-bottom:25px; letter-spacing: 2px;">DoveGram 0.19</h2>
+        <h2 style="margin-bottom:25px;">DoveGram 0.20</h2>
         <input type="text" id="reg-id" class="input-ui" placeholder="@ID (унікальний)" style="margin-bottom:10px">
         <input type="text" id="reg-name" class="input-ui" placeholder="Ім'я" style="margin-bottom:10px">
         <input type="text" id="reg-phone" class="input-ui" placeholder="+380..." style="margin-bottom:20px">
@@ -46,7 +47,9 @@
 
 <div class="app-container" id="scr-main" style="display:none">
     <div class="main-view">
-        <div style="padding: 15px;"><input type="text" id="search-input" class="input-ui" placeholder="Пошук..." oninput="app.search()"></div>
+        <div style="padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1);">
+            <input type="text" id="search-input" class="input-ui" placeholder="Пошук друзів..." oninput="app.search()">
+        </div>
         <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
     </div>
     <div class="side-icons">
@@ -58,49 +61,50 @@
 </div>
 
 <div id="scr-profile" class="screen">
-    <i class="fas fa-arrow-left" onclick="app.nav('scr-main')" style="font-size: 20px; margin-bottom: 20px;"></i>
+    <i class="fas fa-arrow-left" onclick="app.nav('scr-main')" style="font-size: 20px; margin-bottom: 25px;"></i>
     <div style="text-align: center;">
-        <div style="width:100px; height:100px; border-radius:50%; background:var(--accent); margin: 0 auto 15px; overflow:hidden; border:3px solid var(--accent);">
-            <img id="p-ava" src="" style="width:100%; height:100%; object-fit:cover;">
+        <div style="width:110px; height:110px; border-radius:50%; background:#222; margin:0 auto 15px; overflow:hidden; border:3px solid var(--accent);">
+            <img id="p-ava" src="https://via.placeholder.com/110" style="width:100%; height:100%; object-fit:cover;">
         </div>
-        <h2 id="p-name">Ім'я</h2>
+        <h2 id="p-name">Завантаження...</h2>
         <p id="p-id" style="opacity:0.5; margin-bottom:10px;"></p>
-        <p id="p-phone" style="font-weight: bold; color: var(--accent);"></p>
-        <p id="p-bio" style="margin-top:15px; padding: 0 20px;"></p>
+        <p id="p-phone" style="font-weight: bold; color: var(--accent); margin-bottom:20px;"></p>
+        <textarea id="p-bio-edit" class="input-ui" placeholder="Розкажи про себе..." style="height:80px;"></textarea>
+        <button onclick="app.saveBio()" class="btn-ui" style="margin-top:10px">Зберегти опис</button>
     </div>
 </div>
 
 <div id="scr-chat" class="screen" style="padding:0">
     <div style="padding: 15px; display: flex; align-items: center; gap: 12px; background: var(--panel); border-bottom: 1px solid rgba(128,128,128,0.1);">
-        <i class="fas fa-arrow-left" onclick="app.nav('scr-main')"></i>
+        <i class="fas fa-arrow-left" onclick="app.closeChat()"></i>
         <b id="chat-user-name">Чат</b>
         <div id="typing-status" style="font-size:10px; color:var(--accent); margin-left:10px;"></div>
     </div>
     <div id="msg-box"></div>
-    <div id="react-menu" style="display:none; padding:10px; justify-content:center; gap:25px; background:var(--panel); border-top:1px solid #222;">
-        <span onclick="app.applyReact('❤️‍🔥')" style="cursor:pointer">❤️‍🔥</span>
-        <span onclick="app.applyReact('💔')" style="cursor:pointer">💔</span>
-        <span onclick="app.applyReact('❤️')" style="cursor:pointer">❤️</span>
+    <div id="react-panel" style="display:none; padding:10px; justify-content:center; gap:25px; background:var(--panel);">
+        <span onclick="app.applyReact('❤️‍🔥')">❤️‍🔥</span>
+        <span onclick="app.applyReact('💔')">💔</span>
+        <span onclick="app.applyReact('❤️')">❤️</span>
     </div>
-    <div style="padding:12px; display:flex; gap:12px; align-items:center; background:var(--panel);">
-        <i class="fas fa-image" style="font-size:20px; color:var(--accent);" onclick="document.getElementById('img-upload').click()"></i>
-        <input type="file" id="img-upload" hidden accept="image/*" onchange="app.uploadImg(this)">
-        <input type="text" id="msg-input" class="input-ui" style="margin:0; flex:1;" placeholder="Повідомлення..." oninput="app.handleTyping()">
-        <i class="fas fa-paper-plane" style="font-size:20px; color:var(--accent);" onclick="app.sendText()"></i>
+    <div style="padding:12px; display:flex; gap:12px; align-items:center; background:var(--panel); border-top:1px solid rgba(128,128,128,0.1);">
+        <i class="fas fa-camera" onclick="document.getElementById('img-up').click()"></i>
+        <input type="file" id="img-up" hidden accept="image/*" onchange="app.uploadPhoto(this)">
+        <input type="text" id="msg-input" class="input-ui" style="flex:1; margin:0;" placeholder="Повідомлення..." oninput="app.handleTyping()">
+        <i class="fas fa-paper-plane" onclick="app.sendText()"></i>
     </div>
 </div>
 
 <div id="scr-settings" class="screen">
     <i class="fas fa-arrow-left" onclick="app.nav('scr-main')" style="margin-bottom:20px"></i>
     <h2 style="margin-bottom:20px">Налаштування</h2>
-    <button class="btn-ui" style="background:#222; margin-bottom:10px;" onclick="app.switchTheme()">Змінити Тему (Dark/Light)</button>
-    <button class="btn-ui" style="background:#222; margin-bottom:10px;" onclick="app.switchLang()">Мова: <span id="lang-btn-txt">UA</span></button>
-    <button class="btn-ui" style="background:#ef4444; margin-top:30px;" onclick="app.exit()">Вийти з аккаунту</button>
+    <button class="btn-ui" style="background:#222; margin-bottom:10px;" onclick="app.toggleTheme()">Тема (Світла/Темна)</button>
+    <button class="btn-ui" style="background:#222; margin-bottom:10px;" onclick="app.toggleLang()">Мова: <span id="cur-lang">UA</span></button>
+    <button class="btn-ui" style="background:#ef4444; margin-top:20px;" onclick="app.logout()">Вийти</button>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, update, get, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCuo7GtLDVE6ERb8MOke97mFa08M3oZoV8",
@@ -115,21 +119,17 @@ const db = getDatabase(f_app);
 
 window.app = {
     user: null, peer: null, lastM: null, lang: 'uk', theme: 'dark',
+    currentChatRef: null,
 
     init() {
-        const saved = localStorage.getItem('dove_data');
+        const saved = localStorage.getItem('dove_session');
         if(saved) {
             this.user = JSON.parse(saved);
-            this.nav('scr-main');
+            document.getElementById('scr-auth').classList.remove('active');
+            document.getElementById('scr-main').style.display = 'flex';
             if(this.user.id === 'dev') document.getElementById('dev-icon').style.display = 'block';
+            this.loadChats();
         }
-    },
-
-    nav(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr-main').style.display = (id === 'scr-main') ? 'flex' : 'none';
-        if(id !== 'scr-main') document.getElementById(id).classList.add('active');
-        this.updateStrings();
     },
 
     async register() {
@@ -137,33 +137,49 @@ window.app = {
         const ph = document.getElementById('reg-phone').value.trim();
         const nm = document.getElementById('reg-name').value;
 
-        if(!id || !ph || !nm) return alert("Заповни все!");
+        if(!id || !ph || !nm) return alert("Заповни всі поля!");
 
-        const snap = await get(ref(db, 'users'));
-        const all = snap.val() || {};
+        const snap = await get(ref(db, 'users/' + id));
+        if(snap.exists()) {
+            this.user = snap.val();
+        } else {
+            this.user = { id, name: nm, phone: ph, ava: '', bio: '', lang: 'uk', theme: 'dark' };
+            await set(ref(db, 'users/' + id), this.user);
+        }
         
-        if(all[id]) return alert("Цей ID вже є!");
-        for(let k in all) { if(all[k].phone === ph) return alert("Цей номер вже зайнятий!"); }
-
-        this.user = { id, name: nm, phone: ph, ava: '', bio: 'Привіт, я у DoveGram!', lang: 'uk', theme: 'dark' };
-        await set(ref(db, 'users/' + id), this.user);
-        localStorage.setItem('dove_data', JSON.stringify(this.user));
-        this.nav('scr-main'); // Миттєвий перехід
+        localStorage.setItem('dove_session', JSON.stringify(this.user));
+        location.reload(); // Перезавантажуємо для чистого старту
     },
 
     search() {
         const q = document.getElementById('search-input').value.toLowerCase();
+        if(q.length < 2) return this.loadChats();
         onValue(ref(db, 'users'), (snap) => {
             const list = document.getElementById('contacts-list');
             list.innerHTML = '';
             Object.values(snap.val() || {}).forEach(u => {
                 if(u.id !== this.user.id && (u.id.includes(q) || u.name.toLowerCase().includes(q))) {
-                    const d = document.createElement('div');
-                    d.className = 'chat-card';
-                    d.onclick = () => this.openChat(u);
-                    d.innerHTML = `<div style="width:40px;height:40px;border-radius:50%;background:#222;overflow:hidden"><img src="${u.ava || ''}" style="width:100%"></div> <b>${u.name}</b>`;
-                    list.appendChild(d);
+                    this.renderContactRow(u, list);
                 }
+            });
+        }, { onlyOnce: true });
+    },
+
+    renderContactRow(u, container) {
+        const d = document.createElement('div');
+        d.className = 'chat-card';
+        d.onclick = () => this.openChat(u);
+        d.innerHTML = `<div style="width:40px;height:40px;border-radius:50%;background:#222;overflow:hidden"><img src="${u.ava || 'https://via.placeholder.com/40'}" style="width:100%"></div> <b>${u.name}</b>`;
+        container.appendChild(d);
+    },
+
+    loadChats() {
+        // Пошук тих, з ким вже є листування
+        onValue(ref(db, 'users'), (snap) => {
+            const list = document.getElementById('contacts-list');
+            list.innerHTML = '';
+            Object.values(snap.val() || {}).forEach(u => {
+                if(u.id !== this.user.id) this.renderContactRow(u, list);
             });
         });
     },
@@ -172,12 +188,20 @@ window.app = {
         this.peer = u;
         document.getElementById('chat-user-name').innerText = u.name;
         this.nav('scr-chat');
+        
         const path = [this.user.id, u.id].sort().join('_');
-        onValue(ref(db, 'msgs/' + path), (s) => this.renderMsgs(s.val()));
+        this.currentChatRef = ref(db, 'msgs/' + path);
+        
+        onValue(this.currentChatRef, (s) => this.renderMsgs(s.val()));
         onValue(ref(db, `status/${path}/${u.id}`), (s) => {
             const st = this.lang === 'uk' ? 'Цвіркоче...' : 'Думает...';
             document.getElementById('typing-status').innerText = s.val() ? st : '';
         });
+    },
+
+    closeChat() {
+        if(this.currentChatRef) off(this.currentChatRef);
+        this.nav('scr-main');
     },
 
     renderMsgs(data) {
@@ -187,9 +211,10 @@ window.app = {
             const isMy = m.s === this.user.id;
             const div = document.createElement('div');
             div.className = `bubble ${isMy ? 'my' : 'other'}`;
-            div.onclick = () => { this.lastM = key; document.getElementById('react-menu').style.display='flex'; };
-            let html = m.img ? `<img src="${m.img}" style="width:100%;border-radius:10px">` : m.t;
-            div.innerHTML = `${html} <small style="display:block;font-size:8px;opacity:0.5;margin-top:4px">${m.time}</small>`;
+            div.onclick = () => { this.lastM = key; document.getElementById('react-panel').style.display='flex'; };
+            
+            let content = m.img ? `<img src="${m.img}" style="width:100%;border-radius:10px">` : m.t;
+            div.innerHTML = `${content} <small style="display:block;font-size:8px;opacity:0.6;margin-top:4px">${m.time}</small>`;
             if(m.r) div.innerHTML += `<div class="react-badge">${m.r}</div>`;
             box.appendChild(div);
         });
@@ -198,50 +223,51 @@ window.app = {
 
     sendText() {
         const t = document.getElementById('msg-input').value; if(!t) return;
-        this.push({ t }); document.getElementById('msg-input').value = '';
+        this.pushMsg({ t });
+        document.getElementById('msg-input').value = '';
     },
 
-    uploadImg(input) {
+    uploadPhoto(input) {
         if(input.files && input.files[0]) {
             const r = new FileReader();
-            r.onload = (e) => this.push({ img: e.target.result });
+            r.onload = (e) => this.pushMsg({ img: e.target.result });
             r.readAsDataURL(input.files[0]);
         }
     },
 
-    push(obj) {
+    pushMsg(data) {
         const path = [this.user.id, this.peer.id].sort().join('_');
-        push(ref(db, 'msgs/' + path), { ...obj, s: this.user.id, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+        const m = { ...data, s: this.user.id, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
+        push(ref(db, 'msgs/' + path), m);
     },
 
     applyReact(emoji) {
         const path = [this.user.id, this.peer.id].sort().join('_');
         update(ref(db, `msgs/${path}/${this.lastM}`), { r: emoji });
-        document.getElementById('react-menu').style.display='none';
+        document.getElementById('react-panel').style.display='none';
+    },
+
+    nav(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr-main').style.display = (id === 'scr-main') ? 'flex' : 'none';
+        if(id !== 'scr-main') document.getElementById(id).classList.add('active');
     },
 
     showMyProfile() {
-        document.getElementById('p-ava').src = this.user.ava || '';
+        document.getElementById('p-ava').src = this.user.ava || 'https://via.placeholder.com/110';
         document.getElementById('p-name').innerText = this.user.name;
         document.getElementById('p-id').innerText = '@' + this.user.id;
         document.getElementById('p-phone').innerText = this.user.phone;
-        document.getElementById('p-bio').innerText = this.user.bio;
+        document.getElementById('p-bio-edit').value = this.user.bio || '';
         this.nav('scr-profile');
     },
 
-    switchTheme() { 
-        this.theme = this.theme === 'dark' ? 'light' : 'dark'; 
-        document.body.className = this.theme; 
-    },
-
-    switchLang() { 
-        this.lang = this.lang === 'uk' ? 'ru' : 'uk'; 
-        this.updateStrings(); 
-    },
-
-    updateStrings() {
-        document.getElementById('lang-btn-txt').innerText = this.lang.toUpperCase();
-        if(this.peer) document.getElementById('msg-input').placeholder = this.lang === 'uk' ? 'Цвіркоче...' : 'Думает...';
+    saveBio() {
+        const bio = document.getElementById('p-bio-edit').value;
+        this.user.bio = bio;
+        update(ref(db, 'users/' + this.user.id), { bio });
+        localStorage.setItem('dove_session', JSON.stringify(this.user));
+        alert("Збережено!");
     },
 
     handleTyping() {
@@ -250,7 +276,7 @@ window.app = {
         setTimeout(() => set(ref(db, `status/${path}/${this.user.id}`), false), 2000);
     },
 
-    exit() { localStorage.clear(); location.reload(); }
+    logout() { localStorage.clear(); location.reload(); }
 };
 app.init();
 </script>
