@@ -1,7 +1,15 @@
-const express = require('express'), http = require('http'), { Server } = require('socket.io');
-const app = express(), server = http.createServer(app), io = new Server(server);
+const express = require('express');
+const path = require('path');
+const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 let messages = [], users = {};
 
 io.on('connection', (socket) => {
@@ -22,4 +30,5 @@ io.on('connection', (socket) => {
         if (socket.username) { delete users[socket.username]; io.emit('ul', users); }
     });
 });
-server.listen(3000, () => console.log('DoveGram Live!'));
+
+module.exports = server;
