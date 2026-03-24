@@ -3,149 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 6.0</title>
+    <title>DoveGram 6.0 Core</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        :root { --bg: #000; --blue: #3b82f6; --glass: rgba(255, 255, 255, 0.05); }
+        :root { --bg: #000; --blue: #3b82f6; --glass: rgba(255, 255, 255, 0.05); --panel: #000; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: #fff; }
-        body { background: var(--bg); height: 100vh; overflow: hidden; }
+        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; }
 
         /* Регистрация */
-        #auth-screen { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #auth-screen { position: fixed; inset: 0; background: #000; z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .input-reg { width: 100%; max-width: 300px; padding: 15px; margin-bottom: 10px; border-radius: 12px; background: #111; border: 1px solid #222; outline: none; }
         .btn-reg { width: 100%; max-width: 300px; padding: 15px; border-radius: 12px; background: #fff; color: #000; font-weight: bold; border: none; cursor: pointer; }
 
-        /* Главный экран */
-        #main-app { display: none; height: 100vh; width: 100%; }
+        /* Левая панель */
+        #left-side { flex: 1; border-right: 2px solid var(--blue); display: flex; flex-direction: column; background: var(--panel); transition: 0.3s; }
+        .head { padding: 25px 20px; font-size: 24px; font-weight: 900; }
+        .chat-row { padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .chat-row:hover { background: rgba(255,255,255,0.03); }
+        .av-circle { width: 55px; height: 55px; border-radius: 50%; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        /* Правая панель управления */
+        #right-side { width: 85px; display: flex; flex-direction: column; align-items: center; padding-top: 140px; gap: 35px; position: relative; background: #000; }
         
-        #left-side { flex: 1; border-right: 2px solid var(--blue); display: flex; flex-direction: column; }
-        .head { padding: 20px; font-size: 22px; font-weight: 800; }
-        
-        /* Аватарка (без контура, на линии) */
-        #right-side { width: 80px; display: flex; flex-direction: column; align-items: center; padding-top: 140px; gap: 40px; position: relative; }
+        /* Твоя АВАТАРКА: БЕЗ КОНТУРА, на линии */
         .main-av { 
-            position: absolute; top: 20px; right: 38px; 
+            position: absolute; top: 20px; right: 35px; /* 50% на линии */
             width: 100px; height: 100px; border-radius: 50%; 
-            z-index: 100; object-fit: cover; background: #222;
+            z-index: 100; object-fit: cover; background: #222; cursor: pointer;
         }
 
-        .nav-link { font-size: 24px; color: #333; cursor: pointer; transition: 0.2s; }
-        .nav-link.active { color: #fff; }
-
-        /* Список чатов */
-        .chat-row { padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .global-av { width: 50px; height: 50px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; }
+        .nav-btn { font-size: 24px; color: #333; cursor: pointer; transition: 0.3s; position: relative; }
+        .nav-btn:hover, .nav-btn.active { color: #fff; }
 
         /* Экран Чата */
-        #chat-screen { position: fixed; inset: 0; background: #000; z-index: 1500; display: none; flex-direction: column; }
-        .chat-h { padding: 15px; border-bottom: 1px solid #111; display: flex; align-items: center; gap: 15px; }
-        #msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .bubble { padding: 10px 15px; background: var(--glass); border-radius: 15px; max-width: 80%; }
+        #chat-window { position: fixed; inset: 0; background: #000; z-index: 1500; display: none; flex-direction: column; }
+        .chat-header { padding: 15px; border-bottom: 1px solid #111; display: flex; align-items: center; gap: 15px; }
+        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .bubble { padding: 12px 16px; background: var(--glass); border-radius: 18px; max-width: 80%; position: relative; }
         .bubble.me { align-self: flex-end; background: #fff; color: #000; }
+        .bubble small { font-size: 10px; opacity: 0.6; display: block; margin-bottom: 4px; }
+        
+        /* Реакции */
+        .react-box { display: flex; gap: 5px; margin-top: 5px; }
+        .react { cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .react:hover { transform: scale(1.4); }
 
-        /* Настройки */
-        #settings-screen { position: fixed; inset: 0; background: #000; z-index: 1600; display: none; padding: 20px; }
-        .set-row { padding: 15px 0; border-bottom: 1px solid #111; display: flex; justify-content: space-between; align-items: center; }
+        /* Инпут */
+        .input-area { padding: 15px; display: flex; gap: 10px; border-top: 1px solid #111; background: #000; }
+        #m-input { flex: 1; padding: 12px; border-radius: 20px; background: #111; border: none; outline: none; }
 
-        .input-bar { padding: 15px; display: flex; gap: 10px; border-top: 1px solid #111; }
-        #m-text { flex: 1; padding: 10px; border-radius: 10px; background: #111; border: none; }
+        /* Профиль и Настройки */
+        #profile-screen { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; padding: 40px 20px; text-align: center; }
+        .prof-big-av { width: 120px; height: 120px; border-radius: 50%; background: #111; margin: 0 auto 20px; }
     </style>
 </head>
 <body>
 
 <div id="auth-screen">
-    <h2 style="margin-bottom: 20px;">DoveGram 6.0</h2>
-    <input type="text" id="u-name" class="input-reg" placeholder="Ваше имя">
-    <input type="text" id="u-tag" class="input-reg" placeholder="@кличка (уникальный ID)">
-    <button class="btn-reg" onclick="register()">Создать аккаунт</button>
+    <h1 style="margin-bottom: 30px; letter-spacing: 2px;">DOVEGRAM 6.0</h1>
+    <input type="text" id="reg-name" class="input-reg" placeholder="Ваше имя">
+    <input type="text" id="reg-tag" class="input-reg" placeholder="@кличка">
+    <button class="btn-reg" onclick="registerUser()">СОЗДАТЬ АККАУНТ</button>
 </div>
 
-<div id="main-app">
-    <div id="left-side" style="display: flex;">
-        <div class="head">Чаты</div>
-        <div class="chat-row" onclick="openGlobal()">
-            <div class="global-av"><i class="fas fa-bolt"></i></div>
-            <div><b>Глобальный чат</b><br><small style="color: #555;">Все пользователи здесь</small></div>
-        </div>
-    </div>
-
-    <img src="https://i.imgur.com/6VBx3io.png" class="main-av" id="my-photo">
-
-    <div id="right-side">
-        <div class="nav-link" onclick="showSettings()"><i class="fas fa-id-card"></i></div>
-        <div class="nav-link"><i class="fas fa-camera"></i></div>
-        <div class="nav-link active"><i class="fas fa-comment"></i></div>
-        <div class="nav-link" onclick="showSettings()"><i class="fas fa-cog"></i></div>
-        <div class="nav-link" style="margin-top: auto; margin-bottom: 30px;" onclick="location.reload()">
-            <i class="fas fa-arrow-left"></i>
+<div id="left-side">
+    <div class="head">Сообщения</div>
+    <div class="chat-row" onclick="openChat()">
+        <div class="av-circle"><i class="fas fa-bolt" style="color: #ffda44;"></i></div>
+        <div style="flex:1">
+            <div style="display:flex; justify-content:space-between"><b>Глобальный чат</b> <small style="color:#333">19:41</small></div>
+            <small style="color:#666" id="last-msg">(Начало общения)</small>
         </div>
     </div>
 </div>
 
-<div id="chat-screen">
-    <div class="chat-h">
-        <i class="fas fa-chevron-left" onclick="closeChat()"></i>
-        <b>Глобальный чат</b>
-    </div>
-    <div id="msgs"></div>
-    <div class="input-bar">
-        <input type="text" id="m-text" placeholder="Сообщение...">
-        <i class="fas fa-paper-plane" onclick="send()"></i>
+<img src="https://i.imgur.com/6VBx3io.png" class="main-av" onclick="showProfile()">
+
+<div id="right-side">
+    <div class="nav-btn active" onclick="location.reload()"><i class="fas fa-comment"></i></div>
+    <div class="nav-btn" onclick="showProfile()"><i class="fas fa-user"></i></div>
+    <div class="nav-btn" onclick="changeBg()"><i class="fas fa-palette"></i></div>
+    <div class="nav-btn" onclick="showProfile()"><i class="fas fa-cog"></i></div>
+    <div class="nav-btn" style="margin-top: auto; margin-bottom: 30px;" onclick="window.location.href='index.html'">
+        <i class="fas fa-arrow-left"></i>
     </div>
 </div>
 
-<div id="settings-screen">
-    <div class="chat-h">
-        <i class="fas fa-chevron-left" onclick="hideSettings()"></i>
-        <b>Настройки профиля</b>
+<div id="chat-window">
+    <div class="chat-header">
+        <i class="fas fa-chevron-left" style="cursor:pointer" onclick="closeChat()"></i>
+        <b onclick="showProfile()" style="cursor:pointer">Глобальный чат</b>
     </div>
-    <div class="set-row">
-        <span>Имя</span>
-        <b id="set-name">Anton</b>
+    <div id="messages"></div>
+    <div class="input-area">
+        <i class="fas fa-plus" style="color:#333; padding-top:10px;"></i>
+        <input type="text" id="m-input" placeholder="Сообщение...">
+        <i class="fas fa-paper-plane" style="padding-top:10px; color:var(--blue); cursor:pointer" onclick="sendMessage()"></i>
     </div>
-    <div class="set-row">
-        <span>ID</span>
-        <b id="set-tag" style="color: var(--blue);">@anton_dev</b>
+</div>
+
+<div id="profile-screen">
+    <i class="fas fa-times" style="position:absolute; top:20px; right:20px; font-size:24px;" onclick="hideProfile()"></i>
+    <div class="prof-big-av"><i class="fas fa-user" style="font-size:50px; margin-top:35px; color:#333"></i></div>
+    <h2 id="p-name">Имя пользователя</h2>
+    <p id="p-tag" style="color: var(--blue); margin-bottom: 30px;">@tag</p>
+    <div style="text-align:left; background:#111; padding:15px; border-radius:15px;">
+        <p>Статус: <span style="color:#4ade80">Online</span></p>
+        <p style="margin-top:10px; color:#555">DoveGram 6.0 Core Edition</p>
     </div>
-    <div class="set-row">
-        <span>Статус</span>
-        <span style="color: #4ade80;">Online</span>
-    </div>
-    <button class="btn-reg" style="margin-top: 20px; background: #ff4d4d; color: #fff;" onclick="location.reload()">Выйти из системы</button>
+    <button class="btn-reg" style="margin-top:40px; background:#ff4d4d; color:#fff" onclick="location.reload()">ВЫЙТИ</button>
 </div>
 
 <script>
-    let user = { name: '', tag: '' };
+    let myUser = { name: '', tag: '' };
 
-    function register() {
-        const n = document.getElementById('u-name').value;
-        const t = document.getElementById('u-tag').value;
-        if(!n || !t) return alert("Заполни все поля!");
-        
-        user.name = n;
-        user.tag = t.startsWith('@') ? t : '@' + t;
-        
+    function registerUser() {
+        const n = document.getElementById('reg-name').value;
+        const t = document.getElementById('reg-tag').value;
+        if(!n || !t) return alert("Введите данные!");
+        myUser.name = n;
+        myUser.tag = t.startsWith('@') ? t : '@' + t;
         document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('main-app').style.display = 'flex';
-        
-        document.getElementById('set-name').textContent = user.name;
-        document.getElementById('set-tag').textContent = user.tag;
+        document.getElementById('p-name').innerText = myUser.name;
+        document.getElementById('p-tag').innerText = myUser.tag;
     }
 
-    function openGlobal() { document.getElementById('chat-screen').style.display = 'flex'; }
-    function closeChat() { document.getElementById('chat-screen').style.display = 'none'; }
-    
-    function showSettings() { document.getElementById('settings-screen').style.display = 'block'; }
-    function hideSettings() { document.getElementById('settings-screen').style.display = 'none'; }
+    function openChat() { document.getElementById('chat-window').style.display = 'flex'; }
+    function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
 
-    function send() {
-        const i = document.getElementById('m-text');
-        if(!i.value.trim()) return;
-        const m = document.getElementById('msgs');
-        m.innerHTML += `<div class="bubble me"><small>${user.tag}</small><br>${i.value}</div>`;
-        i.value = '';
+    function showProfile() { document.getElementById('profile-screen').style.display = 'block'; }
+    function hideProfile() { document.getElementById('profile-screen').style.display = 'none'; }
+
+    // Зміна фону лівої панелі (працює!)
+    function changeBg() {
+        const colors = ['#000', '#0a0a1a', '#1a0a0a', '#0a1a0a', '#111'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        document.documentElement.style.setProperty('--panel', randomColor);
+    }
+
+    function sendMessage() {
+        const inp = document.getElementById('m-input');
+        if(!inp.value.trim()) return;
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'bubble me';
+        msgDiv.innerHTML = `
+            <small>${myUser.tag}</small>
+            ${inp.value}
+            <div class="react-box">
+                <span class="react" onclick="this.style.opacity=1">💔</span>
+                <span class="react" onclick="this.style.opacity=1">❤️‍🔥</span>
+                <span class="react" onclick="this.style.opacity=1">❤️</span>
+            </div>
+        `;
+        
+        document.getElementById('messages').appendChild(msgDiv);
+        document.getElementById('last-msg').innerText = "Вы: " + inp.value;
+        inp.value = '';
+        const m = document.getElementById('messages');
         m.scrollTop = m.scrollHeight;
     }
+
+    document.getElementById('m-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
 </script>
 </body>
 </html>
