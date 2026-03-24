@@ -3,121 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="/manifest.json">
-    <title>DoveGram 4.8 Midnight</title>
+    <title>DoveGram 4.9 Fast</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        :root { --bg: #0a0a0a; --panel: #141414; --border: #222; --text: #eee; --accent: #fff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        :root { --bg: #000; --card: #111; --text: #fff; --accent: #fff; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: sans-serif; }
         body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-
-        /* Анимации */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Сайдбары */
-        #s, #st_p { width: 300px; background: var(--panel); border-right: 1px solid var(--border); position: fixed; left: -300px; top: 0; bottom: 0; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; padding-top: 60px; }
-        #st_p { left: auto; right: -300px; border-left: 1px solid var(--border); border-right: none; }
-        #s.o { left: 0; } #st_p.o { right: 0; }
-        #ov { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 90; backdrop-filter: blur(4px); }
+        
+        /* Панели */
+        #s, #st { width: 300px; background: var(--card); position: fixed; top:0; bottom:0; transition: 0.2s; z-index: 100; border-right: 1px solid #222; }
+        #s { left: -300px; } #st { right: -300px; padding: 20px; border-left: 1px solid #222; }
+        #s.o { left: 0; } #st.o { right: 0; }
+        #ov { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: none; z-index: 90; backdrop-filter: blur(5px); }
         #ov.o { display: block; }
 
         /* Чат */
-        .h { height: 65px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; background: var(--bg); justify-content: space-between; position: sticky; top: 0; }
-        #bx { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: var(--bg); }
+        .h { height: 60px; padding: 0 20px; display: flex; align-items: center; border-bottom: 1px solid #222; background: #000; justify-content: space-between; }
+        #bx { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background-size: cover; background-position: center; }
         
-        .mw { max-width: 80%; padding: 12px 16px; border-radius: 18px; background: var(--panel); border: 1px solid var(--border); animation: fadeIn 0.3s ease forwards; position: relative; }
-        .mw.me { align-self: flex-end; background: var(--accent); color: #000; border: none; border-bottom-right-radius: 4px; }
-        .mw.ad { border: 1px solid #ff4d4d; box-shadow: 0 0 15px rgba(255,77,77,0.2); }
+        .mw { max-width: 85%; padding: 10px 14px; border-radius: 15px; background: #1a1a1a; position: relative; border: 1px solid #222; }
+        .mw.me { align-self: flex-end; background: #fff; color: #000; }
+        .mw.ad { border: 1px solid #fff; box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        
+        .st-ok { font-size: 10px; margin-left: 5px; opacity: 0.5; } /* Галочки */
+        .img-msg { max-width: 100%; border-radius: 10px; margin-top: 5px; cursor: pointer; }
+        .av { width: 24px; height: 24px; border-radius: 50%; }
 
-        .u-n { font-size: 11px; font-weight: 800; margin-bottom: 5px; opacity: 0.6; display: flex; align-items: center; gap: 8px; }
-        .av-s { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
-        .db { font-size: 18px; cursor: pointer; color: #ff4d4d; margin-left: auto; }
+        .b { padding: 15px; background: #000; display: flex; gap: 10px; border-top: 1px solid #222; }
+        input { flex: 1; background: #111; border: 1px solid #222; color: #fff; padding: 12px 20px; border-radius: 25px; outline: none; }
+        .btn-up { width: 40px; height: 40px; background: #111; border: 1px solid #222; border-radius: 50%; color: #fff; cursor: pointer; }
 
-        /* Ввод */
-        .b { padding: 15px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
-        input { flex: 1; background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 14px 20px; border-radius: 30px; outline: none; transition: 0.2s; }
-        input:focus { border-color: #444; }
-        .btn-s { background: var(--accent); color: #000; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-
-        /* Юзеры */
-        .u-card { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
-        .u-card:hover { background: #1a1a1a; }
-        #ty { font-size: 12px; color: #666; padding: 5px 20px; font-style: italic; }
+        .u-item { padding: 12px 20px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 10px; }
+        .u-off { opacity: 0.4; filter: grayscale(1); }
     </style>
 </head>
 <body>
     <div id="ov" onclick="closeAll()"></div>
 
     <div id="s">
-        <div style="padding: 20px; font-weight: 900; font-size: 20px;">CONTACTS</div>
+        <div style="padding: 20px; font-weight: bold; border-bottom: 1px solid #222">ПОЛЬЗОВАТЕЛИ</div>
         <div id="ul"></div>
     </div>
 
-    <div id="st_p">
-        <div style="padding: 20px;">
-            <h2 style="margin-bottom:20px">SETTINGS</h2>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <img id="set_av" style="width:100px; height:100px; border-radius:50%; border:2px solid #fff; object-fit:cover; cursor:pointer" onclick="document.getElementById('f').click()">
-                <input type="file" id="f" hidden accept="image/*" onchange="updAv(this)">
-            </div>
-            <input type="text" id="set_u" placeholder="Nickname">
-            <button onclick="save()" style="width:100%; padding:15px; background:#fff; color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer">SAVE</button>
-        </div>
+    <div id="st">
+        <h3>Настройки</h3><br>
+        <label>Никнейм:</label><input type="text" id="set_u">
+        <label>Фон (URL фото):</label><input type="text" id="set_bg" placeholder="http://..." oninput="changeBg(this.value)">
+        <button onclick="save()" style="width:100%; padding:10px; background:#fff; color:#000; border:none; font-weight:bold">СОХРАНИТЬ</button>
     </div>
 
     <div style="flex:1; display:flex; flex-direction:column;">
         <div class="h">
-            <div onclick="tm('s')" style="cursor:pointer; font-size:24px">☰</div>
-            <div style="letter-spacing: 2px; font-weight: 900;">DOVEGRAM 4.8</div>
-            <div onclick="tm('st_p')" style="cursor:pointer; font-size:20px">⚙</div>
+            <span onclick="tm('s')">☰</span>
+            <b id="chat_title">DoveGram 4.9</b>
+            <span onclick="tm('st')">⚙</span>
         </div>
         <div id="bx"></div>
-        <div id="ty"></div>
+        <div id="ty" style="font-size:11px; color:#888; padding-left:20px; height:15px"></div>
         <div class="b">
-            <input type="text" id="in" placeholder="Write something..." oninput="isTyping()">
-            <button class="btn-s" onclick="sm()">↑</button>
+            <button class="btn-up" onclick="document.getElementById('f_up').click()">+</button>
+            <input type="file" id="f_up" hidden onchange="upImg(this)">
+            <input type="text" id="in" placeholder="Сообщение..." oninput="isTyping()">
+            <button onclick="sm()" style="background:#fff; border:none; padding:0 15px; border-radius:20px; font-weight:bold">↑</button>
         </div>
     </div>
 
     <script>
-        let u = localStorage.getItem('du'), av = localStorage.getItem('da') || '';
+        let u = localStorage.getItem('du'), av = localStorage.getItem('da') || '', ph = localStorage.getItem('dp') || '';
         if(!u) window.location.href='/';
-        const sc = io(); let to = null, tT = null;
+        
+        const sc = io(); let to = null;
+        let dbg = localStorage.getItem('dbg');
+        if(dbg) document.getElementById('bx').style.backgroundImage = `url(${dbg})`;
 
         function tm(id){ document.getElementById(id).classList.toggle('o'); document.getElementById('ov').classList.toggle('o'); }
-        function closeAll(){ document.getElementById('s').classList.remove('o'); document.getElementById('st_p').classList.remove('o'); document.getElementById('ov').classList.remove('o'); }
+        function closeAll(){ document.getElementById('s').classList.remove('o'); document.getElementById('st').classList.remove('o'); document.getElementById('ov').classList.remove('o'); }
         
-        function isTyping() { sc.emit('t', { s: true }); clearTimeout(tT); tT = setTimeout(() => sc.emit('t', { s: false }), 2000); }
-        sc.on('t', (d) => { document.getElementById('ty').innerText = d.s ? `${d.u} печатает...` : ''; });
+        // Typing
+        function isTyping() { sc.emit('t', true); setTimeout(()=>sc.emit('t', false), 2000); }
+        sc.on('t', d => { document.getElementById('ty').innerText = d.s ? `${d.u} пишет...` : ''; });
 
-        sc.on('connect', () => sc.emit('j', { u, av }));
-        sc.on('ul', (l) => {
+        sc.on('connect', () => sc.emit('j', { u, av, ph }));
+
+        // Список всех пользователей
+        sc.on('ul', d => {
             const c = document.getElementById('ul'); c.innerHTML = '';
-            Object.keys(l).forEach(n => { if(n!==u) c.innerHTML += `<div class="u-card" onclick="st('${n}')"><img src="${l[n].av}" class="av-s">${n}</div>`; });
+            Object.keys(d.all).forEach(name => {
+                const isOnline = d.online[name];
+                c.innerHTML += `<div class="u-item ${!isOnline?'u-off':''}" onclick="st('${name}')">
+                    <img src="${d.all[name].av}" class="av"> ${name} ${isOnline?'●':''}
+                </div>`;
+            });
         });
-        
-        sc.on('hs', (h) => { document.getElementById('bx').innerHTML=''; h.forEach(m=>dr(m)); sl(); });
-        sc.on('m', (m) => { dr(m); sl(); });
-        sc.on('d', (i) => { const e=document.getElementById(i); if(e) e.remove(); });
+
+        sc.on('hs', h => { document.getElementById('bx').innerHTML=''; h.forEach(m=>dr(m)); sl(); });
+        sc.on('m', m => { 
+            dr(m); sl(); 
+            if(m.u !== u) sc.emit('read', m.id); // Отправляем статус "прочитано"
+        });
+        sc.on('read_ok', id => { const e = document.getElementById('st_'+id); if(e) e.innerText = '✓✓'; });
+        sc.on('d', i => document.getElementById(i)?.remove());
 
         function dr(d) {
             const w = document.createElement('div'); w.id = d.id;
             w.className = `mw ${d.u===u?'me':''} ${d.u==='NooMB1T'?'ad':''}`;
-            const isAdmin = (u === 'NooMB1T' || d.u === u);
-            w.innerHTML = `<div class="u-n"><img src="${d.av}" class="av-s"> ${d.u} ${isAdmin ? `<span class="db" onclick="sc.emit('d','${d.id}')">×</span>` : ''}</div>
-                <div style="word-break:break-all">${d.c}</div>`;
+            const isAd = (u === 'NooMB1T' || d.u === u);
+            w.innerHTML = `<div style="font-size:10px; font-weight:bold; margin-bottom:4px; display:flex; align-items:center; gap:5px">
+                <img src="${d.av}" class="av">${d.u} ${isAd?`<span onclick="sc.emit('d','${d.id}')" style="color:red">×</span>`:''}</div>
+                <div style="word-break:break-all">${d.t==='img' ? `<img src="${d.c}" class="img-msg" onclick="dl('${d.c}')">` : d.c}</div>
+                <span class="st-ok" id="st_${d.id}">${d.u===u?'✓':''}</span>`;
             document.getElementById('bx').appendChild(w);
         }
 
-        function st(n){ to = n; document.getElementById('in').placeholder = `Private to ${n}...`; closeAll(); }
-        function sm(){ const i=document.getElementById('in'); if(i.value.trim()){ sc.emit('m',{u, av, c:i.value, to}); i.value=''; to=null; } }
-        function sl(){ const b=document.getElementById('bx'); b.scrollTop=b.scrollHeight; }
-        document.getElementById('in').onkeypress=(e)=>{ if(e.key==='Enter') sm(); };
+        function sm() { 
+            const i=document.getElementById('in'); 
+            if(!i.value.trim()) return;
+            const m = { u, av, c: i.value, t: 'txt', to, id: 'temp_'+Date.now() };
+            dr(m); sl(); // МГНОВЕННОЕ ОТОБРАЖЕНИЕ
+            sc.emit('m', m); 
+            i.value=''; 
+        }
 
-        // Settings
-        document.getElementById('set_u').value = u; document.getElementById('set_av').src = av;
-        function updAv(i){ const r=new FileReader(); r.onload=(e)=>{ av=e.target.result; document.getElementById('set_av').src=av; }; r.readAsDataURL(i.files[0]); }
-        function save(){ u=document.getElementById('set_u').value; localStorage.setItem('du',u); localStorage.setItem('da',av); location.reload(); }
+        function upImg(input) {
+            const r = new FileReader();
+            r.onload = e => {
+                const m = { u, av, c: e.target.result, t: 'img', to, id: 'temp_'+Date.now() };
+                dr(m); sl();
+                sc.emit('m', m);
+            };
+            r.readAsDataURL(input.files[0]);
+        }
+
+        function dl(url) { const a = document.createElement('a'); a.href = url; a.download = 'dovegram_photo.png'; a.click(); }
+        function st(n){ to = n; document.getElementById('chat_title').innerText = n; closeAll(); }
+        function sl(){ const b=document.getElementById('bx'); b.scrollTop=b.scrollHeight; }
+        function changeBg(url){ document.getElementById('bx').style.backgroundImage = `url(${url})`; localStorage.setItem('dbg', url); }
+        function save(){ localStorage.setItem('du', document.getElementById('set_u').value); location.reload(); }
+        document.getElementById('in').onkeypress=e=>{ if(e.key==='Enter') sm(); };
     </script>
 </body>
 </html>
