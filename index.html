@@ -4,275 +4,235 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>DoveGram 6.0 Core</title>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { 
             --bg: #000; 
             --accent: #ff4d4d; 
             --blue-line: #3b82f6; 
-            --panel: #080808;
-            --text: #ffffff;
+            --panel: #0a0a0a;
+            --green-active: #4ade80;
         }
 
-        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; overflow: hidden; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; height: 100vh; display: flex; overflow: hidden; }
 
         /* Авторизація */
-        #auth-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { width: 100%; max-width: 350px; text-align: center; }
-        input[type="text"], input[type="tel"] { width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 12px; background: #111; border: 1px solid #333; color: #fff; outline: none; }
-        .login-btn { width: 100%; padding: 16px; border-radius: 12px; background: #fff; color: #000; font-weight: bold; border: none; cursor: pointer; }
+        #auth { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        .auth-in { width: 100%; max-width: 340px; padding: 18px; margin-bottom: 15px; border-radius: 15px; background: #111; border: 1px solid #222; color: #fff; font-size: 16px; outline: none; }
+        .auth-btn { width: 100%; max-width: 340px; padding: 18px; border-radius: 15px; background: #fff; color: #000; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; }
 
-        /* Ліва частина: Пошук та Список */
-        #left-side { flex: 1; display: flex; flex-direction: column; border-right: 2px solid var(--blue-line); position: relative; }
-        .search-area { padding: 15px; background: var(--bg); }
-        #global-search { width: 100%; padding: 12px 15px; border-radius: 20px; background: #111; border: 1px solid #222; color: #fff; }
-
-        .chat-item { padding: 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #080808; cursor: pointer; transition: 0.2s; }
-        .chat-item:hover { background: #050505; }
-        .chat-item .status { width: 10px; height: 10px; border-radius: 50%; background: #4ade80; }
-
-        /* Права частина: Кнопки та Аватарка */
-        #right-bar { width: 85px; display: flex; flex-direction: column; align-items: center; padding-top: 140px; gap: 30px; position: relative; }
+        /* КОНСТРУКЦІЯ: Ліва панель */
+        #left { flex: 1; display: flex; flex-direction: column; border-right: 2px solid var(--blue-line); position: relative; }
         
-        /* Ефект накладеної аватарки (Червоне коло) */
-        .avatar-wrap { 
-            position: absolute; 
-            top: 15px; 
-            right: 35px; /* Зміщення вліво, щоб перекрити лінію */
-            width: 100px; 
-            height: 100px; 
-            z-index: 2000;
+        /* Пошук (Зелена зона) */
+        .search-wrap { padding: 20px 15px; background: var(--bg); }
+        #s-input { width: 100%; padding: 12px 18px; border-radius: 25px; background: #121212; border: 1px solid #252525; color: #fff; font-size: 14px; }
+
+        /* Список чатів */
+        #chat-list { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+        .chat-row { padding: 18px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #080808; cursor: pointer; position: relative; }
+        .chat-row:active { background: #050505; }
+        .av-min { width: 50px; height: 50px; border-radius: 50%; background: #1a1a1a; object-fit: cover; }
+        .online-dot { position: absolute; bottom: 18px; left: 55px; width: 12px; height: 12px; background: var(--green-active); border: 2px solid #000; border-radius: 50%; }
+
+        /* ПРАВА ПАНЕЛЬ: Аватарка та Кнопки */
+        #right { width: 90px; display: flex; flex-direction: column; align-items: center; padding-top: 150px; gap: 35px; position: relative; }
+
+        /* ФОТО НАКЛАДЕНЕ (Червоне коло - виступає на 50%) */
+        .main-av-container {
+            position: absolute;
+            top: 20px;
+            right: 40px; /* Зсув вліво, щоб перекрити синю лінію */
+            width: 110px;
+            height: 110px;
+            z-index: 100;
         }
-        #user-avatar { 
-            width: 100%; 
-            height: 100%; 
-            border-radius: 50%; 
-            border: 4px solid var(--accent); 
+        #main-av {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
             object-fit: cover;
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.2);
             background: #222;
         }
 
-        /* Іконки замість цифр (Жовті точки) */
-        .nav-icon { font-size: 22px; color: #555; cursor: pointer; transition: 0.3s; position: relative; }
-        .nav-icon:hover, .nav-icon.active { color: var(--accent); transform: scale(1.1); }
-        .badge { position: absolute; top: -5px; right: -8px; background: var(--accent); color: #fff; font-size: 10px; padding: 2px 5px; border-radius: 10px; display: none; }
+        /* ІКОНКИ ЗАМІСТЬ ЦИФР (Жовті точки на схемі) */
+        .nav-link { font-size: 24px; color: #444; cursor: pointer; transition: 0.3s ease; position: relative; }
+        .nav-link:hover { color: #fff; transform: scale(1.1); }
+        .nav-link.active { color: var(--green-active); }
+        .msg-count { position: absolute; top: -8px; right: -10px; background: var(--accent); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
 
-        /* Вікно чату */
-        #chat-window { position: fixed; inset: 0; background: #000; z-index: 1000; display: none; flex-direction: column; }
-        #chat-window.active { display: flex; }
-        .chat-header { padding: 15px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; gap: 15px; }
-        #msg-list { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        /* ВІКНО ЧАТУ (Глобальний чат) */
+        #win { position: fixed; inset: 0; background: #000; z-index: 500; display: none; flex-direction: column; }
+        .win-head { padding: 15px 20px; display: flex; align-items: center; border-bottom: 1px solid #111; gap: 20px; }
+        #msg-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
-        /* Повідомлення */
-        .m-wrap { display: flex; flex-direction: column; max-width: 80%; }
-        .m-wrap.me { align-self: flex-end; }
-        .m-body { padding: 12px 16px; border-radius: 18px; background: #161616; position: relative; }
-        .me .m-body { background: #fff; color: #000; }
-        .m-img { max-width: 100%; border-radius: 10px; margin-top: 5px; cursor: pointer; }
+        /* Повідомлення з реакціями */
+        .msg-cloud { max-width: 80%; padding: 14px 18px; border-radius: 22px; background: #161616; position: relative; font-size: 15px; }
+        .msg-cloud.my { align-self: flex-end; background: #fff; color: #000; border-bottom-right-radius: 4px; }
+        .msg-img { max-width: 100%; border-radius: 12px; margin-top: 8px; border: 1px solid #222; }
         
-        /* Реакції */
-        .reactions { display: flex; gap: 5px; margin-top: -10px; margin-left: 10px; z-index: 2; }
-        .re-item { background: #222; padding: 2px 6px; border-radius: 10px; font-size: 12px; border: 1px solid #333; cursor: pointer; }
+        .react-bar { display: flex; gap: 6px; margin-top: -8px; margin-left: 12px; }
+        .re-chip { background: #222; padding: 3px 8px; border-radius: 12px; font-size: 12px; border: 1px solid #333; cursor: pointer; color: #aaa; }
 
-        /* Поле вводу */
-        .input-zone { padding: 15px; display: flex; gap: 10px; background: #000; border-top: 1px solid #1a1a1a; align-items: center; }
-        #file-input { display: none; }
-        .action-btn { font-size: 20px; color: #888; cursor: pointer; }
-        #text-in { flex: 1; padding: 12px; border-radius: 12px; background: #111; border: none; color: #fff; outline: none; }
+        /* Бар вводу */
+        .input-bar { padding: 15px; background: #000; border-top: 1px solid #111; display: flex; align-items: center; gap: 12px; }
+        #file-up { display: none; }
+        .bar-btn { font-size: 20px; color: #555; cursor: pointer; }
+        #m-input { flex: 1; padding: 14px; border-radius: 15px; background: #111; border: none; color: #fff; outline: none; }
     </style>
 </head>
 <body>
 
-<div id="auth-overlay">
-    <div class="auth-card">
-        <h1 style="margin-bottom: 10px;">DoveGram 6.0</h1>
-        <p style="color: #666; margin-bottom: 30px;">Core Edition</p>
-        <input type="text" id="login-name" placeholder="Ваше ім'я">
-        <input type="tel" id="login-phone" placeholder="+380 ...">
-        <button class="login-btn" onclick="initApp()">ПІДКЛЮЧИТИСЬ</button>
+<div id="auth">
+    <div style="text-align: center;">
+        <h1 style="font-size: 32px; letter-spacing: -1px; margin-bottom: 5px;">DoveGram 6.0</h1>
+        <p style="color: #444; font-weight: bold; margin-bottom: 40px;">CORE STABLE</p>
+        <input type="text" id="nick" class="auth-in" placeholder="Нікнейм">
+        <input type="tel" id="phone" class="auth-in" placeholder="+380 ...">
+        <button class="auth-btn" onclick="login()">Увійти</button>
     </div>
 </div>
 
-<div class="avatar-wrap">
-    <img id="user-avatar" src="https://i.imgur.com/6VBx3io.png" alt="User">
+<div class="main-av-container">
+    <img id="main-av" src="https://i.imgur.com/6VBx3io.png">
 </div>
 
-<div id="left-side">
-    <div class="search-area">
-        <input type="text" id="global-search" placeholder="Пошук..." oninput="filterList()">
+<div id="left">
+    <div class="search-wrap">
+        <input type="text" id="s-input" placeholder="Пошук контактів..." oninput="doSearch()">
     </div>
     <div id="chat-list">
-        <div class="chat-item" onclick="openChat('Глобальний чат', true)">
-            <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-globe"></i>
+        <div class="chat-row" onclick="openChat('Глобальний чат', true)">
+            <div style="width: 50px; height: 50px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-bolt"></i>
             </div>
             <div style="flex: 1;">
-                <b>Глобальний чат</b><br>
-                <small style="color: #444;">Всі користувачі Core</small>
+                <b>Global Core Chat</b><br>
+                <small style="color: #555;">Система: Онлайн</small>
             </div>
-            <div id="global-badge" class="badge" style="position: static; display: none;">0</div>
         </div>
-        <div id="users-online"></div>
+        <div id="others"></div>
     </div>
 </div>
 
-<div id="right-bar">
-    <div class="nav-icon" title="Профіль" onclick="showTab('profile')">
-        <i class="fas fa-user-circle"></i>
+<div id="right">
+    <div class="nav-link" onclick="tab('p')"><i class="fas fa-id-badge"></i></div>
+    <div class="nav-link" onclick="document.getElementById('file-up').click()"><i class="fas fa-camera"></i></div>
+    <div class="nav-link active" onclick="tab('m')">
+        <i class="fas fa-comment-alt"></i>
+        <span id="unread" class="msg-count">2</span>
     </div>
-    <div class="nav-icon" title="Створити" onclick="showTab('create')">
-        <i class="fas fa-plus-square"></i>
-    </div>
-    <div class="nav-icon" title="Повідомлення" onclick="showTab('msgs')">
-        <i class="fas fa-comment-dots"></i>
-        <div id="total-badge" class="badge">0</div>
-    </div>
-    <div class="nav-icon" title="Налаштування" onclick="showTab('settings')">
-        <i class="fas fa-cog"></i>
-    </div>
+    <div class="nav-link" onclick="tab('s')"><i class="fas fa-sliders-h"></i></div>
     
-    <div class="nav-icon" style="margin-top: auto; color: #333;" onclick="location.reload()">
-        <i class="fas fa-sign-out-alt"></i>
+    <div class="nav-link" style="margin-top: auto; color: #222;" onclick="location.reload()">
+        <i class="fas fa-power-off"></i>
     </div>
 </div>
 
-<div id="chat-window">
-    <div class="chat-header">
-        <i class="fas fa-arrow-left" style="cursor: pointer;" onclick="closeChat()"></i>
-        <b id="active-title">Чат</b>
-        <div class="status"></div>
+<div id="win">
+    <div class="win-head">
+        <i class="fas fa-chevron-left" style="font-size: 20px;" onclick="closeChat()"></i>
+        <b id="win-title">Чат</b>
     </div>
-    <div id="msg-list"></div>
-    <div class="input-zone">
-        <label for="file-input" class="action-btn"><i class="fas fa-paperclip"></i></label>
-        <input type="file" id="file-input" accept="image/*" onchange="handleFile(this)">
-        <input type="text" id="text-in" placeholder="Напишіть повідомлення...">
-        <div class="action-btn" onclick="sendMsg()"><i class="fas fa-paper-plane" style="color: #fff;"></i></div>
+    <div id="msg-box"></div>
+    <div class="input-bar">
+        <label for="file-up" class="bar-btn"><i class="fas fa-paperclip"></i></label>
+        <input type="file" id="file-up" accept="image/*" onchange="sendImg(this)">
+        <input type="text" id="m-input" placeholder="Повідомлення...">
+        <div class="bar-btn" onclick="sendText()"><i class="fas fa-arrow-up" style="color: #fff;"></i></div>
     </div>
 </div>
 
 <script>
-    // Ініціалізація Socket (в реальному проекті встав сюди свій URL)
-    const socket = io('https://your-server-url.com', { autoConnect: false });
-    
-    let user = { name: '', phone: '', av: 'https://i.imgur.com/6VBx3io.png' };
-    let unreadCount = 0;
+    let me = { n: '', p: '', av: 'https://i.imgur.com/6VBx3io.png' };
+    let unread = 0;
 
-    function initApp() {
-        const name = document.getElementById('login-name').value;
-        const phone = document.getElementById('login-phone').value;
-        if(!name || !phone) return alert("Заповніть всі поля!");
-        
-        user.name = name;
-        user.phone = phone;
-        document.getElementById('auth-overlay').style.display = 'none';
-        
-        // Візуальний фікс аватарки
-        document.getElementById('user-avatar').src = user.av;
-        
-        // Симуляція підключення
-        addSystemMessage("Ласкаво просимо в DoveGram 6.0 Core!");
-        renderOnlineUsers();
+    function login() {
+        me.n = document.getElementById('nick').value;
+        me.p = document.getElementById('phone').value;
+        if(!me.n || !me.p) return alert("Заповни поля!");
+        document.getElementById('auth').style.display = 'none';
+        document.getElementById('main-av').src = me.av;
+        addSysMsg("Підключено до Core 6.0");
+        genUsers();
     }
 
-    function sendMsg() {
-        const input = document.getElementById('text-in');
-        if(!input.value.trim()) return;
-        
-        appendMessage(user.name, input.value, true);
-        input.value = '';
+    function sendText() {
+        const i = document.getElementById('m-input');
+        if(i.value.trim()) { pushMsg(me.n, i.value, true); i.value = ''; }
     }
 
-    function handleFile(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                appendMessage(user.name, '', true, e.target.result);
-            };
-            reader.readAsDataURL(input.files[0]);
+    function sendImg(input) {
+        if(input.files && input.files[0]) {
+            const r = new FileReader();
+            r.onload = (e) => pushMsg(me.n, '', true, e.target.result);
+            r.readAsDataURL(input.files[0]);
         }
     }
 
-    function appendMessage(sender, text, isMe, imgData = null) {
-        const list = document.getElementById('msg-list');
-        const wrap = document.createElement('div');
-        wrap.className = `m-wrap ${isMe ? 'me' : ''}`;
+    function pushMsg(u, t, isMe, img = null) {
+        const box = document.getElementById('msg-box');
+        const div = document.createElement('div');
+        div.className = `msg-cloud ${isMe ? 'my' : ''}`;
+        div.innerHTML = `<small style="opacity: 0.4; font-size: 10px;">${u}</small><br>
+                         ${t ? `<span>${t}</span>` : ''}
+                         ${img ? `<img src="${img}" class="msg-img">` : ''}`;
         
-        let content = `<div class="m-body">
-            <small style="font-size: 10px; opacity: 0.6;">${sender}</small><br>
-            ${text ? `<span>${text}</span>` : ''}
-            ${imgData ? `<img src="${imgData}" class="m-img">` : ''}
-        </div>
-        <div class="reactions">
-            <span class="re-item" onclick="this.textContent = '🔥 1'">👍</span>
-        </div>`;
+        const react = document.createElement('div');
+        react.className = 'react-bar';
+        react.innerHTML = `<div class="re-chip" onclick="this.innerHTML='🔥 1'; this.style.color='#ff4d4d'">🔥</div>`;
         
-        wrap.innerHTML = content;
-        list.appendChild(wrap);
-        list.scrollTop = list.scrollHeight;
-
-        // Індикатор нових повідомлень, якщо чат закритий
-        if(!document.getElementById('chat-window').classList.contains('active')) {
-            unreadCount++;
-            updateBadges();
-        }
+        box.appendChild(div);
+        box.appendChild(react);
+        box.scrollTop = box.scrollHeight;
+        
+        if(!isMe) { unread++; upd(); }
     }
 
-    function updateBadges() {
-        const b = document.getElementById('total-badge');
-        b.style.display = unreadCount > 0 ? 'block' : 'none';
-        b.textContent = unreadCount;
+    function upd() {
+        const b = document.getElementById('unread');
+        b.textContent = unread;
+        b.style.display = unread > 0 ? 'block' : 'none';
     }
 
-    function openChat(name, isGlobal = false) {
-        document.getElementById('active-title').textContent = name;
-        document.getElementById('chat-window').classList.add('active');
-        unreadCount = 0;
-        updateBadges();
+    function openChat(t) {
+        document.getElementById('win-title').textContent = t;
+        document.getElementById('win').style.display = 'flex';
+        unread = 0; upd();
     }
 
-    function closeChat() {
-        document.getElementById('chat-window').classList.remove('active');
+    function closeChat() { document.getElementById('win').style.display = 'none'; }
+
+    function doSearch() {
+        const q = document.getElementById('s-input').value.toLowerCase();
+        document.querySelectorAll('.chat-row').forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? 'flex' : 'none');
     }
 
-    function filterList() {
-        const q = document.getElementById('global-search').value.toLowerCase();
-        document.querySelectorAll('.chat-item').forEach(item => {
-            item.style.display = item.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+    function genUsers() {
+        const o = document.getElementById('others');
+        const names = ['Anton_Dev', 'Support_Core', 'Moderator'];
+        names.forEach(n => {
+            o.innerHTML += `<div class="chat-row" onclick="openChat('${n}')">
+                <div class="av-min" style="background: #111;"></div>
+                <div class="online-dot"></div>
+                <div style="flex:1"><b>${n}</b><br><small style="color:#333">Core User</small></div>
+            </div>`;
         });
     }
 
-    function renderOnlineUsers() {
-        const container = document.getElementById('users-online');
-        const mockUsers = ['Anton', 'Admin', 'Guest_402'];
-        mockUsers.forEach(u => {
-            container.innerHTML += `
-                <div class="chat-item" onclick="openChat('${u}')">
-                    <div style="width: 45px; height: 45px; border-radius: 50%; background: #222;"></div>
-                    <div style="flex: 1;"><b>${u}</b><br><small style="color: #444;">Online</small></div>
-                    <div class="status"></div>
-                </div>
-            `;
-        });
+    function addSysMsg(t) {
+        document.getElementById('msg-box').innerHTML += `<div style="text-align:center; color:#222; font-size:12px; margin:10px 0;">${t}</div>`;
     }
 
-    function addSystemMessage(txt) {
-        const list = document.getElementById('msg-list');
-        list.innerHTML += `<div style="text-align: center; font-size: 12px; color: #444; margin: 10px 0;">${txt}</div>`;
-    }
-
-    function showTab(type) {
-        document.querySelectorAll('.nav-icon').forEach(i => i.classList.remove('active'));
+    function tab(t) {
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         event.currentTarget.classList.add('active');
-        console.log("Switching to " + type);
     }
 
-    // Фікс багу Enter
-    document.getElementById('text-in').addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') sendMsg();
-    });
+    document.getElementById('m-input').onkeypress = (e) => { if(e.key === 'Enter') sendText(); };
 </script>
 </body>
 </html>
