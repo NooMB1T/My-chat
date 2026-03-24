@@ -15,108 +15,120 @@
         
         /* Авторизация */
         #gate { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .gate-card { width: 90%; max-width: 360px; text-align: center; }
-        .g-input { width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; background: #0a0a0a; border: 1px solid #1a1a1a; outline: none; }
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DoveGram 6.5</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        :root { --accent: #3b82f6; --bg: #000; --panel: #050505; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: #fff; }
+        body { background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
+
+        /* Заглушка для гостей */
+        #guest { position: fixed; inset: 0; background: #000; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        
+        /* Вход */
+        #gate { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .g-card { width: 90%; max-width: 360px; text-align: center; }
+        .g-in { width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; background: #0a0a0a; border: 1px solid #1a1a1a; outline: none; }
         .g-btn { width: 100%; padding: 18px; margin-top: 20px; border-radius: 15px; background: #fff; color: #000; font-weight: 800; border: none; cursor: pointer; }
 
-        /* Основной интерфейс */
-        #main-side { flex: 1; border-right: 2px solid var(--accent); display: flex; flex-direction: column; background: var(--panel); }
-        .h-title { padding: 35px 25px; font-size: 28px; font-weight: 900; display: flex; justify-content: space-between; }
-        .chat-list { flex: 1; overflow-y: auto; }
+        /* UI */
+        #main-view { flex: 1; border-right: 2px solid var(--accent); display: flex; flex-direction: column; background: var(--panel); }
+        .h-title { padding: 35px 25px; font-size: 28px; font-weight: 900; }
         .c-item { padding: 20px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); }
 
-        /* Навигация */
-        #nav-bar { width: 90px; display: flex; flex-direction: column; align-items: center; padding-top: 150px; gap: 40px; position: relative; background: #000; }
-        .main-av { position: absolute; top: 25px; right: 38px; width: 105px; height: 105px; border-radius: 50%; z-index: 100; object-fit: cover; background: #111; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
+        #nav { width: 90px; display: flex; flex-direction: column; align-items: center; padding-top: 150px; gap: 40px; position: relative; background: #000; }
+        .my-av { position: absolute; top: 25px; right: 38px; width: 105px; height: 105px; border-radius: 50%; z-index: 100; object-fit: cover; background: #111; cursor: pointer; }
 
-        #prof-ui { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; padding: 40px 20px; }
+        #profile { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; padding: 40px 20px; }
     </style>
 </head>
 <body>
 
-<div id="guest-screen">
+<div id="guest">
     <h2 style="margin-bottom: 20px;">Эй, почему ты до сих пор не здесь?</h2>
     <p style="color: #444; margin-bottom: 30px;">Присоединяйся к DoveGram 6.5</p>
-    <a href="#" onclick="showGate()" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 20px;">Зарегистрироваться</a>
+    <a href="#" onclick="showLogin()" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 20px;">Зарегистрироваться</a>
 </div>
 
-<div id="gate" style="display: none;">
-    <div class="gate-card">
+<div id="gate">
+    <div class="g-card">
         <h1>DOVEGRAM 6.5</h1>
-        <input type="text" id="in-name" class="g-input" placeholder="Имя профиля">
-        <input type="text" id="in-phone" class="g-input" placeholder="+380 ...">
-        <button class="g-btn" onclick="save()">ВОЙТИ</button>
+        <input type="text" id="n-in" class="g-in" placeholder="Имя профиля">
+        <input type="text" id="p-in" class="g-in" placeholder="+380 ...">
+        <button class="g-btn" onclick="reg()">ВХОД</button>
     </div>
 </div>
 
-<div id="main-side">
-    <div class="h-title">Чаты <i class="fas fa-users" style="font-size: 18px; color: #222;" title="Синхронизация контактов"></i></div>
-    <div class="chat-list">
-        <div class="c-item" onclick="location.href='chat.html'">
-            <div style="width: 55px; height: 55px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; color: var(--accent);"><i class="fas fa-bolt"></i></div>
-            <div style="flex:1"><b>Глобальное ядро</b><br><small style="color:#333" id="typing-status">никто не пишет...</small></div>
-        </div>
+<div id="main-view">
+    <div class="h-title">Чаты</div>
+    <div class="c-item" onclick="location.href='chat.html'">
+        <div style="width: 55px; height: 55px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; color: var(--accent);"><i class="fas fa-bolt"></i></div>
+        <div style="flex:1"><b>Глобальное ядро</b><br><small style="color:#333" id="typing">никто не пишет...</small></div>
     </div>
 </div>
 
-<img src="https://i.imgur.com/6VBx3io.png" id="user-avatar" class="main-av" onclick="openP()">
+<img src="https://i.imgur.com/6VBx3io.png" id="avatar" class="my-av" onclick="openSet()">
 
-<div id="nav-bar">
-    <div class="nav-btn" onclick="location.reload()"><i class="fas fa-home"></i></div>
-    <div class="nav-btn" onclick="openP()"><i class="fas fa-cog"></i></div>
-    <div class="nav-btn" style="margin-top:auto; margin-bottom:40px;" onclick="exit()"><i class="fas fa-power-off" style="color:#300"></i></div>
+<div id="nav">
+    <div class="nav-btn" onclick="location.reload()"><i class="fas fa-home" style="font-size: 26px;"></i></div>
+    <div class="nav-btn" onclick="openSet()"><i class="fas fa-cog" style="font-size: 26px;"></i></div>
+    <div class="nav-btn" style="margin-top:auto; margin-bottom:40px;" onclick="exit()"><i class="fas fa-power-off" style="color:#300; font-size: 26px;"></i></div>
 </div>
 
-<div id="prof-ui">
-    <i class="fas fa-arrow-left" onclick="closeP()"></i>
+<div id="profile">
+    <i class="fas fa-arrow-left" style="font-size: 24px;" onclick="closeSet()"></i>
     <div style="margin-top: 40px; text-align: center;">
-        <input type="file" id="av-change" hidden onchange="updateAv(this)">
-        <img src="" id="p-av-preview" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; cursor: pointer;" onclick="document.getElementById('av-change').click()">
-        <p style="margin-top: 10px; color: #555;">Нажмите на фото, чтобы изменить</p>
+        <input type="file" id="up" hidden onchange="changeAv(this)">
+        <img src="" id="p-pre" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;" onclick="document.getElementById('up').click()">
+        <p style="margin-top: 10px; color: #555;">Нажмите, чтобы сменить фото</p>
     </div>
-    <div style="background: #080808; padding: 20px; border-radius: 20px; margin-top: 30px;">
-        <p>Имя: <b id="p-n"></b></p>
-        <p style="margin-top: 15px;">Телефон: <b id="p-p"></b></p>
+    <div style="background: #080808; padding: 25px; border-radius: 20px; margin-top: 30px;">
+        <p>Имя: <b id="u-name"></b></p>
+        <p style="margin-top: 15px;">Телефон: <b id="u-phone"></b></p>
     </div>
 </div>
 
 <script>
-    function save() {
-        const n = document.getElementById('in-name').value;
-        const p = document.getElementById('in-phone').value;
+    function reg() {
+        const n = document.getElementById('n-in').value;
+        const p = document.getElementById('p-in').value;
         if(n && p) {
-            localStorage.setItem('dg_user', n);
-            localStorage.setItem('dg_phone', p);
-            localStorage.setItem('dg_av', 'https://i.imgur.com/6VBx3io.png');
+            localStorage.setItem('dg_u', n);
+            localStorage.setItem('dg_p', p);
+            localStorage.setItem('dg_a', 'https://i.imgur.com/6VBx3io.png');
             location.reload();
         }
     }
-    function updateAv(input) {
-        if(input.files[0]) {
+    function changeAv(i) {
+        if(i.files[0]) {
             const r = new FileReader();
             r.onload = (e) => {
-                localStorage.setItem('dg_av', e.target.result);
-                document.getElementById('user-avatar').src = e.target.result;
-                document.getElementById('p-av-preview').src = e.target.result;
+                localStorage.setItem('dg_a', e.target.result);
+                document.getElementById('avatar').src = e.target.result;
+                document.getElementById('p-pre').src = e.target.result;
             };
-            r.readAsDataURL(input.files[0]);
+            r.readAsDataURL(i.files[0]);
         }
     }
     function check() {
-        const u = localStorage.getItem('dg_user');
-        if(!u) {
-            document.getElementById('guest-screen').style.display = 'flex';
-        } else {
+        const u = localStorage.getItem('dg_u');
+        if(!u) { document.getElementById('guest').style.display = 'flex'; }
+        else {
             document.getElementById('gate').style.display = 'none';
-            document.getElementById('p-n').innerText = u;
-            document.getElementById('p-p').innerText = localStorage.getItem('dg_phone');
-            document.getElementById('user-avatar').src = localStorage.getItem('dg_av');
-            document.getElementById('p-av-preview').src = localStorage.getItem('dg_av');
+            document.getElementById('u-name').innerText = u;
+            document.getElementById('u-phone').innerText = localStorage.getItem('dg_p');
+            document.getElementById('avatar').src = localStorage.getItem('dg_a');
+            document.getElementById('p-pre').src = localStorage.getItem('dg_a');
         }
     }
-    function showGate() { document.getElementById('guest-screen').style.display = 'none'; document.getElementById('gate').style.display = 'flex'; }
-    function openP() { document.getElementById('prof-ui').style.display = 'block'; }
-    function closeP() { document.getElementById('prof-ui').style.display = 'none'; }
+    function showLogin() { document.getElementById('guest').style.display = 'none'; }
+    function openSet() { document.getElementById('profile').style.display = 'block'; }
+    function closeSet() { document.getElementById('profile').style.display = 'none'; }
     function exit() { localStorage.clear(); location.reload(); }
     window.onload = check;
 </script>
