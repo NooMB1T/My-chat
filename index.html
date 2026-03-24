@@ -1,32 +1,31 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" }, maxHttpBufferSize: 1e8 });
-
-app.use(express.static(__dirname));
-
-let history = []; 
-
-io.on('connection', (socket) => {
-    socket.on('join', (room) => {
-        socket.join(room);
-        const roomMsgs = history.filter(m => m.r === room);
-        socket.emit('history', roomMsgs);
-    });
-
-    socket.on('msg', (data) => {
-        history.push(data);
-        if(history.length > 100) history.shift();
-        io.to(data.r).emit('msg', data); 
-    });
-});
-
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-app.get('/chat', (req, res) => res.sendFile(path.join(__dirname, 'chat.html')));
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log("Live"));
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoveChat | Вход</title>
+    <style>
+        body { background: #0e1621; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #17212b; padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 350px; }
+        h1 { color: #5288c1; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #2b3e51; background: #242f3d; color: #fff; outline: none; margin-bottom: 20px; font-size: 16px; }
+        button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #5288c1; color: #fff; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>DoveChat</h1>
+        <input type="text" id="u" placeholder="Ваше имя..." autocomplete="off">
+        <button onclick="l()">Войти в чат</button>
+    </div>
+    <script>
+        function l() {
+            const n = document.getElementById('u').value.trim();
+            if(n) { 
+                localStorage.setItem('du', n); 
+                window.location.href = '/chat.html'; // Прямий шлях до файлу
+            }
+        }
+    </script>
+</body>
+</html>
