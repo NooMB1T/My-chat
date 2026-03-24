@@ -1,192 +1,146 @@
+</body>
+</html>
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="/manifest.json">
-    <title>DoveGram 6.0</title>
+    <title>DoveGram 6.0 Core</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        :root { --main: #000; --panel: #111; --border: #222; --accent: #fff; --sub: #888; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--main); color: #fff; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* Авторизація */
-        #auth { position: fixed; inset:0; background:#000; z-index:1000; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px; transition: 0.5s; }
-        input { width:100%; max-width:320px; padding:16px; border-radius:14px; border:1px solid #333; background:#111; color:#fff; margin-bottom:12px; outline:none; font-size:16px; }
-        .btn { width:100%; max-width:320px; padding:16px; border-radius:14px; border:none; background:#fff; color:#000; font-weight:bold; cursor:pointer; font-size:16px; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
+        :root { --bg: #000; --accent: #ff4d4d; --blue: #3b82f6; --green: #22c55e; --gray: #111; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: sans-serif; }
+        body { background: var(--bg); color: #fff; height: 100vh; display: flex; overflow: hidden; }
 
-        /* Шапка */
-        .h { height: 70px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; z-index: 10; background: #000; }
-        
-        /* Червоне коло: Велика Аватарка */
-        #user_av_pic { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #ff4d4d; object-fit: cover; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 15px rgba(255,77,77,0.3); }
-        #user_av_pic:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(255,77,77,0.5); }
+        /* Авторизація (Спрощена) */
+        #auth { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        input { width: 100%; max-width: 320px; padding: 18px; border-radius: 15px; background: #0a0a0a; color: #fff; border: 1px solid #222; margin-bottom: 12px; outline: none; }
+        .btn { width: 100%; max-width: 320px; padding: 18px; border-radius: 15px; background: #fff; color: #000; font-weight: bold; border: none; cursor: pointer; }
 
-        /* Синє область (Чати зліва) */
-        #main { flex:1; display:flex; flex-direction:column; background: var(--main); display: none; }
-        #chat_list { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px; }
-        
-        .chat-row { display:flex; gap:12px; align-items:center; padding:15px 20px; border-radius:20px; border: 1px solid #1a1a1a; cursor:pointer; transition:0.2s; }
-        .chat-row:hover { background: var(--panel); }
-        .chat-row.off { opacity: 0.4; filter: grayscale(1); }
-        .av { width:45px; height:45px; border-radius:50%; object-fit:cover; }
-        
-        /* Окно чата */
-        #chats { flex:1; display:none; flex-direction:column; background: var(--main); transition: 0.2s; }
-        #chats.o { display: flex; }
-        
-        #bx { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; background-size: cover; background-position: center; }
-        .mw { max-width:80%; padding:14px; border-radius:22px; background: rgba(30,30,30,0.85); backdrop-filter: blur(10px); align-self:flex-start; position:relative; border:1px solid var(--border); animation: popMsg 0.2s ease; }
-        .mw.me { align-self:flex-end; background:#fff; color:#000; border:none; border-bottom-right-radius: 4px; }
-        @keyframes popMsg { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        /* ВЕЛИКА АВАТАРКА (Червоне коло на схемі) */
+        #big-av { position: fixed; top: 10px; right: 10px; width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--accent); object-fit: cover; z-index: 1000; background: #222; }
 
-        /* Поле ввода */
-        .b { padding:15px 20px; background:rgba(0,0,0,0.9); display:flex; gap:10px; border-top:1px solid var(--border); }
-        
-        /* Зелений список справа: Быстрые действия */
-        #side_bar_btn { font-size: 10px; color:var(--sub); cursor:pointer; display:flex; flex-direction:column; gap:8px; width:45px; margin-top:10px; margin-left:15px}
-        #side_bar { width: 300px; display:flex; flex-direction:column; background: #080808; border-left: 1px solid var(--border); transition:0.3s cubic-bezier(0.4, 0, 0.2, 1); position:fixed; right:-300px; top:0; bottom:0; z-index:100; padding:25px; padding-top: 80px; }
-        #side_bar.o { right:0; }
-        
-        .side-btn { display:flex; align-items:center; gap:12px; padding:18px; border-radius:12px; cursor:pointer; transition:0.2s; font-size:16px; font-weight:500; }
-        .side-btn:hover { background: rgba(255,255,255,0.05); }
-        .side-btn .icon { font-size:20px; color: #666; width: 25px; text-align: center; }
-        .side-btn.active .icon { color: var(--accent); }
+        /* Панель пошуку (Зелена на схемі) */
+        #search-box { width: 100%; padding: 15px 20px; border-bottom: 1px solid #1a1a1a; }
+        #s-in { width: 100%; padding: 12px; border-radius: 20px; background: #111; border: 1px solid #222; color: #fff; outline: none; }
 
-        #ov { position: fixed; inset:0; background:rgba(0,0,0,0.7); display:none; z-index:90; backdrop-filter: blur(5px); transition: 0.3s; }
-        #ov.o { display: block; }
+        /* Список чатів (Зліва від синьої лінії) */
+        #left { flex: 1; display: flex; flex-direction: column; border-right: 2px solid var(--blue); }
+        .u-row { padding: 18px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #080808; cursor: pointer; }
+        .u-row:active { background: #0a0a0a; }
+
+        /* Кнопки налаштувань (Жовті/Зелені 1-4) */
+        #right-btns { width: 70px; display: flex; flex-direction: column; align-items: center; padding-top: 130px; gap: 30px; }
+        .num-btn { font-size: 22px; color: #4ade80; cursor: pointer; font-weight: bold; opacity: 0.6; transition: 0.3s; }
+        .num-btn:hover { opacity: 1; transform: scale(1.2); }
+
+        /* Окно чату */
+        #win { position: fixed; inset: 0; background: #000; z-index: 500; display: none; flex-direction: column; }
+        #msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .m { padding: 14px; border-radius: 20px; background: #161616; max-width: 80%; font-size: 15px; }
+        .m.me { align-self: flex-end; background: #fff; color: #000; border-bottom-right-radius: 2px; }
+        .in-bar { padding: 15px; display: flex; gap: 10px; background: #000; border-top: 1px solid #1a1a1a; }
     </style>
 </head>
 <body>
 
-<div id="ov" onclick="closeSide()"></div>
 <div id="auth">
-    <h1 style="letter-spacing:-1px; margin-bottom:30px">DoveGram 6.0</h1>
-    <input type="text" id="u_n" placeholder="Введите никнейм">
-    <input type="tel" id="u_p" placeholder="Номер телефона">
-    <button class="btn" onclick="join()">ВОЙТИ</button>
+    <h2 style="margin-bottom:25px">DoveGram 6.0</h2>
+    <input type="text" id="u-name" placeholder="Твій нікнейм">
+    <input type="tel" id="u-phone" placeholder="Твій номер">
+    <button class="btn" onclick="start()">УВІЙТИ</button>
 </div>
 
-<div id="side_bar">
-    <div style="font-size:12px; color:#444; text-transform:uppercase; margin-bottom:15px">Меню</div>
-    <div class="side-btn" onclick="openP()"><span class="icon">⚙️</span>Настройки</div>
-    <div class="side-btn" onclick="openA()"><span class="icon">+</span>Добавить чаты</div>
-    <div class="side-btn" onclick="openB()"><span class="icon">🔖</span>Закладки</div>
-    <div class="side-btn" id="sound_btn" onclick="toggleS()"><span class="icon">🔊</span>Звук</div>
-    <div class="side-btn" style="color:#ff4d4d; margin-top:auto" onclick="location.reload()"><span class="icon">→</span>Выйти</div>
+<img id="big-av" src="https://i.imgur.com/6VBx3io.png">
+
+<div id="left">
+    <div id="search-box">
+        <input type="text" id="s-in" placeholder="Пошук..." oninput="search()">
+    </div>
+    <div id="u-list"></div>
 </div>
 
-<div id="main">
-    <div class="h">
-        <b>Чаты</b>
-        <div style="display:flex; align-items:center; gap:10px">
-            <span id="side_bar_btn" onclick="document.getElementById('side_bar').classList.add('o'); document.getElementById('ov').classList.add('o')">...</span>
-            <img id="user_av_pic" src="">
-        </div>
-    </div>
-    
-    <div style="padding:15px 20px; border-bottom:1px solid var(--border)">
-        <input type="text" id="s_in" placeholder="Поиск контактов или номеров..." oninput="sC()" style="width:100%; border-radius:25px; padding:12px; background:#111">
-    </div>
-
-    <div id="chat_list"></div>
+<div id="right-btns">
+    <div class="num-btn" onclick="alert('Налаштування')">1</div>
+    <div class="num-btn" onclick="alert('Додати')">2</div>
+    <div class="num-btn" id="snd-btn" onclick="togSnd()">3</div>
+    <div class="num-btn" onclick="alert('Закладки')">4</div>
+    <div class="num-btn" style="margin-top:auto; color:red" onclick="location.reload()">→</div>
 </div>
 
-<div id="chats">
-    <div class="h">
-        <span onclick="closeChats()" style="cursor:pointer; font-size:24px">←</span>
-        <b id="c_t" style="margin-left:20px">DoveGram 6.0</b>
+<div id="win">
+    <div style="padding:15px; display:flex; align-items:center; border-bottom:1px solid #111">
+        <span onclick="document.getElementById('win').style.display='none'" style="font-size:25px; cursor:pointer">←</span>
+        <b id="chat-with" style="margin-left:20px"></b>
     </div>
-    <div id="bx"></div>
-    <div class="b">
-        <button class="btn" style="width:50px; background:#222; color:#fff" onclick="uI()">+</button>
-        <input type="file" id="f_up" hidden accept="image/*" onchange="uIO(this)">
-        <input type="text" id="in" placeholder="Сообщение..." style="border-radius:30px; background:#1a1a1a">
-        <button class="btn" style="width:50px; background:#fff" onclick="sm()">↑</button>
+    <div id="msgs"></div>
+    <div class="input-bar">
+        <input type="text" id="m-in" placeholder="Повідомлення..." style="flex:1; margin-bottom:0">
+        <button onclick="send()" style="padding:0 20px; border-radius:12px; background:#fff; border:none; font-weight:bold">↑</button>
     </div>
 </div>
 
 <script>
-    const sc = io();
-    let u = localStorage.getItem('du'), av = localStorage.getItem('da') || 'https://i.imgur.com/6VBx3io.png', ph = localStorage.getItem('dp');
-    let to = null; let allU = {}; let snd = localStorage.getItem('ds') || 'on';
+    const socket = io();
+    let me = { n: localStorage.getItem('dg_n'), p: localStorage.getItem('dg_p'), av: 'https://i.imgur.com/6VBx3io.png' };
+    let snd = true;
 
-    if(u) { document.getElementById('auth').style.display='none'; document.getElementById('main').style.display='flex'; join(); }
+    if(me.n) { document.getElementById('auth').style.display='none'; run(); }
 
-    function join() {
-        if(!u) {
-            u = document.getElementById('u_n').value.trim(); ph = document.getElementById('u_p').value.trim();
-            if(!u || !ph) return alert("Введите данные!");
-            localStorage.setItem('du', u); localStorage.setItem('dp', ph); localStorage.setItem('da', av);
-            document.getElementById('auth').style.display='none'; document.getElementById('main').style.display='flex';
-        }
-        document.getElementById('user_av_pic').src = av;
-        sc.emit('j', { u, av, ph });
-        updateSB();
+    function start() {
+        me.n = document.getElementById('u-name').value;
+        me.p = document.getElementById('u-phone').value;
+        if(!me.n || !me.p) return alert("Введи дані!");
+        localStorage.setItem('dg_n', me.n); localStorage.setItem('dg_p', me.p);
+        document.getElementById('auth').style.display='none';
+        run();
     }
 
-    sc.on('ul', d => { allU = d; rUL(); });
-    sc.on('hs', h => { document.getElementById('bx').innerHTML=''; h.forEach(m=>dr(m)); sl(); });
-    sc.on('m', m => { dr(m); sl(); if(m.u!==u && snd==='on') new Audio('https://i.imgur.com/o2v81I1.mp3').play(); });
+    function run() {
+        document.getElementById('big-av').src = me.av;
+        socket.emit('join', { u: me.n, ph: me.p, av: me.av });
+    }
 
-    function rUL() {
-        const c = document.getElementById('chat_list'); c.innerHTML = '';
-        Object.keys(allU.all).forEach(name => {
-            const online = allU.online[name];
-            if(name !== u) {
-                c.innerHTML += `<div class="chat-row ${!online?'off':''}" onclick="st('${name}')">
-                    <img src="${allU.all[name].av}" class="av">
-                    <div>
-                        <div style="font-weight:bold">${name}</div>
-                        <div style="font-size:10px; color:var(--sub)">${allU.all[name].ph}</div>
-                    </div>
-                </div>`;
-            }
+    function search() {
+        const q = document.getElementById('s-in').value.toLowerCase();
+        document.querySelectorAll('.u-row').forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? 'flex' : 'none');
+    }
+
+    function send() {
+        const i = document.getElementById('m-in');
+        if(i.value.trim()) { socket.emit('msg', { u: me.n, t: i.value }); i.value = ''; }
+    }
+
+    socket.on('ul', users => {
+        const l = document.getElementById('u-list'); l.innerHTML = '';
+        Object.keys(users).forEach(u => {
+            if(u === me.n) return;
+            l.innerHTML += `<div class="u-row" onclick="openChat('${u}')">
+                <div style="width:45px; height:45px; border-radius:50%; background:#222"></div>
+                <div><b>${u}</b><br><small style="color:#444">${users[u].ph}</small></div>
+            </div>`;
         });
-    }
+    });
 
-    // Зелене: Динамический поиск (Фішка #1)
-    function sC() {
-        const q = document.getElementById('s_in').value.toLowerCase();
-        const rows = document.querySelectorAll('.chat-row');
-        rows.forEach(r => {
-            const text = r.innerText.toLowerCase();
-            r.style.display = text.includes(q) ? 'flex' : 'none';
-        });
-    }
+    socket.on('msg', m => {
+        const d = document.createElement('div');
+        d.className = `m ${m.u === me.n ? 'me' : ''}`;
+        d.innerHTML = `<small style="opacity:0.5">${m.u}</small><br>${m.t}`;
+        document.getElementById('msgs').appendChild(d);
+        if(snd && m.u !== me.n) new Audio('https://i.imgur.com/o2v81I1.mp3').play();
+        const b = document.getElementById('msgs'); b.scrollTop = b.scrollHeight;
+    });
 
-    function dr(d) {
-        const w = document.createElement('div'); w.id = d.id;
-        w.className = `mw ${d.u===u?'me':''}`;
-        w.innerHTML = `<div style="font-size:10px; opacity:0.6; margin-bottom:5px">${d.u} ${(u === 'NooMB1T' || d.u === u)?`<span onclick="sc.emit('d','${d.id}')" style="color:red; cursor:pointer">×</span>`:''}</div><div>${d.c}</div>`;
-        document.getElementById('bx').appendChild(w);
-    }
+    socket.on('hs', h => h.forEach(m => {
+        const d = document.createElement('div');
+        d.className = `m ${m.u === me.n ? 'me' : ''}`;
+        d.innerHTML = `<small style="opacity:0.5">${m.u}</small><br>${m.t}`;
+        document.getElementById('msgs').appendChild(d);
+    }));
 
-    // Фикс №3: Синхронизация истории в код
-    // Мы просто принимаем данные `hs` от сервера и сразу выводим их.
-
-    function closeSide() { document.getElementById('side_bar').classList.remove('o'); document.getElementById('ov').classList.remove('o'); }
-    function st(n){ to = n; document.getElementById('c_t').innerText = n; document.getElementById('chats').classList.add('o'); }
-    function closeChats(){ document.getElementById('chats').classList.remove('o'); }
-    function sm(){ const i=document.getElementById('in'); if(i.value.trim()){ sc.emit('m',{u, av, c:i.value, to}); i.value=''; } }
-    function toggleS() { snd = (snd === 'on' ? 'off' : 'on'); localStorage.setItem('ds', snd); updateSB(); }
-    function updateSB() { document.getElementById('sound_btn').innerHTML = `<span class="icon">${snd==='on'?'🔊':'🔇'}</span>Звук: ${snd==='on'?'Вкл':'Выкл'}`; }
-
-    function openP() { alert("Настройки профиля: Смена ника, аватарки, номера телефона..."); closeSide(); }
-    function openA() { alert("Добавить чаты: Введите имя комнаты ( rooms)..."); closeSide(); }
-    function openB() { alert("🔖 Закладки: История удаленных вами сообщений и файлы."); closeSide(); }
-    
-    function uI() { document.getElementById('f_up').click(); }
-    function uIO(i) {
-        const r = new FileReader();
-        r.onload = e => sc.emit('m', { u, av, c: `<img src="${e.target.result}" style="max-width:100%; border-radius:10px">`, t: 'img', to });
-        r.readAsDataURL(i.files[0]);
-    }
-
-    function sl(){ const b = document.getElementById('bx'); b.scrollTop = b.scrollHeight; }
-    document.getElementById('in').onkeypress = e => { if(e.key==='Enter') sm(); };
+    function openChat(n) { document.getElementById('chat-with').innerText = n; document.getElementById('win').style.display = 'flex'; }
+    function togSnd() { snd = !snd; document.getElementById('snd-btn').style.color = snd ? '#4ade80' : '#ff4d4d'; }
+    document.getElementById('m-in').onkeypress = e => { if(e.key==='Enter') send(); };
 </script>
 </body>
 </html>
