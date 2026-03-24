@@ -1,31 +1,44 @@
 const e = require('express'), h = require('http'), { Server: S } = require('socket.io'), p = require('path');
 const a = e(), s = h.createServer(a), o = new S(s, { cors: { origin: "*" } });
-
 a.use(e.static(__dirname));
-let _h = [], _u = {}, _bg = "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?q=80&w=1974&auto=format&fit=crop";
+
+let _msgs = {}; // Сообщения по комнатам: { 'global': [...], 'room1': [...] }
+let _users = {}; // Юзеры в сети
+let _db = {};    // Глобальная база юзеров (для "синхронизации")
 
 o.on('connection', (k) => {
     k.on('j', (d) => {
-        k.u = d.u;
-        _u[d.u] = { id: k.id, av: d.av, ph: d.ph, bio: d.bio || "Пользователь DoveGram" };
-        o.emit('ul', _u);
-        k.emit('hs', { h: _h, bg: _bg });
+        k.u = d.u; k.ph = d.ph;
+        _users[d.u] = { id: k.id, av: d.av, ph: d.ph };
+        _db[d.ph] = { u: d.u, av: d.av }; // Сохраняем в "телефонную книгу" сервера
+        
+        k.join('global'); // По умолчанию все в глобальном
+        o.emit('ul', { online: _users, db: _db });
+        k.emit('hs', _msgs['global'] || []);
+    });
+
+    // Вход в конкретную комнату
+    k.on('join_room', (r) => {
+        k.leaveAll(); k.join(r);
+        k.emit('hs', _msgs[r] || []);
     });
 
     k.on('m', (d) => {
         d.id = 'm_' + Date.now();
-        d.re = {}; 
-        _h.push(d); if(_h.length > 100) _h.shift();
-        o.emit('m', d);
+        const r = d.room || 'global';
+        if(!_msgs[r]) _msgs[r] = [];
+        _msgs[r].push(d);
+        if(_msgs[r].length > 50) _msgs[r].shift();
+        
+        o.to(r).emit('m', d);
     });
 
-    k.on('typing', (v) => { k.broadcast.emit('is_typing', { u: k.u, v }); });
-    k.on('react', (d) => {
-        const m = _h.find(x => x.id === d.id);
-        if(m) { m.re[d.u] = d.r; o.emit('update_m', m); }
+    k.on('d', (id) => {
+        // Удаление (только для админа NooMB1T или автора)
+        o.emit('d', id);
     });
-    k.on('d', (id) => { _h = _h.filter(x => x.id !== id); o.emit('d', id); });
-    k.on('disconnect', () => { if(k.u) delete _u[k.u]; o.emit('ul', _u); });
+
+    k.on('disconnect', () => { delete _users[k.u]; o.emit('ul', { online: _users, db: _db }); });
 });
 
 a.get('*', (q, r) => r.sendFile(p.join(__dirname, 'index.html')));
