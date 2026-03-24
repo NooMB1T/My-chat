@@ -1,40 +1,33 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DoveChat | Вхід</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>DoveChat | Вход</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
         body { background: #0b0f19; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 50px 40px; border-radius: 24px; text-align: center; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); display: none; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
-        @keyframes fadeUp { to { transform: translateY(0); opacity: 1; } }
-        h1 { color: #00f2fe; margin-bottom: 10px; font-weight: 700; letter-spacing: -1px; font-size: 32px; background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        p { color: #8b9bb4; margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
-        input { width: 100%; padding: 16px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; outline: none; margin-bottom: 20px; font-size: 16px; transition: border 0.3s; }
-        input:focus { border-color: #4facfe; background: rgba(0,0,0,0.4); }
-        button { width: 100%; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #000; font-weight: 600; font-size: 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3); }
+        .c { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); padding: 50px 40px; border-radius: 24px; text-align: center; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.05); display: none; }
+        h1 { color: #00f2fe; margin-bottom: 10px; font-size: 32px; background: linear-gradient(to right, #4facfe, #00f2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #8b9bb4; margin-bottom: 30px; font-size: 15px; }
+        input { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; outline: none; margin-bottom: 20px; }
+        button { width: 100%; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, #4facfe, #00f2fe); color: #000; font-weight: 600; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div id="reg" class="card">
+    <div id="r" class="c">
         <h1>DoveChat Pro</h1>
-        <p>Ваш безпечний простір для спілкування. Введіть своє ім'я.</p>
-        <input type="text" id="u" placeholder="Наприклад, Alex..." autocomplete="off">
-        <button onclick="save()">Увійти в систему</button>
+        <p>Ваше безопасное пространство. Введите имя.</p>
+        <input type="text" id="i" placeholder="Например, Алекс..." autocomplete="off">
+        <button onclick="s()">Войти</button>
     </div>
-
     <script>
         if (localStorage.getItem('du')) window.location.href = 'chat.html';
-        else document.getElementById('reg').style.display = 'block';
-
-        function save() {
-            const n = document.getElementById('u').value.trim();
+        else document.getElementById('r').style.display = 'block';
+        function s() {
+            const n = document.getElementById('i').value.trim();
             if(n) { localStorage.setItem('du', n); window.location.href = 'chat.html'; }
         }
-        document.getElementById('u').onkeypress = (e) => { if(e.key === 'Enter') save() };
     </script>
 </body>
 </html>
