@@ -1,31 +1,40 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DoveChat | Вход</title>
+    <title>DoveChat | Вхід</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #0e1621; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: #17212b; padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 350px; }
-        h1 { color: #5288c1; margin-bottom: 25px; }
-        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #2b3e51; background: #242f3d; color: #fff; outline: none; margin-bottom: 20px; font-size: 16px; }
-        button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #5288c1; color: #fff; font-weight: bold; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: #0b0f19; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 50px 40px; border-radius: 24px; text-align: center; width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5); display: none; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
+        @keyframes fadeUp { to { transform: translateY(0); opacity: 1; } }
+        h1 { color: #00f2fe; margin-bottom: 10px; font-weight: 700; letter-spacing: -1px; font-size: 32px; background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #8b9bb4; margin-bottom: 30px; font-size: 15px; line-height: 1.5; }
+        input { width: 100%; padding: 16px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; outline: none; margin-bottom: 20px; font-size: 16px; transition: border 0.3s; }
+        input:focus { border-color: #4facfe; background: rgba(0,0,0,0.4); }
+        button { width: 100%; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #000; font-weight: 600; font-size: 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>DoveChat</h1>
-        <input type="text" id="u" placeholder="Ваше имя..." autocomplete="off">
-        <button onclick="l()">Войти в чат</button>
+    <div id="reg" class="card">
+        <h1>DoveChat Pro</h1>
+        <p>Ваш безпечний простір для спілкування. Введіть своє ім'я.</p>
+        <input type="text" id="u" placeholder="Наприклад, Alex..." autocomplete="off">
+        <button onclick="save()">Увійти в систему</button>
     </div>
+
     <script>
-        function l() {
+        if (localStorage.getItem('du')) window.location.href = 'chat.html';
+        else document.getElementById('reg').style.display = 'block';
+
+        function save() {
             const n = document.getElementById('u').value.trim();
-            if(n) { 
-                localStorage.setItem('du', n); 
-                window.location.href = '/chat.html'; // Прямий шлях до файлу
-            }
+            if(n) { localStorage.setItem('du', n); window.location.href = 'chat.html'; }
         }
+        document.getElementById('u').onkeypress = (e) => { if(e.key === 'Enter') save() };
     </script>
 </body>
 </html>
