@@ -7,69 +7,81 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { 
-            background: #0e1621; 
-            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
-        }
-        .h { background: #17212b; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid #0e1621; color: #fff; font-weight: bold; font-size: 18px; }
-        .ms { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .m { padding: 8px 12px; border-radius: 12px; max-width: 80%; position: relative; font-size: 15px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-        .s { align-self: flex-end; background: #2b5278; color: #fff; border-bottom-right-radius: 2px; }
-        .r { align-self: flex-start; background: #182533; color: #fff; border-bottom-left-radius: 2px; }
-        .u-name { font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #5288c1; display: block; }
-        .s .u-name { color: #88b7e8; }
-        .im { max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; }
+        body { background: #0e1621; color: #fff; height: 100vh; display: flex; overflow: hidden; }
+        /* Боковая панель как в ТГ */
+        .side { width: 80px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; }
+        .room-btn { width: 50px; height: 50px; border-radius: 50%; background: #2b5278; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
+        .room-btn.active { border: 2px solid #5288c1; }
+        
+        .main { flex: 1; display: flex; flex-direction: column; background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png'); }
+        .h { background: #17212b; padding: 15px; font-weight: bold; border-bottom: 1px solid #0e1621; display: flex; justify-content: space-between; }
+        .ms { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .m { padding: 10px 14px; border-radius: 15px; max-width: 80%; position: relative; }
+        .s { align-self: flex-end; background: #2b5278; border-bottom-right-radius: 2px; }
+        .r { align-self: flex-start; background: #182533; border-bottom-left-radius: 2px; }
+        .u { font-size: 11px; color: #88b7e8; margin-bottom: 3px; display: block; font-weight: bold; }
+        .im { max-width: 100%; border-radius: 10px; margin-top: 5px; }
         .b { background: #17212b; padding: 10px; display: flex; gap: 10px; align-items: center; }
-        .ic { background: none; border: none; font-size: 22px; cursor: pointer; color: #708499; }
-        input[type="text"] { flex: 1; padding: 10px 15px; border-radius: 20px; border: none; background: #0e1621; color: #fff; outline: none; font-size: 16px; }
-        .sd { color: #5288c1; border: none; background: none; font-size: 24px; cursor: pointer; }
+        input[type="text"] { flex: 1; padding: 12px 18px; border-radius: 25px; border: none; background: #0e1621; color: #fff; outline: none; }
+        .btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #708499; }
     </style>
 </head>
 <body>
-    <div class="h">DoveChat</div>
-    <div class="ms" id="box"></div>
-    <div class="b">
-        <button class="ic" onclick="document.getElementById('fi').click()">📎</button>
-        <input type="file" id="fi" hidden accept="image/*" onchange="si()">
-        <input type="text" id="inp" placeholder="Сообщение..." autocomplete="off">
-        <button class="sd" onclick="sm()">➜</button>
+    <div class="side">
+        <div class="room-btn active" onclick="chR('global')">🌐</div>
+        <div class="room-btn" onclick="chR('secret')">🔒</div>
     </div>
+    <div class="main">
+        <div class="h"><span id="rt">Global Chat</span> <span onclick="location.href='/'" style="cursor:pointer">🚪</span></div>
+        <div class="ms" id="box"></div>
+        <div class="b">
+            <button class="btn" onclick="document.getElementById('fi').click()">📎</button>
+            <input type="file" id="fi" hidden accept="image/*" onchange="si()">
+            <input type="text" id="inp" placeholder="Написать..." autocomplete="off">
+            <button class="btn" style="color:#5288c1" onclick="sm()">➜</button>
+        </div>
+    </div>
+
     <script>
         const u = localStorage.getItem('du') || 'User';
-        const socket = io(); // На Vercel можно оставить пустым, если всё в одном месте
+        let r = 'global'; 
+        const socket = io();
 
-        socket.on('history', (h) => {
-            document.getElementById('box').innerHTML = '';
-            h.forEach(m => rm(m));
-            sd();
-        });
+        function chR(newR) {
+            r = newR;
+            document.getElementById('rt').innerText = r === 'global' ? 'Global Chat' : 'Secret Room';
+            document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            socket.emit('join', r);
+        }
 
+        socket.on('connect', () => socket.emit('join', r));
+        socket.on('history', (h) => { document.getElementById('box').innerHTML = ''; h.forEach(m => rm(m)); sd(); });
         socket.on('msg', (m) => { rm(m); sd(); });
 
         function rm(d) {
             const v = document.createElement('div');
             v.className = `m ${d.u === u ? 's' : 'r'}`;
-            let content = `<span class="u-name">${d.u}</span>`;
-            if(d.t === 'img') content += `<img src="${d.c}" class="im">`;
-            else content += `<div>${d.c}</div>`;
-            v.innerHTML = content;
+            let c = `<span class="u">${d.u}</span>`;
+            if(d.t === 'img') c += `<img src="${d.c}" class="im">`;
+            else c += `<div>${d.c}</div>`;
+            v.innerHTML = c;
             document.getElementById('box').appendChild(v);
         }
 
         function sm() {
             const i = document.getElementById('inp');
             if(i.value.trim()) {
-                socket.emit('msg', { u, t: 'txt', c: i.value });
+                socket.emit('msg', { u, t: 'txt', c: i.value, r: r });
                 i.value = '';
             }
         }
 
         function si() {
             const f = document.getElementById('fi').files[0];
-            const r = new FileReader();
-            r.onload = (e) => socket.emit('msg', { u, t: 'img', c: e.target.result });
-            if(f) r.readAsDataURL(f);
+            const reader = new FileReader();
+            reader.onload = (e) => socket.emit('msg', { u, t: 'img', c: e.target.result, r: r });
+            if(f) reader.readAsDataURL(f);
         }
 
         function sd() { const x = document.getElementById('box'); x.scrollTop = x.scrollHeight; }
