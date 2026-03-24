@@ -3,158 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 5.5</title>
+    <title>DoveGram 6.0 Multiverse</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        :root { --bg: #000; --card: #121212; --text: #fff; }
-        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --bg: #000; --card: #151515; --accent: #fff; --ghost: rgba(255,255,255,0.1); }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: #fff; height: 100vh; display: flex; overflow: hidden; }
+
+        /* Авторизация */
+        #auth { position: fixed; inset:0; background:#000; z-index:2000; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px; }
+        .inp { width:100%; max-width:300px; padding:15px; border-radius:15px; border:1px solid #333; background:#111; color:#fff; margin-bottom:10px; outline:none; }
+        .btn-main { width:100%; max-width:300px; padding:15px; border-radius:15px; border:none; background:#fff; color:#000; font-weight:bold; cursor:pointer; }
+
+        /* Левая панель (Синє на эскизе) - Список чатов */
+        #left { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #222; }
+        .h { height: 70px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #222; }
         
-        #auth { position: fixed; inset:0; background:#000; z-index:1000; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:20px; }
-        input { width:100%; max-width:300px; padding:15px; border-radius:14px; border:1px solid #333; background:#111; color:#fff; margin-bottom:12px; outline:none; }
-        .btn { width:100%; max-width:300px; padding:15px; border-radius:14px; border:none; background:#fff; color:#000; font-weight:bold; cursor:pointer; }
+        /* Червоне коло: Аватар */
+        .my-av { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #fff; object-fit: cover; cursor: pointer; }
 
-        .h { height:65px; border-bottom:1px solid #222; display:flex; align-items:center; padding:0 20px; background:#000; justify-content:space-between; z-index:10; }
-        #bx { flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; gap:12px; background-size:cover; background-position:center; }
+        .chat-item { padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid #111; transition: 0.2s; }
+        .chat-item:hover { background: var(--ghost); }
+        .chat-item .av { width: 50px; height: 50px; border-radius: 50%; background: #222; }
+        .chat-item.active { background: #1a1a1a; border-left: 3px solid #fff; }
+
+        /* Правая панель (Кнопки 1, 2, 3, 4, ->) */
+        #right-menu { width: 70px; background: #080808; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 25px; border-left: 1px solid #222; }
+        .m-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: #111; cursor: pointer; font-size: 20px; transition: 0.2s; color: #555; }
+        .m-btn:hover { background: #fff; color: #000; transform: scale(1.1); }
+        .m-btn.active { color: #fff; border: 1px solid #444; }
+
+        /* Окно сообщений */
+        #chat-window { flex: 2; display: flex; flex-direction: column; background: #000; border-right: 1px solid #222; display: none; }
+        #msgs { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; background: #1a1a1a; align-self: flex-start; line-height: 1.4; border: 1px solid #222; }
+        .msg.me { align-self: flex-end; background: #fff; color: #000; border: none; }
+
+        .input-area { padding: 20px; display: flex; gap: 10px; border-top: 1px solid #222; }
         
-        .mw { max-width:85%; padding:12px; border-radius:18px; background: rgba(30,30,30,0.9); backdrop-filter:blur(10px); align-self:flex-start; border:1px solid #333; position:relative; }
-        .mw.me { align-self:flex-end; background:#fff; color:#000; border:none; }
-        .av-m { width:30px; height:30px; border-radius:50%; object-fit:cover; margin-right:8px; cursor:pointer; }
-        
-        /* Голосовые */
-        audio { height: 35px; width: 220px; filter: invert(1); margin-top: 5px; }
-        .mw.me audio { filter: none; }
-
-        /* Реакции */
-        .re-box { display:flex; gap:4px; margin-top:8px; }
-        .re-btn { background:rgba(255,255,255,0.1); border-radius:10px; padding:2px 7px; font-size:12px; color:#fff; cursor:pointer; }
-        .re-sel { position:absolute; bottom:-35px; left:0; display:none; background:#222; padding:6px; border-radius:15px; gap:8px; z-index:100; box-shadow: 0 4px 15px #000; }
-        .mw:hover .re-sel { display:flex; }
-
-        #st { position:fixed; right:-100%; top:0; bottom:0; width:300px; background:#111; z-index:500; transition:0.3s; padding:20px; border-left:1px solid #222; }
-        #st.o { right:0; }
-
-        .b { padding:15px; background:#000; border-top:1px solid #222; display:flex; gap:10px; align-items:center; }
-        .rec-btn { width:45px; height:45px; border-radius:50%; background:#ff3b30; border:none; color:#fff; cursor:pointer; font-size:20px; }
-        .rec-btn.active { animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity:1; } 50% { opacity:0.5; } 100% { opacity:1; } }
+        /* Спец-эффекты */
+        .secret-mode { filter: hue-rotate(280deg) brightness(0.8); }
+        .secret-mode .msg { font-style: italic; opacity: 0.8; }
     </style>
 </head>
 <body>
 
 <div id="auth">
-    <h1 style="margin-bottom:20px">DoveGram 5.5</h1>
-    <input type="text" id="u_n" placeholder="Никнейм">
-    <input type="tel" id="u_p" placeholder="Номер телефона">
-    <button class="btn" onclick="join()">ВОЙТИ</button>
+    <h1 style="letter-spacing: 5px; margin-bottom: 30px">DOVEGRAM 6.0</h1>
+    <input type="text" id="u_n" class="inp" placeholder="Ваше имя">
+    <input type="tel" id="u_p" class="inp" placeholder="+7 / +380 ...">
+    <button class="btn-main" onclick="start()">ВОЙТИ В МУЛЬТИВСЕЛЕННУЮ</button>
 </div>
 
-<div id="st">
-    <h2>Настройки</h2><br>
-    <center>
-        <img id="p_av" style="width:80px; height:80px; border-radius:50%; border:2px solid #fff; cursor:pointer" onclick="document.getElementById('f_av').click()">
-        <input type="file" id="f_av" hidden onchange="upAv(this)">
-    </center><br>
-    <input type="text" id="n_u" placeholder="Сменить ник">
-    <button class="btn" onclick="save()">СОХРАНИТЬ</button><br><br>
-    <button class="btn" style="background:#ff3b30; color:#fff" onclick="localStorage.clear(); location.reload()">ВЫЙТИ</button>
+<div id="left">
+    <div class="h">
+        <b style="font-size: 20px">Чаты</b>
+        <img id="my-pic" class="my-av" src="" onclick="openTab(1)">
+    </div>
+    <div id="hub-list">
+        <div class="chat-item active" onclick="joinRoom('global')">
+            <div class="av" style="background: linear-gradient(45deg, #333, #666); display: flex; align-items: center; justify-content: center">🌍</div>
+            <div><b>Глобальный хаб</b><br><small style="color: #666">Общий чат для всех</small></div>
+        </div>
+        <div id="contacts-area">
+            <div style="padding: 10px 20px; font-size: 11px; color: #444; text-transform: uppercase">Контакты</div>
+            <div id="my-contacts"></div>
+        </div>
+    </div>
 </div>
 
-<div class="h">
-    <b>ГЛОБАЛЬНЫЙ ЧАТ</b>
-    <span onclick="document.getElementById('st').classList.toggle('o')" style="cursor:pointer; font-size:20px">⚙️</span>
+<div id="chat-window">
+    <div class="h">
+        <b id="room-name">Глобальный хаб</b>
+        <span id="room-status" style="font-size: 11px; color: #0f0">онлайн</span>
+    </div>
+    <div id="msgs"></div>
+    <div class="input-area">
+        <input type="text" id="in" class="inp" style="margin:0" placeholder="Напишите сообщение...">
+        <button class="btn-main" style="width: 60px" onclick="send()">↑</button>
+    </div>
 </div>
 
-<div id="bx"></div>
-<div id="ty" style="font-size:11px; color:#555; padding:2px 20px; height:15px"></div>
-
-<div class="b">
-    <button class="btn" style="width:45px" onclick="document.getElementById('f_m').click()">+</button>
-    <input type="file" id="f_m" hidden accept="image/*" onchange="upImg(this)">
-    <input type="text" id="in" placeholder="Сообщение..." oninput="isT()">
-    <button id="rb" class="rec-btn" onclick="toggleR()">🎤</button>
-    <button class="btn" style="width:50px" onclick="sm()">↑</button>
+<div id="right-menu">
+    <div class="m-btn" title="Настройки (1)" onclick="openTab(1)">⚙️</div>
+    <div class="m-btn" title="Добавить (2)" onclick="openTab(2)">+</div>
+    <div class="m-btn" title="Секретный режим (3)" onclick="openTab(3)">🔒</div>
+    <div class="m-btn" title="Инфо (4)" onclick="openTab(4)">❔</div>
+    <div style="margin-top: auto; margin-bottom: 20px" class="m-btn" onclick="location.reload()">➡️</div>
 </div>
 
 <script>
     const sc = io();
-    let u = localStorage.getItem('du'), av = localStorage.getItem('da') || 'https://i.imgur.com/6VBx3io.png', ph = localStorage.getItem('dp');
-    let mR, chunks = [];
+    let u = localStorage.getItem('du'), ph = localStorage.getItem('dp'), av = localStorage.getItem('da') || 'https://i.imgur.com/6VBx3io.png';
+    let curRoom = 'global';
+    let secret = false;
 
-    if(u) { document.getElementById('auth').style.display='none'; join(); }
+    if(u) { document.getElementById('auth').style.display='none'; start(); }
 
-    function join() {
+    function start() {
         if(!u) {
             u = document.getElementById('u_n').value.trim(); ph = document.getElementById('u_p').value.trim();
-            if(!u || !ph) return alert("Заполни данные!");
+            if(!u || !ph) return;
             localStorage.setItem('du', u); localStorage.setItem('dp', ph); localStorage.setItem('da', av);
             document.getElementById('auth').style.display='none';
         }
+        document.getElementById('my-pic').src = av;
+        document.getElementById('chat-window').style.display = 'flex';
         sc.emit('j', { u, av, ph });
     }
 
-    function isT() { sc.emit('typing', true); clearTimeout(window.tT); window.tT = setTimeout(()=>sc.emit('typing', false), 2000); }
-    sc.on('is_typing', d => { document.getElementById('ty').innerText = d.v ? `${d.u} печатает...` : ''; });
-    sc.on('hs', d => { document.getElementById('bx').innerHTML=''; d.h.forEach(m=>dr(m)); if(d.bg) setBg(d.bg); sl(); });
+    // Логика кнопок (1, 2, 3, 4)
+    function openTab(n) {
+        if(n === 1) alert("Настройки: Тут можно будет сменить тему или аватар.");
+        if(n === 2) {
+            let p = prompt("Введите номер телефона для синхронизации:");
+            sc.emit('sync_request', p); // Запрос на поиск в базе
+            alert("Поиск контакта " + p + "...");
+        }
+        if(n === 3) {
+            secret = !secret;
+            document.body.classList.toggle('secret-mode');
+            alert(secret ? "Включен Burn Mode (сообщения не сохраняются)" : "Секретный режим выключен");
+        }
+        if(n === 4) alert("DoveGram 6.0 Multiverse\nBuild: 240326\nDev: Gemini & NooMB1T");
+    }
+
+    function joinRoom(r) {
+        curRoom = r;
+        document.getElementById('room-name').innerText = r === 'global' ? 'Глобальный хаб' : r;
+        document.getElementById('msgs').innerHTML = '';
+        sc.emit('join_room', r);
+    }
+
+    sc.on('ul', d => {
+        const list = document.getElementById('my-contacts');
+        list.innerHTML = '';
+        // "Синхронизация" - показываем всех, кто есть в глобальной базе
+        Object.values(d.db).forEach(user => {
+            if(user.u !== u) {
+                list.innerHTML += `
+                    <div class="chat-item" onclick="joinRoom('${user.u}')">
+                        <img src="${user.av}" class="av">
+                        <div><b>${user.u}</b><br><small style="color:#555">${user.ph}</small></div>
+                    </div>`;
+            }
+        });
+    });
+
+    sc.on('hs', h => { h.forEach(m => dr(m)); sl(); });
     sc.on('m', m => { dr(m); sl(); });
-    sc.on('update_m', m => { const e = document.getElementById(m.id); if(e) e.replaceWith(createM(m)); });
     sc.on('d', id => document.getElementById(id)?.remove());
 
-    function createM(d) {
-        const w = document.createElement('div'); w.id = d.id;
-        w.className = `mw ${d.u === u ? 'me' : ''}`;
-        let c = d.c;
-        if(d.t === 'img') c = `<img src="${d.c}" style="max-width:100%; border-radius:10px; margin-top:5px">`;
-        if(d.t === 'audio') c = `<audio src="${d.c}" controls></audio>`;
-
-        let reH = '';
-        const counts = {};
-        Object.values(d.re || {}).forEach(r => counts[r] = (counts[r] || 0) + 1);
-        for(let r in counts) reH += `<span class="re-btn">${r} ${counts[r]}</span>`;
-
-        w.innerHTML = `
-            <div style="font-size:10px; font-weight:bold; margin-bottom:5px; display:flex; align-items:center">
-                <img src="${d.av}" class="av-m">${d.u}
-                ${(u === 'NooMB1T' || d.u === u) ? `<span onclick="sc.emit('d','${d.id}')" style="color:red; margin-left:auto">×</span>` : ''}
-            </div>
-            <div style="word-break:break-all">${c}</div>
-            <div class="re-box">${reH}</div>
-            <div class="re-sel">
-                <span onclick="sc.emit('react',{id:'${d.id}',u:'${u}',r:'❤️'})">❤️</span>
-                <span onclick="sc.emit('react',{id:'${d.id}',u:'${u}',r:'💔'})">💔</span>
-                <span onclick="sc.emit('react',{id:'${d.id}',u:'${u}',r:'❤️‍🔥'})">❤️‍🔥</span>
-            </div>
-        `;
-        return w;
+    function dr(d) {
+        const div = document.createElement('div'); div.id = d.id;
+        div.className = `msg ${d.u === u ? 'me' : ''}`;
+        div.innerHTML = `<div style="font-size:10px; opacity:0.6; margin-bottom:4px">${d.u}</div>${d.c}`;
+        document.getElementById('msgs').appendChild(div);
+        
+        if(secret) { // Если секретный режим, удаляем через 10 сек
+            setTimeout(() => div.style.opacity = "0.2", 5000);
+            setTimeout(() => div.remove(), 10000);
+        }
     }
 
-    function dr(d) { document.getElementById('bx').appendChild(createM(d)); }
-    function sm() { const i=document.getElementById('in'); if(i.value.trim()){ sc.emit('m',{u, av, c:i.value, t:'txt'}); i.value=''; } }
-    function upImg(el) { const r=new FileReader(); r.onload=e=>sc.emit('m',{u, av, c:e.target.result, t:'img'}); r.readAsDataURL(el.files[0]); }
-    function upAv(el) { const r=new FileReader(); r.onload=e=>{ av=e.target.result; document.getElementById('p_av').src=av; }; r.readAsDataURL(el.files[0]); }
-    function save() { u = document.getElementById('n_u').value || u; localStorage.setItem('du', u); localStorage.setItem('da', av); location.reload(); }
-
-    async function toggleR() {
-        const btn = document.getElementById('rb');
-        if (!mR || mR.state === 'inactive') {
-            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mR = new MediaRecorder(s);
-            mR.ondataavailable = e => chunks.push(e.data);
-            mR.onstop = () => {
-                const b = new Blob(chunks, { type: 'audio/ogg' });
-                const r = new FileReader();
-                r.onload = e => sc.emit('m', { u, av, c: e.target.result, t: 'audio' });
-                r.readAsDataURL(b); chunks = [];
-            };
-            mR.start(); btn.classList.add('active'); btn.innerText = '⏹';
-        } else { mR.stop(); btn.classList.remove('active'); btn.innerText = '🎤'; }
+    function send() {
+        const i = document.getElementById('in');
+        if(i.value.trim()) {
+            sc.emit('m', { u, av, c: i.value, room: curRoom });
+            i.value = '';
+        }
     }
 
-    function setBg(url) { document.getElementById('bx').style.backgroundImage = `url(${url})`; }
-    function sl() { const b = document.getElementById('bx'); b.scrollTop = b.scrollHeight; }
-    document.getElementById('in').onkeypress = e => { if(e.key==='Enter') sm(); };
+    function sl() { const b = document.getElementById('msgs'); b.scrollTop = b.scrollHeight; }
+    document.getElementById('in').onkeypress = e => { if(e.key === 'Enter') send(); };
 </script>
 </body>
 </html>
-</body>
-</html>
+/html>
