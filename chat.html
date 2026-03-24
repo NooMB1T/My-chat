@@ -3,93 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DoveChat 3.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+    <title>DoveGram</title>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Orbitron', sans-serif; }
-        body { background: #080808; color: #00f2fe; height: 100vh; display: flex; }
-        #s { width: 280px; background: #000; border-right: 1px solid #1a1a1a; padding: 20px; position: fixed; left: -280px; top: 0; bottom: 0; transition: 0.3s; z-index: 20; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, system-ui, Roboto, sans-serif; }
+        body { background: #96afc3 url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); display: flex; height: 100vh; }
+        #s { width: 300px; background: #fff; border-right: 1px solid #dfe5ea; position: fixed; left: -300px; top: 0; bottom: 0; transition: 0.2s; z-index: 100; }
         #s.o { left: 0; }
-        .u { padding: 10px; border: 1px solid #1a1a1a; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 13px; }
-        .u:hover { border-color: #4facfe; background: #4facfe11; }
-        .m-p { flex: 1; display: flex; flex-direction: column; }
-        .h { padding: 20px; background: #000; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; }
-        #bx { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .mw { max-width: 85%; position: relative; padding: 12px; border: 1px solid #1a1a1a; background: #0a0a0a; border-radius: 2px; }
-        .mw.me { align-self: flex-end; border-color: #4facfe66; background: #001a2e; }
-        .mw.to { border-color: #f0f; box-shadow: 0 0 10px #f0f2; } /* Private */
-        .db { position: absolute; right: 5px; top: 5px; color: #f00; cursor: pointer; background: none; border: none; font-size: 16px; }
-        .rb { background: none; border: 1px solid #1a1a1a; color: #4facfe; padding: 3px 7px; font-size: 10px; cursor: pointer; margin-top: 10px; margin-right: 5px; }
-        .b { padding: 20px; background: #000; display: flex; gap: 10px; border-top: 1px solid #1a1a1a; }
-        #in { flex: 1; background: #0a0a0a; border: 1px solid #1a1a1a; padding: 15px; color: #fff; outline: none; }
-        .bt { background: #4facfe; color: #000; border: none; padding: 0 20px; cursor: pointer; font-weight: bold; }
-        #target { font-size: 10px; color: #f0f; margin-bottom: 5px; display: none; }
+        .h { background: #517da2; color: #fff; padding: 10px 15px; display: flex; align-items: center; height: 56px; z-index: 10; position: sticky; top: 0; }
+        .ms { flex: 1; display: flex; flex-direction: column; height: 100vh; position: relative; }
+        #bx { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .mw { max-width: 85%; padding: 8px 12px; border-radius: 12px; position: relative; font-size: 14.5px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); transition: 0.2s; }
+        .mw.me { align-self: flex-end; background: #effdde; border-bottom-right-radius: 2px; }
+        .mw.ot { align-self: flex-start; background: #fff; border-bottom-left-radius: 2px; }
+        .mw.pr { border: 2px solid #3390ec; box-shadow: 0 0 10px rgba(51,144,236,0.3); }
+        .u-n { font-weight: 600; font-size: 13px; color: #3390ec; display: block; margin-bottom: 2px; cursor: pointer; }
+        .db { position: absolute; right: -25px; top: 5px; color: #e53935; cursor: pointer; display: none; font-weight: bold; font-size: 18px; }
+        .mw:hover .db { display: block; }
+        .im { max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; display: block; }
+        .b { background: #fff; padding: 10px; display: flex; gap: 10px; align-items: center; border-top: 1px solid #ddd; }
+        #in { flex: 1; border: none; outline: none; font-size: 16px; padding: 5px; }
+        .btn { color: #3390ec; cursor: pointer; font-weight: 600; font-size: 24px; border: none; background: none; }
+        .u-l { padding: 15px; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .u-l:hover { background: #f4f4f4; }
+        .av { width: 40px; height: 40px; background: #3390ec; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        #ls-tag { display: none; background: #3390ec; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-right: 5px; }
     </style>
 </head>
 <body>
     <audio id="sd" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
     <div id="s">
-        <h3 style="margin-bottom:20px">ONLINE</h3>
+        <div style="background:#517da2; color:#fff; padding:20px;">
+            <div id="m-av" class="av">?</div>
+            <div id="m-nu" style="margin-top:10px; font-weight:600;"></div>
+        </div>
         <div id="ul"></div>
-        <button onclick="tm()" style="width:100%; padding:10px; background:#1a1a1a; color:#fff; border:none; margin-top:20px; cursor:pointer">CLOSE</button>
     </div>
-    <div class="m-p">
+    <div class="ms">
         <div class="h">
-            <div onclick="tm()" style="cursor:pointer">☰ NEON_CHAT <span id="oc" style="font-size:10px; color:#4facfe"></span></div>
-            <div id="cur-u" style="font-size:12px"></div>
+            <span onclick="tm()" style="font-size:24px; cursor:pointer; margin-right:20px;">☰</span>
+            <div> DoveGram <span id="oc" style="font-size:12px; opacity:0.8;"></span></div>
         </div>
         <div id="bx"></div>
-        <div id="ty" style="padding-left:20px; height:15px; font-size:10px"></div>
         <div class="b">
-            <div style="display:flex; flex-direction:column; flex:1">
-                <div id="target" onclick="st(null)">SENDING TO: <span id="tn"></span> [X]</div>
-                <input type="text" id="in" placeholder="TYPE MESSAGE..." oninput="it()">
-            </div>
-            <button class="bt" onclick="sm()">SEND</button>
+            <span class="btn" onclick="document.getElementById('fi').click()">📎</span>
+            <input type="file" id="fi" hidden accept="image/*" onchange="si()">
+            <span id="ls-tag">ЛС → <span id="ls-n"></span></span>
+            <input type="text" id="in" placeholder="Написать сообщение..." autocomplete="off">
+            <button class="btn" onclick="sm()">➜</button>
         </div>
     </div>
     <script>
-        const u = localStorage.getItem('du');
-        if(!u) window.location.href = 'index.html';
-        document.getElementById('cur-u').innerText = 'USER: ' + u;
-        const sc = io(); let tt, to = null;
+        const u = localStorage.getItem('du'); if(!u) window.location.href='index.html';
+        document.getElementById('m-nu').innerText = u; document.getElementById('m-av').innerText = u[0].toUpperCase();
+        const sc = io(); let to = null;
 
-        function tm() { document.getElementById('s').classList.toggle('o'); }
-        function st(n) { to = n; const t = document.getElementById('target'); if(n){ t.style.display='block'; document.getElementById('tn').innerText=n; } else { t.style.display='none'; } }
+        function tm(){ document.getElementById('s').classList.toggle('o'); }
+        function st(n){ to = n; const t=document.getElementById('ls-tag'); if(n){ t.style.display='inline'; document.getElementById('ls-n').innerText=n; } else { t.style.display='none'; } if(n) tm(); }
 
         sc.on('connect', () => sc.emit('j', { u }));
         sc.on('ul', (l) => {
-            document.getElementById('oc').innerText = l.length + ' ACTIVE';
+            document.getElementById('oc').innerText = l.length + ' в сети';
             const c = document.getElementById('ul'); c.innerHTML = '';
-            l.forEach(n => { if(n !== u) c.innerHTML += `<div class="u" onclick="st('${n}'); tm()">ID: ${n}</div>`; });
+            l.forEach(n => { if(n!==u) c.innerHTML += `<div class="u-l" onclick="st('${n}')"><div class="av">${n[0].toUpperCase()}</div><div>${n}</div></div>`; });
         });
-        sc.on('hs', (h) => { document.getElementById('bx').innerHTML = ''; h.forEach(m => dr(m)); sl(); });
-        sc.on('m', (m) => { dr(m); sl(); if(m.u !== u) document.getElementById('sd').play().catch(()=>{}); });
-        sc.on('d', (i) => { const e = document.getElementById(i); if(e) e.remove(); });
-        sc.on('up', (m) => {
-            const e = document.getElementById(m.id);
-            if(e) e.querySelector('.rl').innerHTML = `<button class="rb" onclick="re('${m.id}','👍')">👍 ${m.r['👍']}</button><button class="rb" onclick="re('${m.id}','❤️')">❤️ ${m.r['❤️']}</button><button class="rb" onclick="re('${m.id}','🔥')">🔥 ${m.r['🔥']}</button>`;
-        });
+        sc.on('hs', (h) => { document.getElementById('bx').innerHTML=''; h.forEach(m=>dr(m)); sl(); });
+        sc.on('m', (m) => { dr(m); sl(); if(m.u!==u) document.getElementById('sd').play().catch(()=>{}); });
+        sc.on('d', (i) => { const e=document.getElementById(i); if(e) e.remove(); });
 
         function dr(d) {
             const w = document.createElement('div');
-            w.className = `mw ${d.u === u ? 'me' : ''} ${d.to ? 'to' : ''}`; w.id = d.id;
-            w.innerHTML = `<span style="font-size:9px; color:#4facfe">${d.to ? '[PRIVATE FROM ' + d.u + ']' : d.u}</span>
-                ${d.u === u ? `<button class="db" onclick="sc.emit('d', '${d.id}')">×</button>` : ''}
-                <div style="margin-top:5px; color:#fff">${d.c}</div>
-                <div class="rl">
-                    <button class="rb" onclick="re('${d.id}','👍')">👍 ${d.r['👍']}</button>
-                    <button class="rb" onclick="re('${d.id}','❤️')">❤️ ${d.r['❤️']}</button>
-                    <button class="rb" onclick="re('${d.id}','🔥')">🔥 ${d.r['🔥']}</button>
-                </div>`;
-            document.getElementById('bx').appendChild(w);
+            w.className = `mw ${d.u===u?'me':'ot'} ${d.to?'pr':''}`; w.id = d.id;
+            let h = `<span class="u-n" onclick="st('${d.u}')">${d.u}${d.to?' (ЛС)':''}</span>`;
+            if(d.u===u) h += `<span class="db" onclick="sc.emit('d','${d.id}')">×</span>`;
+            if(d.t==='img') h += `<img src="${d.c}" class="im">`; else h += `<div>${d.c}</div>`;
+            w.innerHTML = h; document.getElementById('bx').appendChild(w);
         }
-        function sm() { const i = document.getElementById('in'); if(i.value.trim()){ sc.emit('m', { u, c: i.value, to }); i.value = ''; st(null); } }
-        function re(i, e) { sc.emit('re', { id: i, e: e }); }
-        function it() { sc.emit('t', true); clearTimeout(tt); tt = setTimeout(() => sc.emit('t', false), 2000); }
-        function sl() { const b = document.getElementById('bx'); b.scrollTop = b.scrollHeight; }
-        document.getElementById('in').onkeypress = (e) => { if(e.key === 'Enter') sm(); };
+
+        function sm() { const i=document.getElementById('in'); if(i.value.trim()){ sc.emit('m',{u, t:'txt', c:i.value, to}); i.value=''; st(null); } }
+        function si() { const f=document.getElementById('fi').files[0]; const r=new FileReader(); r.onload=(e)=>sc.emit('m',{u, t:'img', c:e.target.result, to}); if(f) r.readAsDataURL(f); }
+        function sl() { const b=document.getElementById('bx'); b.scrollTop=b.scrollHeight; }
+        document.getElementById('in').onkeypress=(e)=>{ if(e.key==='Enter') sm(); };
     </script>
 </body>
 </html>
