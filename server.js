@@ -1,62 +1,46 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" }, maxHttpBufferSize: 1e8 });
-
-app.use(express.static(__dirname));
-
-let history = []; 
-let users = {}; 
-
-io.on('connection', (socket) => {
-    socket.on('join', (data) => {
-        socket.username = data.u;
-        users[socket.id] = data.u;
-        socket.join('global');
-        io.emit('userList', Object.values(users));
-        socket.emit('history', history);
+const e = require('express');
+const h = require('http');
+const { Server: S } = require('socket.io');
+const p = require('path');
+const a = e();
+const s = h.createServer(a);
+const o = new S(s, { cors: { origin: "*" }, maxHttpBufferSize: 1e8 });
+a.use(e.static(__dirname));
+let _h = []; 
+let _u = {}; 
+a.get('/', (q, r) => r.sendFile(p.join(__dirname, 'index.html')));
+a.get('/chat.html', (q, r) => r.sendFile(p.join(__dirname, 'chat.html')));
+a.get('/chat', (q, r) => r.sendFile(p.join(__dirname, 'chat.html')));
+o.on('connection', (k) => {
+    k.on('join', (d) => {
+        k.u = d.u;
+        _u[k.id] = d.u;
+        k.join('global');
+        o.emit('ul', Object.values(_u));
+        k.emit('hs', _h);
     });
-
-    // Отримання повідомлення
-    socket.on('msg', (data) => {
-        data.id = Date.now().toString(); // Унікальний ID
-        data.r = { '👍':0, '❤️':0, '😂':0 }; // Реакції
-        history.push(data);
-        if(history.length > 100) history.shift();
-        io.emit('msg', data); 
+    k.on('m', (d) => {
+        d.id = Date.now().toString();
+        d.r = { '👍':0, '❤️':0, '😂':0 };
+        _h.push(d);
+        if(_h.length > 100) _h.shift();
+        o.emit('m', d); 
     });
-
-    // Хтось друкує
-    socket.on('typing', (isTyping) => {
-        socket.broadcast.emit('typing', { u: socket.username, isTyping });
+    k.on('t', (v) => {
+        k.broadcast.emit('t', { u: k.u, v });
     });
-
-    // Видалення повідомлення
-    socket.on('del', (id) => {
-        history = history.filter(m => m.id !== id);
-        io.emit('del', id);
+    k.on('d', (i) => {
+        _h = _h.filter(m => m.id !== i);
+        o.emit('d', i);
     });
-
-    // Реакції
-    socket.on('react', (data) => {
-        const msg = history.find(m => m.id === data.id);
-        if(msg) {
-            msg.r[data.emoji]++;
-            io.emit('updateMsg', msg);
-        }
+    k.on('re', (d) => {
+        const m = _h.find(x => x.id === d.id);
+        if(m) { m.r[d.e]++; o.emit('up', m); }
     });
-
-    socket.on('disconnect', () => {
-        delete users[socket.id];
-        io.emit('userList', Object.values(users));
+    k.on('disconnect', () => {
+        delete _u[k.id];
+        o.emit('ul', Object.values(_u));
     });
 });
-
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log("Live"));
+const P = process.env.PORT || 3000;
+s.listen(P);
