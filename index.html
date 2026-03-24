@@ -3,108 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DoveGram 0.20</title>
+    <title>DoveGram 0.21</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; --msg-my: #2563eb; --msg-other: #1a1a1a; }
         body.light { --bg: #f0f2f5; --panel: #fff; --text: #000; --msg-other: #e4e6eb; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; width: 100vw; }
 
-        /* Конструкція */
-        .app-container { display: flex; height: 100vh; width: 100vw; }
+        /* Головний контейнер */
+        #app { display: none; height: 100vh; width: 100vw; flex-direction: row; }
         .main-view { flex: 1; display: flex; flex-direction: column; border-right: 1px solid rgba(128,128,128,0.1); }
-        .side-icons { width: 70px; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 35px; background: var(--panel); border-left: 1px solid rgba(128,128,128,0.1); }
+        .side-icons { width: 70px; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 35px; background: var(--panel); }
         .side-icons i { font-size: 22px; color: #555; cursor: pointer; padding: 10px; }
-        .side-icons i.active, .side-icons i:hover { color: var(--accent); }
+        .side-icons i:hover { color: var(--accent); }
 
+        /* Екрани */
         .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; }
         .screen.active { display: flex; }
 
         .chat-card { padding: 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(128,128,128,0.1); cursor: pointer; }
-        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; margin: 4px 0; position: relative; word-wrap: break-word; font-size: 15px; }
+        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; margin: 4px 0; position: relative; word-wrap: break-word; }
         .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
         .bubble.other { align-self: flex-start; background: var(--msg-other); border-bottom-left-radius: 4px; }
         
-        .react-badge { position: absolute; bottom: -12px; right: 5px; background: var(--panel); border-radius: 10px; padding: 2px 6px; font-size: 13px; border: 1px solid rgba(128,128,128,0.2); }
         .input-ui { width: 100%; padding: 14px; background: var(--panel); border: 1px solid rgba(128,128,128,0.2); border-radius: 12px; color: var(--text); outline: none; }
-        .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; cursor: pointer; color: #fff; }
-
-        #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 4px; }
+        .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; color: #fff; cursor: pointer; }
+        
+        #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 5px; }
     </style>
 </head>
 <body class="dark">
 
 <div id="scr-auth" class="screen active" style="justify-content: center; align-items: center;">
-    <div style="width: 100%; max-width: 320px; text-align: center;">
-        <h2 style="margin-bottom:25px;">DoveGram 0.20</h2>
-        <input type="text" id="reg-id" class="input-ui" placeholder="@ID (унікальний)" style="margin-bottom:10px">
-        <input type="text" id="reg-name" class="input-ui" placeholder="Ім'я" style="margin-bottom:10px">
+    <div style="width: 100%; max-width: 300px; text-align: center;">
+        <h2 style="margin-bottom:30px;">DoveGram 0.21</h2>
+        <input type="text" id="reg-id" class="input-ui" placeholder="@ID (наприклад: nick)" style="margin-bottom:10px">
+        <input type="text" id="reg-name" class="input-ui" placeholder="Ваше ім'я" style="margin-bottom:10px">
         <input type="text" id="reg-phone" class="input-ui" placeholder="+380..." style="margin-bottom:20px">
-        <button onclick="app.register()" class="btn-ui">Увійти / Створити</button>
+        <button id="login-btn" onclick="app.register()" class="btn-ui">УВІЙТИ</button>
+        <p id="auth-status" style="font-size:12px; margin-top:15px; color:var(--accent)"></p>
     </div>
 </div>
 
-<div class="app-container" id="scr-main" style="display:none">
+<div id="app">
     <div class="main-view">
-        <div style="padding: 15px; border-bottom: 1px solid rgba(128,128,128,0.1);">
-            <input type="text" id="search-input" class="input-ui" placeholder="Пошук друзів..." oninput="app.search()">
-        </div>
+        <div style="padding: 15px;"><input type="text" id="search-in" class="input-ui" placeholder="Пошук друзів..." oninput="app.search()"></div>
         <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
     </div>
     <div class="side-icons">
         <i class="fas fa-cog" onclick="app.nav('scr-settings')"></i>
-        <i class="fas fa-plus" onclick="document.getElementById('search-input').focus()"></i>
-        <i class="fas fa-users" id="dev-icon" style="display:none" onclick="app.showDevPanel()"></i>
+        <i class="fas fa-plus" onclick="document.getElementById('search-in').focus()"></i>
+        <i class="fas fa-users" id="dev-btn" style="display:none" onclick="app.showDev()"></i>
         <i class="fas fa-user-circle" onclick="app.showMyProfile()"></i>
-    </div>
-</div>
-
-<div id="scr-profile" class="screen">
-    <i class="fas fa-arrow-left" onclick="app.nav('scr-main')" style="font-size: 20px; margin-bottom: 25px;"></i>
-    <div style="text-align: center;">
-        <div style="width:110px; height:110px; border-radius:50%; background:#222; margin:0 auto 15px; overflow:hidden; border:3px solid var(--accent);">
-            <img id="p-ava" src="https://via.placeholder.com/110" style="width:100%; height:100%; object-fit:cover;">
-        </div>
-        <h2 id="p-name">Завантаження...</h2>
-        <p id="p-id" style="opacity:0.5; margin-bottom:10px;"></p>
-        <p id="p-phone" style="font-weight: bold; color: var(--accent); margin-bottom:20px;"></p>
-        <textarea id="p-bio-edit" class="input-ui" placeholder="Розкажи про себе..." style="height:80px;"></textarea>
-        <button onclick="app.saveBio()" class="btn-ui" style="margin-top:10px">Зберегти опис</button>
     </div>
 </div>
 
 <div id="scr-chat" class="screen" style="padding:0">
     <div style="padding: 15px; display: flex; align-items: center; gap: 12px; background: var(--panel); border-bottom: 1px solid rgba(128,128,128,0.1);">
-        <i class="fas fa-arrow-left" onclick="app.closeChat()"></i>
-        <b id="chat-user-name">Чат</b>
-        <div id="typing-status" style="font-size:10px; color:var(--accent); margin-left:10px;"></div>
+        <i class="fas fa-arrow-left" onclick="app.nav('close-chat')"></i>
+        <b id="chat-head-name">Чат</b>
+        <span id="typing-notif" style="font-size:10px; color:var(--accent)"></span>
     </div>
     <div id="msg-box"></div>
-    <div id="react-panel" style="display:none; padding:10px; justify-content:center; gap:25px; background:var(--panel);">
-        <span onclick="app.applyReact('❤️‍🔥')">❤️‍🔥</span>
-        <span onclick="app.applyReact('💔')">💔</span>
-        <span onclick="app.applyReact('❤️')">❤️</span>
-    </div>
-    <div style="padding:12px; display:flex; gap:12px; align-items:center; background:var(--panel); border-top:1px solid rgba(128,128,128,0.1);">
-        <i class="fas fa-camera" onclick="document.getElementById('img-up').click()"></i>
-        <input type="file" id="img-up" hidden accept="image/*" onchange="app.uploadPhoto(this)">
-        <input type="text" id="msg-input" class="input-ui" style="flex:1; margin:0;" placeholder="Повідомлення..." oninput="app.handleTyping()">
-        <i class="fas fa-paper-plane" onclick="app.sendText()"></i>
+    <div style="padding:10px; display:flex; gap:10px; background:var(--panel);">
+        <input type="text" id="msg-input" class="input-ui" style="flex:1; margin:0" placeholder="Повідомлення..." oninput="app.typing()">
+        <button onclick="app.send()" style="background:none; border:none; color:var(--accent); font-size:20px;"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
-<div id="scr-settings" class="screen">
-    <i class="fas fa-arrow-left" onclick="app.nav('scr-main')" style="margin-bottom:20px"></i>
-    <h2 style="margin-bottom:20px">Налаштування</h2>
-    <button class="btn-ui" style="background:#222; margin-bottom:10px;" onclick="app.toggleTheme()">Тема (Світла/Темна)</button>
-    <button class="btn-ui" style="background:#222; margin-bottom:10px;" onclick="app.toggleLang()">Мова: <span id="cur-lang">UA</span></button>
-    <button class="btn-ui" style="background:#ef4444; margin-top:20px;" onclick="app.logout()">Вийти</button>
+<div id="scr-profile" class="screen">
+    <i class="fas fa-arrow-left" onclick="app.nav('close-chat')" style="margin-bottom:20px"></i>
+    <div style="text-align: center;">
+        <div style="width:90px; height:90px; border-radius:50%; background:var(--accent); margin:0 auto 15px; border:3px solid #333;"></div>
+        <h2 id="p-name-val">Ім'я</h2>
+        <p id="p-id-val" style="opacity:0.5; margin-bottom:5px"></p>
+        <p id="p-phone-val" style="color:var(--accent); font-weight:bold"></p>
+        <button class="btn-ui" style="background:#ef4444; margin-top:40px;" onclick="app.logout()">ВИЙТИ З АККАУНТУ</button>
+    </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, update, get, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCuo7GtLDVE6ERb8MOke97mFa08M3oZoV8",
@@ -118,162 +99,107 @@ const f_app = initializeApp(firebaseConfig);
 const db = getDatabase(f_app);
 
 window.app = {
-    user: null, peer: null, lastM: null, lang: 'uk', theme: 'dark',
-    currentChatRef: null,
+    user: null, peer: null,
 
     init() {
-        const saved = localStorage.getItem('dove_session');
-        if(saved) {
-            this.user = JSON.parse(saved);
-            document.getElementById('scr-auth').classList.remove('active');
-            document.getElementById('scr-main').style.display = 'flex';
-            if(this.user.id === 'dev') document.getElementById('dev-icon').style.display = 'block';
-            this.loadChats();
+        const local = localStorage.getItem('dove_v21');
+        if(local) {
+            this.user = JSON.parse(local);
+            this.launch();
         }
+    },
+
+    launch() {
+        document.getElementById('scr-auth').classList.remove('active');
+        document.getElementById('app').style.display = 'flex';
+        if(this.user.id === 'dev') document.getElementById('dev-btn').style.display = 'block';
+        this.loadUsers();
     },
 
     async register() {
         const id = document.getElementById('reg-id').value.trim().toLowerCase();
+        const nm = document.getElementById('reg-name').value.trim();
         const ph = document.getElementById('reg-phone').value.trim();
-        const nm = document.getElementById('reg-name').value;
+        const btn = document.getElementById('login-btn');
+        const stat = document.getElementById('auth-status');
 
-        if(!id || !ph || !nm) return alert("Заповни всі поля!");
-
-        const snap = await get(ref(db, 'users/' + id));
-        if(snap.exists()) {
-            this.user = snap.val();
-        } else {
-            this.user = { id, name: nm, phone: ph, ava: '', bio: '', lang: 'uk', theme: 'dark' };
-            await set(ref(db, 'users/' + id), this.user);
-        }
+        if(!id || !nm || !ph) return alert("Заповни все!");
         
-        localStorage.setItem('dove_session', JSON.stringify(this.user));
-        location.reload(); // Перезавантажуємо для чистого старту
+        btn.disabled = true;
+        stat.innerText = "Перевірка даних...";
+
+        try {
+            const snap = await get(ref(db, 'users/' + id));
+            if(snap.exists()) {
+                this.user = snap.val();
+            } else {
+                this.user = { id, name: nm, phone: ph, ava: '', bio: '', lang: 'uk' };
+                await set(ref(db, 'users/' + id), this.user);
+            }
+            localStorage.setItem('dove_v21', JSON.stringify(this.user));
+            location.reload(); // Перезавантаження для ініціалізації
+        } catch(e) {
+            alert("Помилка бази: " + e.message);
+            btn.disabled = false;
+        }
     },
 
-    search() {
-        const q = document.getElementById('search-input').value.toLowerCase();
-        if(q.length < 2) return this.loadChats();
+    loadUsers() {
         onValue(ref(db, 'users'), (snap) => {
             const list = document.getElementById('contacts-list');
             list.innerHTML = '';
             Object.values(snap.val() || {}).forEach(u => {
-                if(u.id !== this.user.id && (u.id.includes(q) || u.name.toLowerCase().includes(q))) {
-                    this.renderContactRow(u, list);
+                if(u.id !== this.user.id) {
+                    const d = document.createElement('div');
+                    d.className = 'chat-card';
+                    d.onclick = () => this.openChat(u);
+                    d.innerHTML = `<div style="width:40px;height:40px;border-radius:50%;background:#222;"></div> <b>${u.name}</b>`;
+                    list.appendChild(d);
                 }
-            });
-        }, { onlyOnce: true });
-    },
-
-    renderContactRow(u, container) {
-        const d = document.createElement('div');
-        d.className = 'chat-card';
-        d.onclick = () => this.openChat(u);
-        d.innerHTML = `<div style="width:40px;height:40px;border-radius:50%;background:#222;overflow:hidden"><img src="${u.ava || 'https://via.placeholder.com/40'}" style="width:100%"></div> <b>${u.name}</b>`;
-        container.appendChild(d);
-    },
-
-    loadChats() {
-        // Пошук тих, з ким вже є листування
-        onValue(ref(db, 'users'), (snap) => {
-            const list = document.getElementById('contacts-list');
-            list.innerHTML = '';
-            Object.values(snap.val() || {}).forEach(u => {
-                if(u.id !== this.user.id) this.renderContactRow(u, list);
             });
         });
     },
 
     openChat(u) {
         this.peer = u;
-        document.getElementById('chat-user-name').innerText = u.name;
+        document.getElementById('chat-head-name').innerText = u.name;
         this.nav('scr-chat');
-        
         const path = [this.user.id, u.id].sort().join('_');
-        this.currentChatRef = ref(db, 'msgs/' + path);
-        
-        onValue(this.currentChatRef, (s) => this.renderMsgs(s.val()));
-        onValue(ref(db, `status/${path}/${u.id}`), (s) => {
-            const st = this.lang === 'uk' ? 'Цвіркоче...' : 'Думает...';
-            document.getElementById('typing-status').innerText = s.val() ? st : '';
-        });
+        onValue(ref(db, 'msgs/' + path), (s) => this.draw(s.val()));
     },
 
-    closeChat() {
-        if(this.currentChatRef) off(this.currentChatRef);
-        this.nav('scr-main');
-    },
-
-    renderMsgs(data) {
+    draw(data) {
         const box = document.getElementById('msg-box');
         box.innerHTML = ''; if(!data) return;
-        Object.entries(data).forEach(([key, m]) => {
-            const isMy = m.s === this.user.id;
+        Object.values(data).forEach(m => {
             const div = document.createElement('div');
-            div.className = `bubble ${isMy ? 'my' : 'other'}`;
-            div.onclick = () => { this.lastM = key; document.getElementById('react-panel').style.display='flex'; };
-            
-            let content = m.img ? `<img src="${m.img}" style="width:100%;border-radius:10px">` : m.t;
-            div.innerHTML = `${content} <small style="display:block;font-size:8px;opacity:0.6;margin-top:4px">${m.time}</small>`;
-            if(m.r) div.innerHTML += `<div class="react-badge">${m.r}</div>`;
+            div.className = `bubble ${m.s === this.user.id ? 'my' : 'other'}`;
+            div.innerHTML = `${m.t} <small style="display:block;font-size:8px;opacity:0.5;text-align:right">${m.time}</small>`;
             box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
     },
 
-    sendText() {
+    send() {
         const t = document.getElementById('msg-input').value; if(!t) return;
-        this.pushMsg({ t });
+        const path = [this.user.id, this.peer.id].sort().join('_');
+        push(ref(db, 'msgs/' + path), {
+            s: this.user.id, t, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        });
         document.getElementById('msg-input').value = '';
-    },
-
-    uploadPhoto(input) {
-        if(input.files && input.files[0]) {
-            const r = new FileReader();
-            r.onload = (e) => this.pushMsg({ img: e.target.result });
-            r.readAsDataURL(input.files[0]);
-        }
-    },
-
-    pushMsg(data) {
-        const path = [this.user.id, this.peer.id].sort().join('_');
-        const m = { ...data, s: this.user.id, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-        push(ref(db, 'msgs/' + path), m);
-    },
-
-    applyReact(emoji) {
-        const path = [this.user.id, this.peer.id].sort().join('_');
-        update(ref(db, `msgs/${path}/${this.lastM}`), { r: emoji });
-        document.getElementById('react-panel').style.display='none';
     },
 
     nav(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.getElementById('scr-main').style.display = (id === 'scr-main') ? 'flex' : 'none';
-        if(id !== 'scr-main') document.getElementById(id).classList.add('active');
+        if(id === 'close-chat') return;
+        document.getElementById(id).classList.add('active');
     },
 
     showMyProfile() {
-        document.getElementById('p-ava').src = this.user.ava || 'https://via.placeholder.com/110';
-        document.getElementById('p-name').innerText = this.user.name;
-        document.getElementById('p-id').innerText = '@' + this.user.id;
-        document.getElementById('p-phone').innerText = this.user.phone;
-        document.getElementById('p-bio-edit').value = this.user.bio || '';
+        document.getElementById('p-name-val').innerText = this.user.name;
+        document.getElementById('p-id-val').innerText = '@' + this.user.id;
+        document.getElementById('p-phone-val').innerText = this.user.phone;
         this.nav('scr-profile');
-    },
-
-    saveBio() {
-        const bio = document.getElementById('p-bio-edit').value;
-        this.user.bio = bio;
-        update(ref(db, 'users/' + this.user.id), { bio });
-        localStorage.setItem('dove_session', JSON.stringify(this.user));
-        alert("Збережено!");
-    },
-
-    handleTyping() {
-        const path = [this.user.id, this.peer.id].sort().join('_');
-        set(ref(db, `status/${path}/${this.user.id}`), true);
-        setTimeout(() => set(ref(db, `status/${path}/${this.user.id}`), false), 2000);
     },
 
     logout() { localStorage.clear(); location.reload(); }
