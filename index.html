@@ -20,10 +20,11 @@
         /* Шапка */
         .h { height: 70px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; justify-content: space-between; z-index: 10; background: #000; }
         
-        /* Червоне коло: Аватар пользователя в углу */
-        #user_av_pic { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #ff0000; object-fit: cover; cursor: pointer; }
+        /* Червоне коло: Велика Аватарка */
+        #user_av_pic { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #ff4d4d; object-fit: cover; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 15px rgba(255,77,77,0.3); }
+        #user_av_pic:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(255,77,77,0.5); }
 
-        /* Синє область: Будут чаты */
+        /* Синє область (Чати зліва) */
         #main { flex:1; display:flex; flex-direction:column; background: var(--main); display: none; }
         #chat_list { flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:10px; }
         
@@ -146,7 +147,7 @@
         });
     }
 
-    // Секретная фішка: Поиск (Фішка #1)
+    // Зелене: Динамический поиск (Фішка #1)
     function sC() {
         const q = document.getElementById('s_in').value.toLowerCase();
         const rows = document.querySelectorAll('.chat-row');
@@ -163,7 +164,7 @@
         document.getElementById('bx').appendChild(w);
     }
 
-    // Фикс: Синхронизация истории в код (Фішка #3)
+    // Фикс №3: Синхронизация истории в код
     // Мы просто принимаем данные `hs` от сервера и сразу выводим их.
 
     function closeSide() { document.getElementById('side_bar').classList.remove('o'); document.getElementById('ov').classList.remove('o'); }
