@@ -2,336 +2,329 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 8.0 SPA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DoveGram Ultra</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: var(--text); user-select: none; }
-        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        
-        /* Екрани SPA */
-        .screen { display: none; flex-direction: column; height: 100vh; width: 100vw; position: absolute; top: 0; left: 0; background: var(--bg); }
-        .active-screen { display: flex; z-index: 10; }
+        :root {
+            --accent: #3b82f6;
+            --bg: #000;
+            --panel: #0a0a0a;
+            --text: #fff;
+            --msg-my: #3b82f6;
+            --msg-other: #1a1a1a;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-        /* Загальні елементи */
-        .header { padding: 20px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; background: #000; z-index: 5; }
-        .btn-icon { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text); padding: 5px; }
-        .input-text { width: 100%; padding: 15px; border-radius: 12px; background: #111; border: 1px solid #222; margin-bottom: 15px; outline: none; transition: 0.3s; }
-        .input-text:focus { border-color: var(--accent); }
-        .btn-primary { width: 100%; padding: 15px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; }
-        
-        /* Авторизація */
-        #auth-screen { align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { width: 100%; max-width: 350px; background: var(--panel); padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #1a1a1a; }
+        [data-theme="light"] {
+            --bg: #f3f4f6;
+            --panel: #ffffff;
+            --text: #000;
+            --msg-my: #3b82f6;
+            --msg-other: #e5e7eb;
+        }
 
-        /* Список чатів */
-        .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #111; cursor: pointer; }
-        .chat-item:hover { background: #111; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: var(--accent); object-fit: cover; }
-        .add-btn { background: var(--accent); color: #fff; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; color: var(--text); -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); height: 100vh; overflow: hidden; transition: var(--transition); }
 
-        /* Вікно чату */
-        .chat-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; position: relative; word-wrap: break-word; }
-        .msg.my { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.other { align-self: flex-start; background: #1a1a1a; border-bottom-left-radius: 4px; }
-        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; text-align: right; display: block; }
-        
-        .chat-input-area { padding: 15px 20px; background: #000; border-top: 1px solid #1a1a1a; display: flex; gap: 10px; align-items: center; }
-        .chat-input-area input { flex: 1; margin: 0; border-radius: 30px; }
+        /* SPA Layout */
+        .screen { 
+            position: fixed; inset: 0; background: var(--bg); 
+            display: none; flex-direction: column; 
+            transform: translateX(100%); transition: var(--transition); 
+        }
+        .screen.active { display: flex; transform: translateX(0); z-index: 10; }
+        .screen.prev { transform: translateX(-20%); opacity: 0.5; }
 
-        /* Модальні вікна */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal { background: var(--panel); padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; border: 1px solid #222; }
-        
-        /* Налаштування */
-        .lang-switch { display: flex; gap: 10px; margin-top: 15px; }
-        .lang-btn { flex: 1; padding: 10px; border-radius: 10px; background: #111; border: 1px solid #333; cursor: pointer; text-align: center; }
-        .lang-btn.active { background: var(--accent); border-color: var(--accent); }
+        /* Headers */
+        .header { 
+            padding: 15px 20px; background: var(--panel); 
+            border-bottom: 1px solid rgba(128,128,128,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* UI Elements */
+        .btn-round { 
+            width: 45px; height: 45px; border-radius: 50%; 
+            background: var(--panel); border: 1px solid rgba(128,128,128,0.2);
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .input-main {
+            width: 100%; padding: 14px 20px; border-radius: 15px;
+            background: var(--panel); border: 1px solid rgba(128,128,128,0.2);
+            margin-bottom: 15px; outline: none; transition: 0.2s;
+        }
+        .input-main:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+
+        /* Chat List */
+        .chat-card {
+            padding: 15px 20px; display: flex; align-items: center; gap: 15px;
+            border-bottom: 1px solid rgba(128,128,128,0.05); cursor: pointer;
+        }
+        .avatar { 
+            width: 55px; height: 55px; border-radius: 50%; 
+            background: var(--accent); display: flex; align-items: center; 
+            justify-content: center; font-size: 20px; font-weight: bold; color: #fff;
+        }
+
+        /* Messages */
+        #msg-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .bubble { 
+            max-width: 80%; padding: 12px 16px; border-radius: 18px; 
+            position: relative; animation: pop 0.2s ease-out;
+        }
+        .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
+        .bubble.other { align-self: flex-start; background: var(--msg-other); border-bottom-left-radius: 4px; }
+        .time { font-size: 10px; opacity: 0.6; margin-top: 4px; display: block; text-align: right; }
+
+        @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Settings */
+        .settings-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 20px; background: var(--panel); margin-bottom: 2px;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+        .modal-content { background: var(--panel); padding: 30px; border-radius: 25px; width: 90%; max-width: 400px; }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-<div id="auth-screen" class="screen">
-    <div class="auth-card">
-        <h2 style="margin-bottom: 5px;">DoveGram</h2>
-        <p style="color: #777; margin-bottom: 25px; font-size: 14px;" data-i18n="auth_desc">Создание профиля</p>
-        <input type="text" id="reg-name" class="input-text" placeholder="Имя профиля" data-i18n-ph="ph_name">
-        <input type="text" id="reg-phone" class="input-text" placeholder="+380 ..." data-i18n-ph="ph_phone">
-        <button class="btn-primary" onclick="app.register()" data-i18n="btn_enter">ВОЙТИ</button>
+<div id="scr-auth" class="screen active" style="justify-content: center; align-items: center; transform: none;">
+    <div style="width: 85%; max-width: 340px; text-align: center;">
+        <i class="fas fa-dove" style="font-size: 50px; color: var(--accent); margin-bottom: 20px;"></i>
+        <h1 style="margin-bottom: 30px;">DoveGram</h1>
+        <input type="text" id="in-name" class="input-main" placeholder="Имя" data-i18="ph_name">
+        <input type="text" id="in-phone" class="input-main" placeholder="+380..." data-i18="ph_phone">
+        <button onclick="core.reg()" class="input-main" style="background: var(--accent); color: #fff; font-weight: bold; border: none;">Увійти / Войти</button>
     </div>
 </div>
 
-<div id="main-screen" class="screen">
+<div id="scr-main" class="screen">
     <div class="header">
-        <h2 data-i18n="title_chats">Чаты</h2>
-        <div>
-            <button class="add-btn" onclick="app.showModal('add-modal')" data-i18n="btn_add">+ Добавить</button>
-            <button class="btn-icon" style="margin-left: 15px;" onclick="app.showModal('settings-modal')"><i class="fas fa-cog"></i></button>
+        <h2 data-i18="title_chats">Чаты</h2>
+        <div style="display: flex; gap: 10px;">
+            <div class="btn-round" onclick="core.modal('mod-add', true)"><i class="fas fa-plus"></i></div>
+            <div class="btn-round" onclick="core.nav('scr-set')"><i class="fas fa-user-cog"></i></div>
         </div>
     </div>
-    <div class="chat-list" id="chat-list-container"></div>
+    <div id="list-chats" style="flex: 1; overflow-y: auto;"></div>
 </div>
 
-<div id="chat-screen" class="screen">
+<div id="scr-chat" class="screen">
     <div class="header">
-        <button class="btn-icon" onclick="app.navigate('main-screen')"><i class="fas fa-chevron-left"></i></button>
+        <div class="btn-round" onclick="core.nav('scr-main')"><i class="fas fa-arrow-left"></i></div>
         <div style="text-align: center;">
-            <b id="active-chat-name" style="font-size: 16px;">Name</b>
-            <div style="font-size: 12px; color: var(--accent);" id="active-chat-id">ID</div>
+            <b id="chat-title">Name</b>
+            <div id="chat-status" style="font-size: 10px; color: var(--accent);">online</div>
         </div>
-        <button class="btn-icon" style="opacity: 0;"><i class="fas fa-ellipsis-v"></i></button> </div>
-    <div class="chat-area" id="chat-messages"></div>
-    <div style="text-align: center; font-size: 12px; color: #555; padding-bottom: 5px;" data-i18n="hint_delete">Двойной клик по сообщению для удаления</div>
-    <div class="chat-input-area">
-        <input type="text" id="msg-input" class="input-text" placeholder="Сообщение..." data-i18n-ph="ph_msg">
-        <button class="btn-icon" style="color: var(--accent);" onclick="app.sendMessage()"><i class="fas fa-paper-plane"></i></button>
+        <div class="btn-round" onclick="core.clearChat()"><i class="fas fa-trash"></i></div>
+    </div>
+    <div id="msg-container"></div>
+    <div class="header" style="border-top: 1px solid rgba(128,128,128,0.1); border-bottom: none;">
+        <input type="text" id="msg-input" class="input-main" style="margin: 0;" placeholder="Сообщение..." data-i18="ph_msg">
+        <div class="btn-round" style="margin-left: 10px; background: var(--accent); border: none;" onclick="core.send()">
+            <i class="fas fa-paper-plane" style="color: #fff;"></i>
+        </div>
     </div>
 </div>
 
-<div id="add-modal" class="modal-overlay">
-    <div class="modal">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <h3 data-i18n="title_new_chat">Новый чат</h3>
-            <i class="fas fa-times" style="cursor: pointer;" onclick="app.closeModal('add-modal')"></i>
-        </div>
-        <input type="text" id="add-id" class="input-text" placeholder="ID (DG-...) или номер" data-i18n-ph="ph_id">
-        <input type="text" id="add-name" class="input-text" placeholder="Имя контакта" data-i18n-ph="ph_contact">
-        <button class="btn-primary" onclick="app.addChat()" data-i18n="btn_add_contact">Добавить контакт</button>
+<div id="scr-set" class="screen">
+    <div class="header">
+        <div class="btn-round" onclick="core.nav('scr-main')"><i class="fas fa-arrow-left"></i></div>
+        <h2 data-i18="title_settings">Настройки</h2>
+        <div style="width: 45px;"></div>
     </div>
+    
+    <div style="padding: 20px; text-align: center;">
+        <div class="avatar" id="my-av" style="width: 100px; height: 100px; font-size: 40px; margin: 0 auto 15px;">?</div>
+        <h2 id="my-name">User</h2>
+        <p id="my-id" style="color: var(--accent); font-family: monospace;"></p>
+    </div>
+
+    <div class="settings-row">
+        <span data-i18="lbl_theme">Темная тема</span>
+        <input type="checkbox" id="theme-tog" checked onchange="core.toggleTheme()">
+    </div>
+    
+    <div class="settings-row">
+        <span data-i18="lbl_lang">Язык / Мова</span>
+        <select id="lang-sel" onchange="core.setLang(this.value)" style="background: var(--bg); padding: 5px; border-radius: 5px;">
+            <option value="ru">Русский</option>
+            <option value="uk">Українська</option>
+        </select>
+    </div>
+
+    <button onclick="core.exit()" class="input-main" style="width: 90%; margin: 40px auto; display: block; background: #ef4444; color: #fff; border: none;">Вихід / Выход</button>
 </div>
 
-<div id="settings-modal" class="modal-overlay">
-    <div class="modal">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-            <h3 data-i18n="title_settings">Настройки</h3>
-            <i class="fas fa-times" style="cursor: pointer;" onclick="app.closeModal('settings-modal')"></i>
+<div id="mod-add" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 20px;" data-i18="title_new">Добавить контакт</h3>
+        <input type="text" id="add-id" class="input-main" placeholder="ID (DG-...)">
+        <input type="text" id="add-name" class="input-main" placeholder="Имя">
+        <div style="display: flex; gap: 10px;">
+            <button onclick="core.modal('mod-add', false)" class="input-main" style="flex: 1;">Отмена</button>
+            <button onclick="core.addContact()" class="input-main" style="flex: 1; background: var(--accent); color: #fff; border: none;">ОК</button>
         </div>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <img src="https://i.imgur.com/6VBx3io.png" id="my-avatar" class="avatar" style="margin: 0 auto; width: 80px; height: 80px; cursor: pointer;" onclick="document.getElementById('file-upload').click()">
-            <input type="file" id="file-upload" hidden onchange="app.changeAvatar(this)">
-            <h3 id="my-name" style="margin-top: 10px;">---</h3>
-            <div style="background: #111; padding: 5px 10px; border-radius: 8px; display: inline-block; margin-top: 5px; font-family: monospace; color: var(--accent);" id="my-id">---</div>
-        </div>
-
-        <p style="font-size: 14px; color: #888;" data-i18n="lbl_lang">Язык / Мова</p>
-        <div class="lang-switch">
-            <div class="lang-btn" id="lang-ru" onclick="app.setLang('ru')">Русский</div>
-            <div class="lang-btn" id="lang-uk" onclick="app.setLang('uk')">Українська</div>
-        </div>
-
-        <button class="btn-primary" style="background: #300; margin-top: 25px;" onclick="app.logout()" data-i18n="btn_logout">Выйти из аккаунта</button>
     </div>
 </div>
 
 <script>
-// --- СЛОВНИК ЛОКАЛІЗАЦІЇ ---
 const dict = {
-    ru: {
-        auth_desc: "Создание профиля", ph_name: "Имя профиля", ph_phone: "+380 ...", btn_enter: "ВОЙТИ",
-        title_chats: "Чаты", btn_add: "+ Добавить", title_new_chat: "Новый чат", ph_id: "ID (DG-...) или номер",
-        ph_contact: "Имя контакта", btn_add_contact: "Добавить контакт", title_settings: "Настройки",
-        lbl_lang: "Язык интерфейса", btn_logout: "Выйти из аккаунта", ph_msg: "Сообщение...", hint_delete: "Двойной клик по сообщению для удаления"
-    },
-    uk: {
-        auth_desc: "Створення профілю", ph_name: "Ім'я профілю", ph_phone: "+380 ...", btn_enter: "УВІЙТИ",
-        title_chats: "Чати", btn_add: "+ Додати", title_new_chat: "Новий чат", ph_id: "ID (DG-...) або номер",
-        ph_contact: "Ім'я контакту", btn_add_contact: "Додати контакт", title_settings: "Налаштування",
-        lbl_lang: "Мова інтерфейсу", btn_logout: "Вийти з акаунту", ph_msg: "Повідомлення...", hint_delete: "Подвійний клік по повідомленню для видалення"
-    }
+    ru: { ph_name: "Ваше имя", ph_phone: "Телефон", title_chats: "Чаты", ph_msg: "Сообщение...", title_settings: "Настройки", lbl_theme: "Темная тема", lbl_lang: "Язык интерфейса", title_new: "Новый контакт" },
+    uk: { ph_name: "Ваше ім'я", ph_phone: "Телефон", title_chats: "Чати", ph_msg: "Повідомлення...", title_settings: "Налаштування", lbl_theme: "Темна тема", lbl_lang: "Мова інтерфейсу", title_new: "Новий контакт" }
 };
 
-// --- ОСНОВНА ЛОГІКА ДОДАТКУ ---
-const app = {
-    data: { user: null, chats: [], lang: 'ru' },
-    activeChatId: null,
+const core = {
+    db: { user: null, contacts: [], lang: 'ru', theme: 'dark' },
+    activeId: null,
 
     init() {
-        const saved = localStorage.getItem('dg_app_data');
-        if (saved) this.data = JSON.parse(saved);
+        const data = localStorage.getItem('dove_db');
+        if(data) this.db = JSON.parse(data);
         
-        // Встановлення мови за замовчуванням
-        if(!this.data.lang) this.data.lang = 'ru';
+        this.applyTheme();
         this.applyLang();
-
-        if (!this.data.user) {
-            this.navigate('auth-screen');
-        } else {
-            this.updateProfileUI();
-            this.renderChats();
-            this.navigate('main-screen');
-        }
-
-        // Обробник Enter для повідомлень
-        document.getElementById('msg-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendMessage();
-        });
-    },
-
-    save() { localStorage.setItem('dg_app_data', JSON.stringify(this.data)); },
-
-    navigate(screenId) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-        document.getElementById(screenId).classList.add('active-screen');
-    },
-
-    showModal(id) { document.getElementById(id).style.display = 'flex'; },
-    closeModal(id) { document.getElementById(id).style.display = 'none'; },
-
-    // --- АВТОРИЗАЦІЯ ---
-    register() {
-        const n = document.getElementById('reg-name').value.trim();
-        const p = document.getElementById('reg-phone').value.trim();
-        if (!n || !p) return alert("Заполните поля!");
         
-        this.data.user = {
-            name: n, phone: p, id: 'DG-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
-            avatar: 'https://i.imgur.com/6VBx3io.png'
-        };
-        this.save();
-        this.init();
-    },
-
-    logout() {
-        if(confirm("Точно выйти?")) {
-            localStorage.removeItem('dg_app_data');
-            location.reload();
+        if(this.db.user) {
+            this.nav('scr-main');
+            this.renderList();
+            this.updateProfile();
         }
+
+        document.getElementById('msg-input').onkeyup = (e) => { if(e.key === 'Enter') this.send(); };
     },
 
-    // --- ЧАТИ ТА КОНТАКТИ ---
-    addChat() {
-        const id = document.getElementById('add-id').value.trim();
-        const name = document.getElementById('add-name').value.trim();
-        if (!id || !name) return;
-        if (this.data.chats.find(c => c.id === id)) return alert("Уже добавлен!");
+    nav(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    },
 
-        this.data.chats.push({ id, name, history: [] });
+    modal(id, show) { document.getElementById(id).style.display = show ? 'flex' : 'none'; },
+
+    reg() {
+        const n = document.getElementById('in-name').value;
+        const p = document.getElementById('in-phone').value;
+        if(!n || !p) return;
+        this.db.user = { name: n, phone: p, id: 'DG-' + Math.random().toString(36).substr(2,4).toUpperCase() };
         this.save();
-        this.closeModal('add-modal');
-        document.getElementById('add-id').value = '';
-        document.getElementById('add-name').value = '';
-        this.renderChats();
+        location.reload();
     },
 
-    renderChats() {
-        const list = document.getElementById('chat-list-container');
-        list.innerHTML = '';
-        this.data.chats.forEach(c => {
-            const initial = c.name.charAt(0).toUpperCase();
-            const lastMsg = c.history.length > 0 ? c.history[c.history.length-1].text : '...';
-            
-            const div = document.createElement('div');
-            div.className = 'chat-item';
-            div.innerHTML = `
-                <div class="avatar">${initial}</div>
-                <div style="flex:1; overflow:hidden;">
-                    <b>${c.name}</b>
-                    <p style="font-size: 13px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lastMsg}</p>
+    save() { localStorage.setItem('dove_db', JSON.stringify(this.db)); },
+
+    addContact() {
+        const id = document.getElementById('add-id').value;
+        const name = document.getElementById('add-name').value;
+        if(!id || !name) return;
+        this.db.contacts.push({ id, name, msgs: [] });
+        this.save();
+        this.modal('mod-add', false);
+        this.renderList();
+    },
+
+    renderList() {
+        const container = document.getElementById('list-chats');
+        container.innerHTML = '';
+        this.db.contacts.forEach(c => {
+            const last = c.msgs.length ? c.msgs[c.msgs.length-1].text : 'Нет сообщений';
+            container.innerHTML += `
+                <div class="chat-card" onclick="core.openChat('${c.id}')">
+                    <div class="avatar">${c.name[0]}</div>
+                    <div style="flex:1">
+                        <b>${c.name}</b><br>
+                        <small style="opacity:0.5">${last}</small>
+                    </div>
                 </div>
             `;
-            div.onclick = () => this.openChat(c.id);
-            list.appendChild(div);
         });
     },
 
-    // --- ВІКНО ПОВІДОМЛЕНЬ ---
-    openChat(chatId) {
-        this.activeChatId = chatId;
-        const chat = this.data.chats.find(c => c.id === chatId);
-        document.getElementById('active-chat-name').innerText = chat.name;
-        document.getElementById('active-chat-id').innerText = chat.id;
-        this.renderMessages();
-        this.navigate('chat-screen');
+    openChat(id) {
+        this.activeId = id;
+        const c = this.db.contacts.find(x => x.id === id);
+        document.getElementById('chat-title').innerText = c.name;
+        this.renderMsgs();
+        this.nav('scr-chat');
     },
 
-    sendMessage() {
+    send() {
         const inp = document.getElementById('msg-input');
-        const text = inp.value.trim();
-        if(!text) return;
-
-        const chat = this.data.chats.find(c => c.id === this.activeChatId);
-        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        chat.history.push({ id: Date.now(), text, time, sender: 'my' });
+        if(!inp.value.trim()) return;
+        const c = this.db.contacts.find(x => x.id === this.activeId);
+        c.msgs.push({ text: inp.value, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), my: true });
         this.save();
         inp.value = '';
-        this.renderMessages();
-        this.renderChats(); // Оновлюємо останнє повідомлення в списку
+        this.renderMsgs();
     },
 
-    deleteMessage(msgId) {
-        if(!confirm("Удалить сообщение? / Видалити повідомлення?")) return;
-        const chat = this.data.chats.find(c => c.id === this.activeChatId);
-        chat.history = chat.history.filter(m => m.id !== msgId);
-        this.save();
-        this.renderMessages();
-        this.renderChats();
-    },
-
-    renderMessages() {
-        const box = document.getElementById('chat-messages');
+    renderMsgs() {
+        const box = document.getElementById('msg-container');
         box.innerHTML = '';
-        const chat = this.data.chats.find(c => c.id === this.activeChatId);
-        
-        chat.history.forEach(m => {
-            const div = document.createElement('div');
-            div.className = `msg ${m.sender}`;
-            div.innerHTML = `${m.text} <span class="msg-time">${m.time}</span>`;
-            // Видалення по подвійному кліку
-            div.ondblclick = () => this.deleteMessage(m.id);
-            box.appendChild(div);
+        const c = this.db.contacts.find(x => x.id === this.activeId);
+        c.msgs.forEach(m => {
+            box.innerHTML += `
+                <div class="bubble ${m.my ? 'my' : 'other'}">
+                    ${m.text}
+                    <span class="time">${m.time}</span>
+                </div>
+            `;
         });
         box.scrollTop = box.scrollHeight;
     },
 
-    // --- НАЛАШТУВАННЯ ТА ЛОКАЛІЗАЦІЯ ---
-    updateProfileUI() {
-        document.getElementById('my-name').innerText = this.data.user.name;
-        document.getElementById('my-id').innerText = 'ID: ' + this.data.user.id;
-        document.getElementById('my-avatar').src = this.data.user.avatar;
+    clearChat() {
+        if(!confirm('Очистить историю?')) return;
+        const c = this.db.contacts.find(x => x.id === this.activeId);
+        c.msgs = [];
+        this.save();
+        this.renderMsgs();
     },
 
-    changeAvatar(input) {
-        if(input.files[0]) {
-            const r = new FileReader();
-            r.onload = (e) => {
-                this.data.user.avatar = e.target.result;
-                this.save();
-                this.updateProfileUI();
-            };
-            r.readAsDataURL(input.files[0]);
-        }
+    toggleTheme() {
+        this.db.theme = this.db.theme === 'dark' ? 'light' : 'dark';
+        this.save();
+        this.applyTheme();
     },
 
-    setLang(langCode) {
-        this.data.lang = langCode;
+    applyTheme() {
+        document.body.setAttribute('data-theme', this.db.theme);
+        document.getElementById('theme-tog').checked = (this.db.theme === 'dark');
+    },
+
+    setLang(l) {
+        this.db.lang = l;
         this.save();
         this.applyLang();
     },
 
     applyLang() {
-        const l = this.data.lang;
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('lang-' + l).classList.add('active');
+        const l = this.db.lang;
+        document.getElementById('lang-sel').value = l;
+        document.querySelectorAll('[data-i18]').forEach(el => {
+            const key = el.getAttribute('data-i18');
+            if(el.tagName === 'INPUT') el.placeholder = dict[l][key];
+            else el.innerText = dict[l][key];
+        });
+    },
 
-        // Переклад тексту
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if(dict[l][key]) el.innerText = dict[l][key];
-        });
-        // Переклад плейсхолдерів
-        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-            const key = el.getAttribute('data-i18n-ph');
-            if(dict[l][key]) el.placeholder = dict[l][key];
-        });
-    }
+    updateProfile() {
+        document.getElementById('my-name').innerText = this.db.user.name;
+        document.getElementById('my-id').innerText = 'Your ID: ' + this.db.user.id;
+        document.getElementById('my-av').innerText = this.db.user.name[0];
+    },
+
+    exit() { localStorage.clear(); location.reload(); }
 };
 
-window.onload = () => app.init();
+window.onload = () => core.init();
 </script>
 </body>
 </html>
