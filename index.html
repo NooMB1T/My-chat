@@ -3,168 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 6.0 Core</title>
+    <title>DoveGram 6.0 | Core</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        :root { --bg: #000; --blue: #3b82f6; --glass: rgba(255, 255, 255, 0.05); --panel: #000; }
+        :root { --accent: #3b82f6; --bg: #000; --panel: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: #fff; }
-        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; }
+        body { background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
 
-        /* Регистрация */
-        #auth-screen { position: fixed; inset: 0; background: #000; z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .input-reg { width: 100%; max-width: 300px; padding: 15px; margin-bottom: 10px; border-radius: 12px; background: #111; border: 1px solid #222; outline: none; }
-        .btn-reg { width: 100%; max-width: 300px; padding: 15px; border-radius: 12px; background: #fff; color: #000; font-weight: bold; border: none; cursor: pointer; }
+        /* Система входа */
+        #auth-gate { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
+        .gate-card { width: 90%; max-width: 350px; text-align: center; }
+        .gate-input { width: 100%; padding: 16px; margin: 8px 0; border-radius: 12px; background: #111; border: 1px solid #222; outline: none; transition: 0.3s; }
+        .gate-input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .gate-btn { width: 100%; padding: 16px; margin-top: 15px; border-radius: 12px; background: #fff; color: #000; font-weight: 800; border: none; cursor: pointer; text-transform: uppercase; }
 
-        /* Левая панель */
-        #left-side { flex: 1; border-right: 2px solid var(--blue); display: flex; flex-direction: column; background: var(--panel); transition: 0.3s; }
-        .head { padding: 25px 20px; font-size: 24px; font-weight: 900; }
-        .chat-row { padding: 15px 20px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
-        .chat-row:hover { background: rgba(255,255,255,0.03); }
-        .av-circle { width: 55px; height: 55px; border-radius: 50%; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        /* Основной интерфейс */
+        #main-view { flex: 1; border-right: 2px solid var(--accent); display: flex; flex-direction: column; background: var(--panel); }
+        .top-bar { padding: 30px 25px; display: flex; justify-content: space-between; align-items: center; }
+        .top-bar h1 { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
 
-        /* Правая панель управления */
-        #right-side { width: 85px; display: flex; flex-direction: column; align-items: center; padding-top: 140px; gap: 35px; position: relative; background: #000; }
-        
-        /* Твоя АВАТАРКА: БЕЗ КОНТУРА, на линии */
-        .main-av { 
-            position: absolute; top: 20px; right: 35px; /* 50% на линии */
-            width: 100px; height: 100px; border-radius: 50%; 
-            z-index: 100; object-fit: cover; background: #222; cursor: pointer;
-        }
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item { padding: 18px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); transition: 0.2s; }
+        .chat-item:hover { background: rgba(255,255,255,0.03); }
+        .chat-icon { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(45deg, #111, #222); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--accent); }
 
-        .nav-btn { font-size: 24px; color: #333; cursor: pointer; transition: 0.3s; position: relative; }
-        .nav-btn:hover, .nav-btn.active { color: #fff; }
+        /* Боковое меню */
+        #nav-side { width: 90px; display: flex; flex-direction: column; align-items: center; padding-top: 150px; gap: 40px; position: relative; background: #000; }
+        .side-av { position: absolute; top: 25px; right: 38px; width: 105px; height: 105px; border-radius: 50%; z-index: 100; object-fit: cover; background: #111; cursor: pointer; transition: 0.3s; }
+        .side-av:hover { transform: scale(1.05); }
 
-        /* Экран Чата */
-        #chat-window { position: fixed; inset: 0; background: #000; z-index: 1500; display: none; flex-direction: column; }
-        .chat-header { padding: 15px; border-bottom: 1px solid #111; display: flex; align-items: center; gap: 15px; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .bubble { padding: 12px 16px; background: var(--glass); border-radius: 18px; max-width: 80%; position: relative; }
-        .bubble.me { align-self: flex-end; background: #fff; color: #000; }
-        .bubble small { font-size: 10px; opacity: 0.6; display: block; margin-bottom: 4px; }
-        
-        /* Реакции */
-        .react-box { display: flex; gap: 5px; margin-top: 5px; }
-        .react { cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .react:hover { transform: scale(1.4); }
+        .nav-link { font-size: 26px; color: #222; cursor: pointer; transition: 0.3s; position: relative; }
+        .nav-link:hover, .nav-link.active { color: #fff; }
+        .nav-link i { filter: drop-shadow(0 0 5px rgba(0,0,0,0.5)); }
 
-        /* Инпут */
-        .input-area { padding: 15px; display: flex; gap: 10px; border-top: 1px solid #111; background: #000; }
-        #m-input { flex: 1; padding: 12px; border-radius: 20px; background: #111; border: none; outline: none; }
-
-        /* Профиль и Настройки */
-        #profile-screen { position: fixed; inset: 0; background: #000; z-index: 2000; display: none; padding: 40px 20px; text-align: center; }
-        .prof-big-av { width: 120px; height: 120px; border-radius: 50%; background: #111; margin: 0 auto 20px; }
+        /* Экран Профиля */
+        #profile-overlay { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; padding: 30px; }
+        .prof-header { display: flex; align-items: center; gap: 20px; margin-bottom: 40px; }
+        .prof-info-box { background: #080808; padding: 25px; border-radius: 20px; border: 1px solid #111; }
+        .info-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #111; }
+        .info-row span { color: #555; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div id="auth-screen">
-    <h1 style="margin-bottom: 30px; letter-spacing: 2px;">DOVEGRAM 6.0</h1>
-    <input type="text" id="reg-name" class="input-reg" placeholder="Ваше имя">
-    <input type="text" id="reg-tag" class="input-reg" placeholder="@кличка">
-    <button class="btn-reg" onclick="registerUser()">СОЗДАТЬ АККАУНТ</button>
+<div id="auth-gate">
+    <div class="gate-card">
+        <h1 style="font-size: 32px; margin-bottom: 10px;">DOVEGRAM</h1>
+        <p style="color: #444; margin-bottom: 30px;">Core 6.0 Architecture</p>
+        <input type="text" id="reg-name" class="gate-input" placeholder="Введите имя">
+        <input type="text" id="reg-phone" class="gate-input" placeholder="+380 ...">
+        <button class="gate-btn" onclick="saveUser()">Начать сессию</button>
+    </div>
 </div>
 
-<div id="left-side">
-    <div class="head">Сообщения</div>
-    <div class="chat-row" onclick="openChat()">
-        <div class="av-circle"><i class="fas fa-bolt" style="color: #ffda44;"></i></div>
-        <div style="flex:1">
-            <div style="display:flex; justify-content:space-between"><b>Глобальный чат</b> <small style="color:#333">19:41</small></div>
-            <small style="color:#666" id="last-msg">(Начало общения)</small>
+<div id="main-view">
+    <div class="top-bar">
+        <h1>Чаты</h1>
+        <i class="fas fa-search" style="color: #333;"></i>
+    </div>
+    <div class="chat-list">
+        <div class="chat-item" onclick="location.href='chat.html'">
+            <div class="chat-icon"><i class="fas fa-bolt"></i></div>
+            <div style="flex: 1;">
+                <div style="display:flex; justify-content:space-between"><b>Глобальное ядро</b> <small style="color:#222">сейчас</small></div>
+                <p style="color: #555; font-size: 14px; margin-top: 4px;">(Начало общения)</p>
+            </div>
         </div>
     </div>
 </div>
 
-<img src="https://i.imgur.com/6VBx3io.png" class="main-av" onclick="showProfile()">
+<img src="https://i.imgur.com/6VBx3io.png" class="side-av" id="user-photo" onclick="toggleProfile(true)">
 
-<div id="right-side">
-    <div class="nav-btn active" onclick="location.reload()"><i class="fas fa-comment"></i></div>
-    <div class="nav-btn" onclick="showProfile()"><i class="fas fa-user"></i></div>
-    <div class="nav-btn" onclick="changeBg()"><i class="fas fa-palette"></i></div>
-    <div class="nav-btn" onclick="showProfile()"><i class="fas fa-cog"></i></div>
-    <div class="nav-btn" style="margin-top: auto; margin-bottom: 30px;" onclick="window.location.href='index.html'">
-        <i class="fas fa-arrow-left"></i>
+<div id="nav-side">
+    <div class="nav-link active"><i class="fas fa-comment-alt"></i></div>
+    <div class="nav-link" onclick="toggleProfile(true)"><i class="fas fa-sliders-h"></i></div>
+    <div class="nav-link" onclick="changeColor()"><i class="fas fa-palette"></i></div>
+    <div class="nav-link" style="margin-top: auto; margin-bottom: 40px;" onclick="logout()">
+        <i class="fas fa-power-off" style="color: #400;"></i>
     </div>
 </div>
 
-<div id="chat-window">
-    <div class="chat-header">
-        <i class="fas fa-chevron-left" style="cursor:pointer" onclick="closeChat()"></i>
-        <b onclick="showProfile()" style="cursor:pointer">Глобальный чат</b>
+<div id="profile-overlay">
+    <div class="prof-header">
+        <i class="fas fa-chevron-left" style="font-size: 24px; cursor:pointer;" onclick="toggleProfile(false)"></i>
+        <h2 style="font-size: 28px;">Настройки</h2>
     </div>
-    <div id="messages"></div>
-    <div class="input-area">
-        <i class="fas fa-plus" style="color:#333; padding-top:10px;"></i>
-        <input type="text" id="m-input" placeholder="Сообщение...">
-        <i class="fas fa-paper-plane" style="padding-top:10px; color:var(--blue); cursor:pointer" onclick="sendMessage()"></i>
+    <div class="prof-info-box">
+        <div class="info-row"><span>Имя аккаунта</span> <b id="p-name">---</b></div>
+        <div class="info-row"><span>Привязанный номер</span> <b id="p-phone">---</b></div>
+        <div class="info-row"><span>Версия ПО</span> <b style="color: var(--accent);">6.0.4-STABLE</b></div>
+        <div class="info-row" style="border:none; margin-top: 20px; color: #ff4d4d; cursor:pointer;" onclick="logout()">
+            <b>Завершить все сеансы</b>
+        </div>
     </div>
-</div>
-
-<div id="profile-screen">
-    <i class="fas fa-times" style="position:absolute; top:20px; right:20px; font-size:24px;" onclick="hideProfile()"></i>
-    <div class="prof-big-av"><i class="fas fa-user" style="font-size:50px; margin-top:35px; color:#333"></i></div>
-    <h2 id="p-name">Имя пользователя</h2>
-    <p id="p-tag" style="color: var(--blue); margin-bottom: 30px;">@tag</p>
-    <div style="text-align:left; background:#111; padding:15px; border-radius:15px;">
-        <p>Статус: <span style="color:#4ade80">Online</span></p>
-        <p style="margin-top:10px; color:#555">DoveGram 6.0 Core Edition</p>
-    </div>
-    <button class="btn-reg" style="margin-top:40px; background:#ff4d4d; color:#fff" onclick="location.reload()">ВЫЙТИ</button>
 </div>
 
 <script>
-    let myUser = { name: '', tag: '' };
+    const storage = {
+        save: (key, val) => localStorage.setItem(key, val),
+        get: (key) => localStorage.getItem(key),
+        clear: () => localStorage.clear()
+    };
 
-    function registerUser() {
+    function checkSession() {
+        const name = storage.get('dg_name');
+        if (name) {
+            document.getElementById('auth-gate').style.display = 'none';
+            document.getElementById('p-name').innerText = name;
+            document.getElementById('p-phone').innerText = storage.get('dg_phone');
+        }
+    }
+
+    function saveUser() {
         const n = document.getElementById('reg-name').value;
-        const t = document.getElementById('reg-tag').value;
-        if(!n || !t) return alert("Введите данные!");
-        myUser.name = n;
-        myUser.tag = t.startsWith('@') ? t : '@' + t;
-        document.getElementById('auth-screen').style.display = 'none';
-        document.getElementById('p-name').innerText = myUser.name;
-        document.getElementById('p-tag').innerText = myUser.tag;
-    }
-
-    function openChat() { document.getElementById('chat-window').style.display = 'flex'; }
-    function closeChat() { document.getElementById('chat-window').style.display = 'none'; }
-
-    function showProfile() { document.getElementById('profile-screen').style.display = 'block'; }
-    function hideProfile() { document.getElementById('profile-screen').style.display = 'none'; }
-
-    // Зміна фону лівої панелі (працює!)
-    function changeBg() {
-        const colors = ['#000', '#0a0a1a', '#1a0a0a', '#0a1a0a', '#111'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        document.documentElement.style.setProperty('--panel', randomColor);
-    }
-
-    function sendMessage() {
-        const inp = document.getElementById('m-input');
-        if(!inp.value.trim()) return;
+        const p = document.getElementById('reg-phone').value;
+        if(n.length < 2 || p.length < 5) return alert("Данные слишком короткие!");
         
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'bubble me';
-        msgDiv.innerHTML = `
-            <small>${myUser.tag}</small>
-            ${inp.value}
-            <div class="react-box">
-                <span class="react" onclick="this.style.opacity=1">💔</span>
-                <span class="react" onclick="this.style.opacity=1">❤️‍🔥</span>
-                <span class="react" onclick="this.style.opacity=1">❤️</span>
-            </div>
-        `;
-        
-        document.getElementById('messages').appendChild(msgDiv);
-        document.getElementById('last-msg').innerText = "Вы: " + inp.value;
-        inp.value = '';
-        const m = document.getElementById('messages');
-        m.scrollTop = m.scrollHeight;
+        storage.save('dg_name', n);
+        storage.save('dg_phone', p);
+        location.reload();
     }
 
-    document.getElementById('m-input').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+    function logout() {
+        if(confirm("Выйти из системы? Все данные будут стерты.")) {
+            storage.clear();
+            location.reload();
+        }
+    }
+
+    function toggleProfile(show) {
+        document.getElementById('profile-overlay').style.display = show ? 'block' : 'none';
+    }
+
+    function changeColor() {
+        const colors = ['#3b82f6', '#ff4d4d', '#4ade80', '#a855f7', '#eab308'];
+        const current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+        let next = colors[(colors.indexOf(current) + 1) % colors.length];
+        document.documentElement.style.setProperty('--accent', next);
+    }
+
+    window.onload = checkSession;
 </script>
 </body>
 </html>
