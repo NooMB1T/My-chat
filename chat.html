@@ -4,63 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="manifest" href="/manifest.json">
-    <title>DoveGram Chat</title>
+    <title>DoveGram 4.8 Midnight</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background: #fff; display: flex; height: 100vh; overflow: hidden; }
-        #s { width: 280px; background: #fff; border-right: 1px solid #eee; position: fixed; left: -280px; top: 0; bottom: 0; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; }
-        #s.o { left: 0; }
-        #ov { position: fixed; inset: 0; background: rgba(0,0,0,0.2); display: none; z-index: 90; }
+        :root { --bg: #0a0a0a; --panel: #141414; --border: #222; --text: #eee; --accent: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Анимации */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Сайдбары */
+        #s, #st_p { width: 300px; background: var(--panel); border-right: 1px solid var(--border); position: fixed; left: -300px; top: 0; bottom: 0; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 100; padding-top: 60px; }
+        #st_p { left: auto; right: -300px; border-left: 1px solid var(--border); border-right: none; }
+        #s.o { left: 0; } #st_p.o { right: 0; }
+        #ov { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 90; backdrop-filter: blur(4px); }
         #ov.o { display: block; }
-        .h { height: 60px; border-bottom: 1px solid #eee; display: flex; align-items: center; padding: 0 20px; background: #fff; font-weight: bold; }
-        #bx { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #fcfcfc; }
-        .mw { max-width: 85%; padding: 12px; border-radius: 16px; background: #fff; border: 1px solid #eee; position: relative; line-height: 1.4; }
-        .mw.me { align-self: flex-end; background: #000; color: #fff; border: none; }
-        .mw.ad { border: 2px solid #000; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .u-n { font-size: 11px; font-weight: bold; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-        .av-s { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
-        .db { color: #ff4d4d; cursor: pointer; font-size: 18px; margin-left: auto; }
-        .b { padding: 15px; display: flex; gap: 10px; background: #fff; border-top: 1px solid #eee; }
-        input { flex: 1; border: 1px solid #eee; padding: 12px 18px; border-radius: 25px; outline: none; background: #f5f5f5; }
-        .btn { background: #000; color: #fff; border: none; padding: 0 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
-        .u-item { padding: 15px; border-bottom: 1px solid #f9f9f9; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+
+        /* Чат */
+        .h { height: 65px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 20px; background: var(--bg); justify-content: space-between; position: sticky; top: 0; }
+        #bx { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: var(--bg); }
+        
+        .mw { max-width: 80%; padding: 12px 16px; border-radius: 18px; background: var(--panel); border: 1px solid var(--border); animation: fadeIn 0.3s ease forwards; position: relative; }
+        .mw.me { align-self: flex-end; background: var(--accent); color: #000; border: none; border-bottom-right-radius: 4px; }
+        .mw.ad { border: 1px solid #ff4d4d; box-shadow: 0 0 15px rgba(255,77,77,0.2); }
+
+        .u-n { font-size: 11px; font-weight: 800; margin-bottom: 5px; opacity: 0.6; display: flex; align-items: center; gap: 8px; }
+        .av-s { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
+        .db { font-size: 18px; cursor: pointer; color: #ff4d4d; margin-left: auto; }
+
+        /* Ввод */
+        .b { padding: 15px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 12px; align-items: center; }
+        input { flex: 1; background: var(--panel); border: 1px solid var(--border); color: #fff; padding: 14px 20px; border-radius: 30px; outline: none; transition: 0.2s; }
+        input:focus { border-color: #444; }
+        .btn-s { background: var(--accent); color: #000; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* Юзеры */
+        .u-card { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
+        .u-card:hover { background: #1a1a1a; }
+        #ty { font-size: 12px; color: #666; padding: 5px 20px; font-style: italic; }
     </style>
 </head>
 <body>
-    <div id="ov" onclick="tm()"></div>
+    <div id="ov" onclick="closeAll()"></div>
+
     <div id="s">
-        <div style="padding:20px; border-bottom:1px solid #eee; font-weight:bold">КОНТАКТЫ</div>
+        <div style="padding: 20px; font-weight: 900; font-size: 20px;">CONTACTS</div>
         <div id="ul"></div>
     </div>
-    <div style="flex:1; display:flex; flex-direction:column;">
-        <div class="h">
-            <span onclick="tm()" style="font-size:24px; cursor:pointer">☰</span>
-            <span style="margin-left:20px">DoveGram</span>
-            <span id="oc" style="margin-left:auto; font-size:10px; opacity:0.5"></span>
-        </div>
-        <div id="bx"></div>
-        <div class="b">
-            <input type="text" id="in" placeholder="Напиши что-нибудь..." autocomplete="off">
-            <button class="btn" onclick="sm()">➔</button>
+
+    <div id="st_p">
+        <div style="padding: 20px;">
+            <h2 style="margin-bottom:20px">SETTINGS</h2>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img id="set_av" style="width:100px; height:100px; border-radius:50%; border:2px solid #fff; object-fit:cover; cursor:pointer" onclick="document.getElementById('f').click()">
+                <input type="file" id="f" hidden accept="image/*" onchange="updAv(this)">
+            </div>
+            <input type="text" id="set_u" placeholder="Nickname">
+            <button onclick="save()" style="width:100%; padding:15px; background:#fff; color:#000; border:none; border-radius:10px; font-weight:bold; cursor:pointer">SAVE</button>
         </div>
     </div>
-    <script>
-        const u = localStorage.getItem('du'), av = localStorage.getItem('da') || '';
-        if(!u) window.location.href='/';
-        const sc = io(); let to = null;
 
-        function tm(){ document.getElementById('s').classList.toggle('o'); document.getElementById('ov').classList.toggle('o'); }
-        function st(n){ to = n; document.getElementById('in').placeholder = `Личное для ${n}...`; tm(); }
+    <div style="flex:1; display:flex; flex-direction:column;">
+        <div class="h">
+            <div onclick="tm('s')" style="cursor:pointer; font-size:24px">☰</div>
+            <div style="letter-spacing: 2px; font-weight: 900;">DOVEGRAM 4.8</div>
+            <div onclick="tm('st_p')" style="cursor:pointer; font-size:20px">⚙</div>
+        </div>
+        <div id="bx"></div>
+        <div id="ty"></div>
+        <div class="b">
+            <input type="text" id="in" placeholder="Write something..." oninput="isTyping()">
+            <button class="btn-s" onclick="sm()">↑</button>
+        </div>
+    </div>
+
+    <script>
+        let u = localStorage.getItem('du'), av = localStorage.getItem('da') || '';
+        if(!u) window.location.href='/';
+        const sc = io(); let to = null, tT = null;
+
+        function tm(id){ document.getElementById(id).classList.toggle('o'); document.getElementById('ov').classList.toggle('o'); }
+        function closeAll(){ document.getElementById('s').classList.remove('o'); document.getElementById('st_p').classList.remove('o'); document.getElementById('ov').classList.remove('o'); }
+        
+        function isTyping() { sc.emit('t', { s: true }); clearTimeout(tT); tT = setTimeout(() => sc.emit('t', { s: false }), 2000); }
+        sc.on('t', (d) => { document.getElementById('ty').innerText = d.s ? `${d.u} печатает...` : ''; });
 
         sc.on('connect', () => sc.emit('j', { u, av }));
         sc.on('ul', (l) => {
-            const users = Object.keys(l);
-            document.getElementById('oc').innerText = users.length + ' ONLINE';
             const c = document.getElementById('ul'); c.innerHTML = '';
-            users.forEach(n => { if(n!==u) c.innerHTML += `<div class="u-item" onclick="st('${n}')"><img src="${l[n].av}" class="av-s">${n}</div>`; });
+            Object.keys(l).forEach(n => { if(n!==u) c.innerHTML += `<div class="u-card" onclick="st('${n}')"><img src="${l[n].av}" class="av-s">${n}</div>`; });
         });
-
+        
         sc.on('hs', (h) => { document.getElementById('bx').innerHTML=''; h.forEach(m=>dr(m)); sl(); });
         sc.on('m', (m) => { dr(m); sl(); });
         sc.on('d', (i) => { const e=document.getElementById(i); if(e) e.remove(); });
@@ -68,22 +103,21 @@
         function dr(d) {
             const w = document.createElement('div'); w.id = d.id;
             w.className = `mw ${d.u===u?'me':''} ${d.u==='NooMB1T'?'ad':''}`;
-            const canDel = (u === 'NooMB1T' || d.u === u); // NooMB1T может удалять всё
-            w.innerHTML = `<div class="u-n"><img src="${d.av}" class="av-s"> ${d.u} ${canDel ? `<span class="db" onclick="sc.emit('d','${d.id}')">×</span>` : ''}</div>
+            const isAdmin = (u === 'NooMB1T' || d.u === u);
+            w.innerHTML = `<div class="u-n"><img src="${d.av}" class="av-s"> ${d.u} ${isAdmin ? `<span class="db" onclick="sc.emit('d','${d.id}')">×</span>` : ''}</div>
                 <div style="word-break:break-all">${d.c}</div>`;
             document.getElementById('bx').appendChild(w);
         }
 
-        function sm() { 
-            const i=document.getElementById('in'); 
-            if(i.value.trim()){ 
-                sc.emit('m',{u, av, c: i.value, to}); 
-                i.value=''; to=null; 
-                document.getElementById('in').placeholder='Напиши что-нибудь...';
-            } 
-        }
-        function sl() { const b=document.getElementById('bx'); b.scrollTop=b.scrollHeight; }
+        function st(n){ to = n; document.getElementById('in').placeholder = `Private to ${n}...`; closeAll(); }
+        function sm(){ const i=document.getElementById('in'); if(i.value.trim()){ sc.emit('m',{u, av, c:i.value, to}); i.value=''; to=null; } }
+        function sl(){ const b=document.getElementById('bx'); b.scrollTop=b.scrollHeight; }
         document.getElementById('in').onkeypress=(e)=>{ if(e.key==='Enter') sm(); };
+
+        // Settings
+        document.getElementById('set_u').value = u; document.getElementById('set_av').src = av;
+        function updAv(i){ const r=new FileReader(); r.onload=(e)=>{ av=e.target.result; document.getElementById('set_av').src=av; }; r.readAsDataURL(i.files[0]); }
+        function save(){ u=document.getElementById('set_u').value; localStorage.setItem('du',u); localStorage.setItem('da',av); location.reload(); }
     </script>
 </body>
 </html>
