@@ -7,50 +7,73 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background: #0f172a; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .h { background: #1e293b; padding: 15px; text-align: center; color: #00ffcc; font-weight: bold; border-bottom: 1px solid #334155; }
-        .ms { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .m { padding: 12px; border-radius: 15px; background: #334155; max-width: 85%; align-self: flex-start; }
-        .my { align-self: flex-end; background: #00ffcc; color: #000; }
-        .b { background: #1e293b; padding: 15px; display: flex; gap: 10px; }
-        input { flex: 1; padding: 12px; border-radius: 20px; border: none; outline: none; }
-        button { padding: 10px 20px; background: #00ffcc; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; }
+        body { 
+            background: #0e1621; 
+            background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
+        }
+        .h { background: #17212b; padding: 12px 20px; display: flex; align-items: center; border-bottom: 1px solid #0e1621; color: #fff; font-weight: bold; font-size: 18px; }
+        .ms { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .m { padding: 8px 12px; border-radius: 12px; max-width: 80%; position: relative; font-size: 15px; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+        .s { align-self: flex-end; background: #2b5278; color: #fff; border-bottom-right-radius: 2px; }
+        .r { align-self: flex-start; background: #182533; color: #fff; border-bottom-left-radius: 2px; }
+        .u-name { font-size: 12px; font-weight: bold; margin-bottom: 2px; color: #5288c1; display: block; }
+        .s .u-name { color: #88b7e8; }
+        .im { max-width: 100%; border-radius: 8px; margin-top: 5px; cursor: pointer; }
+        .b { background: #17212b; padding: 10px; display: flex; gap: 10px; align-items: center; }
+        .ic { background: none; border: none; font-size: 22px; cursor: pointer; color: #708499; }
+        input[type="text"] { flex: 1; padding: 10px 15px; border-radius: 20px; border: none; background: #0e1621; color: #fff; outline: none; font-size: 16px; }
+        .sd { color: #5288c1; border: none; background: none; font-size: 24px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="h">DoveChat 🕊️</div>
+    <div class="h">DoveChat</div>
     <div class="ms" id="box"></div>
     <div class="b">
-        <input type="text" id="i" placeholder="Сообщение..." autocomplete="off">
-        <button onclick="s()">➜</button>
+        <button class="ic" onclick="document.getElementById('fi').click()">📎</button>
+        <input type="file" id="fi" hidden accept="image/*" onchange="si()">
+        <input type="text" id="inp" placeholder="Сообщение..." autocomplete="off">
+        <button class="sd" onclick="sm()">➜</button>
     </div>
     <script>
-        const u = localStorage.getItem('du') || 'Аноним';
-        const socket = io('https://my-chat-swart-two.vercel.app');
+        const u = localStorage.getItem('du') || 'User';
+        const socket = io(); // На Vercel можно оставить пустым, если всё в одном месте
 
         socket.on('history', (h) => {
             document.getElementById('box').innerHTML = '';
-            h.forEach(m => add(m));
+            h.forEach(m => rm(m));
+            sd();
         });
 
-        socket.on('msg', (m) => add(m));
+        socket.on('msg', (m) => { rm(m); sd(); });
 
-        function add(d) {
+        function rm(d) {
             const v = document.createElement('div');
-            v.className = `m ${d.u === u ? 'my' : ''}`;
-            v.innerHTML = `<small style="font-size:10px;display:block;opacity:0.7">${d.u}</small>${d.c}`;
+            v.className = `m ${d.u === u ? 's' : 'r'}`;
+            let content = `<span class="u-name">${d.u}</span>`;
+            if(d.t === 'img') content += `<img src="${d.c}" class="im">`;
+            else content += `<div>${d.c}</div>`;
+            v.innerHTML = content;
             document.getElementById('box').appendChild(v);
-            document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
         }
 
-        function s() {
-            const inp = document.getElementById('i');
-            if(inp.value.trim()) {
-                socket.emit('msg', { u, c: inp.value });
-                inp.value = '';
+        function sm() {
+            const i = document.getElementById('inp');
+            if(i.value.trim()) {
+                socket.emit('msg', { u, t: 'txt', c: i.value });
+                i.value = '';
             }
         }
-        document.getElementById('i').onkeypress = (e) => { if(e.key === 'Enter') s() };
+
+        function si() {
+            const f = document.getElementById('fi').files[0];
+            const r = new FileReader();
+            r.onload = (e) => socket.emit('msg', { u, t: 'img', c: e.target.result });
+            if(f) r.readAsDataURL(f);
+        }
+
+        function sd() { const x = document.getElementById('box'); x.scrollTop = x.scrollHeight; }
+        document.getElementById('inp').onkeypress = (e) => { if(e.key === 'Enter') sm(); };
     </script>
 </body>
 </html>
