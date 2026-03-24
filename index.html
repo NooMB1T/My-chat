@@ -1,74 +1,74 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 6.5 | Core</title>
+    <title>DoveGram 7.0 | Core</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: #fff; }
         body { background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
 
-        /* Экран для незалогиненных */
-        #guest-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        
-        /* Авторизация */
-        #gate { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 6.5</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        :root { --accent: #3b82f6; --bg: #000; --panel: #050505; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: #fff; }
-        body { background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
-
-        /* Заглушка для гостей */
-        #guest { position: fixed; inset: 0; background: #000; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        
-        /* Вход */
+        /* Авторизація */
         #gate { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .g-card { width: 90%; max-width: 360px; text-align: center; }
-        .g-in { width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; background: #0a0a0a; border: 1px solid #1a1a1a; outline: none; }
-        .g-btn { width: 100%; padding: 18px; margin-top: 20px; border-radius: 15px; background: #fff; color: #000; font-weight: 800; border: none; cursor: pointer; }
+        .g-in { width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; background: #0a0a0a; border: 1px solid #1a1a1a; outline: none; transition: 0.3s; }
+        .g-in:focus { border-color: var(--accent); }
+        .g-btn { width: 100%; padding: 18px; margin-top: 20px; border-radius: 15px; background: #fff; color: #000; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; }
+        .g-btn:active { transform: scale(0.98); }
 
         /* UI */
-        #main-view { flex: 1; border-right: 2px solid var(--accent); display: flex; flex-direction: column; background: var(--panel); }
-        .h-title { padding: 35px 25px; font-size: 28px; font-weight: 900; }
-        .c-item { padding: 20px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        #main-view { flex: 1; border-right: 2px solid var(--accent); display: flex; flex-direction: column; background: var(--panel); position: relative; }
+        .h-title { padding: 35px 25px; font-size: 28px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Кнопка додавання чату */
+        .add-chat-btn { background: var(--accent); color: #fff; border: none; padding: 10px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; }
+        .add-chat-btn:hover { filter: brightness(1.2); }
 
+        #chat-list { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+        .c-item { padding: 20px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); transition: 0.2s; }
+        .c-item:hover { background: rgba(255,255,255,0.03); }
+        .c-icon { width: 55px; height: 55px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); font-weight: bold; }
+
+        /* Навігація */
         #nav { width: 90px; display: flex; flex-direction: column; align-items: center; padding-top: 150px; gap: 40px; position: relative; background: #000; }
         .my-av { position: absolute; top: 25px; right: 38px; width: 105px; height: 105px; border-radius: 50%; z-index: 100; object-fit: cover; background: #111; cursor: pointer; }
 
+        /* Профіль */
         #profile { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; padding: 40px 20px; }
+        .uid-badge { background: #111; padding: 8px 15px; border-radius: 10px; font-family: monospace; color: var(--accent); font-size: 18px; margin-top: 10px; display: inline-block; letter-spacing: 2px; }
+
+        /* Модальне вікно додавання */
+        #add-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-box { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 30px; border-radius: 25px; width: 90%; max-width: 380px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="guest">
-    <h2 style="margin-bottom: 20px;">Эй, почему ты до сих пор не здесь?</h2>
-    <p style="color: #444; margin-bottom: 30px;">Присоединяйся к DoveGram 6.5</p>
-    <a href="#" onclick="showLogin()" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 20px;">Зарегистрироваться</a>
-</div>
-
-<div id="gate">
+<div id="gate" style="display: none;">
     <div class="g-card">
-        <h1>DOVEGRAM 6.5</h1>
-        <input type="text" id="n-in" class="g-in" placeholder="Имя профиля">
+        <h1 style="margin-bottom: 10px;">DOVEGRAM</h1>
+        <p style="color: #555; margin-bottom: 30px; font-size: 14px;">Система генерації ID</p>
+        <input type="text" id="n-in" class="g-in" placeholder="Твоє ім'я">
         <input type="text" id="p-in" class="g-in" placeholder="+380 ...">
-        <button class="g-btn" onclick="reg()">ВХОД</button>
+        <button class="g-btn" onclick="reg()">СТВОРИТИ ПРОФІЛЬ</button>
     </div>
 </div>
 
 <div id="main-view">
-    <div class="h-title">Чаты</div>
-    <div class="c-item" onclick="location.href='chat.html'">
-        <div style="width: 55px; height: 55px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; color: var(--accent);"><i class="fas fa-bolt"></i></div>
-        <div style="flex:1"><b>Глобальное ядро</b><br><small style="color:#333" id="typing">никто не пишет...</small></div>
+    <div class="h-title">
+        Чати
+        <button class="add-chat-btn" onclick="openAddModal()"><i class="fas fa-plus"></i> Додати</button>
+    </div>
+    
+    <div id="chat-list">
+        </div>
+    
+    <div id="empty-state" style="text-align: center; margin-top: 50px; color: #444; display: none;">
+        <i class="fas fa-ghost" style="font-size: 40px; margin-bottom: 15px;"></i>
+        <p>У тебе ще немає чатів.</p>
+        <p style="font-size: 12px; margin-top: 5px;">Натисни "Додати", щоб почати.</p>
     </div>
 </div>
 
@@ -76,34 +76,126 @@
 
 <div id="nav">
     <div class="nav-btn" onclick="location.reload()"><i class="fas fa-home" style="font-size: 26px;"></i></div>
-    <div class="nav-btn" onclick="openSet()"><i class="fas fa-cog" style="font-size: 26px;"></i></div>
+    <div class="nav-btn" onclick="openSet()"><i class="fas fa-id-card" style="font-size: 26px;"></i></div>
     <div class="nav-btn" style="margin-top:auto; margin-bottom:40px;" onclick="exit()"><i class="fas fa-power-off" style="color:#300; font-size: 26px;"></i></div>
 </div>
 
 <div id="profile">
-    <i class="fas fa-arrow-left" style="font-size: 24px;" onclick="closeSet()"></i>
+    <i class="fas fa-arrow-left" style="font-size: 24px; cursor: pointer;" onclick="closeSet()"></i>
     <div style="margin-top: 40px; text-align: center;">
         <input type="file" id="up" hidden onchange="changeAv(this)">
-        <img src="" id="p-pre" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover;" onclick="document.getElementById('up').click()">
-        <p style="margin-top: 10px; color: #555;">Нажмите, чтобы сменить фото</p>
+        <img src="" id="p-pre" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; cursor: pointer;" onclick="document.getElementById('up').click()">
+        <h2 id="u-name" style="margin-top: 15px;">---</h2>
+        <div class="uid-badge" id="u-id">ID: ---</div>
     </div>
     <div style="background: #080808; padding: 25px; border-radius: 20px; margin-top: 30px;">
-        <p>Имя: <b id="u-name"></b></p>
-        <p style="margin-top: 15px;">Телефон: <b id="u-phone"></b></p>
+        <p style="color: #888;">Телефон</p>
+        <p style="margin-top: 5px; font-size: 18px;"><b id="u-phone"></b></p>
+    </div>
+</div>
+
+<div id="add-modal">
+    <div class="modal-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3>Новий чат</h3>
+            <i class="fas fa-times" style="cursor: pointer; color: #555; font-size: 20px;" onclick="closeAddModal()"></i>
+        </div>
+        <p style="color: #666; font-size: 13px; margin-bottom: 15px; text-align: left;">Введіть унікальний ID або номер телефону користувача:</p>
+        <input type="text" id="new-chat-input" class="g-in" placeholder="ID (напр. DG-A1B2) або +380...">
+        <input type="text" id="new-chat-name" class="g-in" placeholder="Ім'я контакту (як підписати)">
+        <button class="g-btn" style="background: var(--accent); color: #fff;" onclick="addNewChat()">ДОДАТИ КОНТАКТ</button>
     </div>
 </div>
 
 <script>
+    // Генерація унікального ID
+    function generateUID() {
+        return 'DG-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+    }
+
     function reg() {
         const n = document.getElementById('n-in').value;
         const p = document.getElementById('p-in').value;
         if(n && p) {
             localStorage.setItem('dg_u', n);
             localStorage.setItem('dg_p', p);
+            localStorage.setItem('dg_uid', generateUID());
             localStorage.setItem('dg_a', 'https://i.imgur.com/6VBx3io.png');
+            localStorage.setItem('dg_chats', JSON.stringify([])); // Порожній масив чатів
             location.reload();
         }
     }
+
+    function check() {
+        const u = localStorage.getItem('dg_u');
+        if(!u) { 
+            document.getElementById('gate').style.display = 'flex'; 
+        } else {
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('u-name').innerText = u;
+            document.getElementById('u-phone').innerText = localStorage.getItem('dg_p');
+            document.getElementById('u-id').innerText = 'ID: ' + localStorage.getItem('dg_uid');
+            document.getElementById('avatar').src = localStorage.getItem('dg_a');
+            document.getElementById('p-pre').src = localStorage.getItem('dg_a');
+            loadChats();
+        }
+    }
+
+    function loadChats() {
+        const chats = JSON.parse(localStorage.getItem('dg_chats') || '[]');
+        const list = document.getElementById('chat-list');
+        list.innerHTML = '';
+
+        if(chats.length === 0) {
+            document.getElementById('empty-state').style.display = 'block';
+        } else {
+            document.getElementById('empty-state').style.display = 'none';
+            chats.forEach(chat => {
+                const initial = chat.name.charAt(0).toUpperCase();
+                list.innerHTML += `
+                    <div class="c-item" onclick="openChat('${chat.name}', '${chat.identifier}')">
+                        <div class="c-icon">${initial}</div>
+                        <div style="flex:1">
+                            <b>${chat.name}</b><br>
+                            <small style="color:#555">${chat.identifier}</small>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    function openAddModal() { document.getElementById('add-modal').style.display = 'flex'; }
+    function closeAddModal() { document.getElementById('add-modal').style.display = 'none'; }
+
+    function addNewChat() {
+        const identifier = document.getElementById('new-chat-input').value.trim();
+        const name = document.getElementById('new-chat-name').value.trim();
+        
+        if(!identifier || !name) return alert("Заповніть всі поля!");
+
+        let chats = JSON.parse(localStorage.getItem('dg_chats') || '[]');
+        // Перевірка чи вже є такий чат
+        if(chats.find(c => c.identifier === identifier)) {
+            alert("Цей контакт вже додано!"); return;
+        }
+
+        chats.push({ identifier, name });
+        localStorage.setItem('dg_chats', JSON.stringify(chats));
+        
+        closeAddModal();
+        document.getElementById('new-chat-input').value = '';
+        document.getElementById('new-chat-name').value = '';
+        loadChats();
+    }
+
+    function openChat(name, id) {
+        // Зберігаємо інфо про те, з ким відкриваємо чат, щоб chat.html знав
+        localStorage.setItem('dg_active_chat_name', name);
+        localStorage.setItem('dg_active_chat_id', id);
+        location.href = 'chat.html';
+    }
+
     function changeAv(i) {
         if(i.files[0]) {
             const r = new FileReader();
@@ -115,21 +207,11 @@
             r.readAsDataURL(i.files[0]);
         }
     }
-    function check() {
-        const u = localStorage.getItem('dg_u');
-        if(!u) { document.getElementById('guest').style.display = 'flex'; }
-        else {
-            document.getElementById('gate').style.display = 'none';
-            document.getElementById('u-name').innerText = u;
-            document.getElementById('u-phone').innerText = localStorage.getItem('dg_p');
-            document.getElementById('avatar').src = localStorage.getItem('dg_a');
-            document.getElementById('p-pre').src = localStorage.getItem('dg_a');
-        }
-    }
-    function showLogin() { document.getElementById('guest').style.display = 'none'; }
+
     function openSet() { document.getElementById('profile').style.display = 'block'; }
     function closeSet() { document.getElementById('profile').style.display = 'none'; }
     function exit() { localStorage.clear(); location.reload(); }
+    
     window.onload = check;
 </script>
 </body>
