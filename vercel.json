@@ -1,8 +1,7 @@
 {
   "version": 2,
-  "builds": [{ "src": "server.js", "use": "@vercel/node" }],
-  "routes": [
-    { "src": "/manifest.json", "dest": "/manifest.json" },
-    { "src": "/(.*)", "dest": "server.js" }
+  "rewrites": [
+    { "source": "/chat", "destination": "/chat.html" },
+    { "source": "/(.*)", "destination": "/server.js" }
   ]
 }
