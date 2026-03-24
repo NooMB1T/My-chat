@@ -7,8 +7,8 @@ const path = require('path');
 const app = express();
 app.use(cors());
 
-// Эта строка заставляет сервер "видеть" твои файлы index.html и chat.html
-app.use(express.static(__dirname));
+// Указываем серверу брать статические файлы из текущей папки
+app.use(express.static(path.join(__dirname, '.')));
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
@@ -24,9 +24,14 @@ io.on('connection', (socket) => {
     });
 });
 
-// Эта строка говорит серверу: "Когда заходят на сайт, покажи index.html"
+// Маршрут для главной страницы
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Маршрут для чата (на всякий случай)
+app.get('/chat.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'chat.html'));
 });
 
 const PORT = process.env.PORT || 3000;
