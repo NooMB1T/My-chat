@@ -1,218 +1,337 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 7.0 | Core</title>
+    <title>DoveGram 8.0 SPA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        :root { --accent: #3b82f6; --bg: #000; --panel: #050505; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: #fff; }
-        body { background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
-
-        /* Авторизація */
-        #gate { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .g-card { width: 90%; max-width: 360px; text-align: center; }
-        .g-in { width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; background: #0a0a0a; border: 1px solid #1a1a1a; outline: none; transition: 0.3s; }
-        .g-in:focus { border-color: var(--accent); }
-        .g-btn { width: 100%; padding: 18px; margin-top: 20px; border-radius: 15px; background: #fff; color: #000; font-weight: 800; border: none; cursor: pointer; transition: 0.2s; }
-        .g-btn:active { transform: scale(0.98); }
-
-        /* UI */
-        #main-view { flex: 1; border-right: 2px solid var(--accent); display: flex; flex-direction: column; background: var(--panel); position: relative; }
-        .h-title { padding: 35px 25px; font-size: 28px; font-weight: 900; display: flex; justify-content: space-between; align-items: center; }
+        :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: var(--text); user-select: none; }
+        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* Кнопка додавання чату */
-        .add-chat-btn { background: var(--accent); color: #fff; border: none; padding: 10px 15px; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 14px; transition: 0.2s; }
-        .add-chat-btn:hover { filter: brightness(1.2); }
+        /* Екрани SPA */
+        .screen { display: none; flex-direction: column; height: 100vh; width: 100vw; position: absolute; top: 0; left: 0; background: var(--bg); }
+        .active-screen { display: flex; z-index: 10; }
 
-        #chat-list { flex: 1; overflow-y: auto; padding-bottom: 20px; }
-        .c-item { padding: 20px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); transition: 0.2s; }
-        .c-item:hover { background: rgba(255,255,255,0.03); }
-        .c-icon { width: 55px; height: 55px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--accent); font-weight: bold; }
+        /* Загальні елементи */
+        .header { padding: 20px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; background: #000; z-index: 5; }
+        .btn-icon { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text); padding: 5px; }
+        .input-text { width: 100%; padding: 15px; border-radius: 12px; background: #111; border: 1px solid #222; margin-bottom: 15px; outline: none; transition: 0.3s; }
+        .input-text:focus { border-color: var(--accent); }
+        .btn-primary { width: 100%; padding: 15px; border-radius: 12px; background: var(--accent); color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 10px; }
+        
+        /* Авторизація */
+        #auth-screen { align-items: center; justify-content: center; padding: 20px; }
+        .auth-card { width: 100%; max-width: 350px; background: var(--panel); padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #1a1a1a; }
 
-        /* Навігація */
-        #nav { width: 90px; display: flex; flex-direction: column; align-items: center; padding-top: 150px; gap: 40px; position: relative; background: #000; }
-        .my-av { position: absolute; top: 25px; right: 38px; width: 105px; height: 105px; border-radius: 50%; z-index: 100; object-fit: cover; background: #111; cursor: pointer; }
+        /* Список чатів */
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item { padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #111; cursor: pointer; }
+        .chat-item:hover { background: #111; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: var(--accent); object-fit: cover; }
+        .add-btn { background: var(--accent); color: #fff; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
 
-        /* Профіль */
-        #profile { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; padding: 40px 20px; }
-        .uid-badge { background: #111; padding: 8px 15px; border-radius: 10px; font-family: monospace; color: var(--accent); font-size: 18px; margin-top: 10px; display: inline-block; letter-spacing: 2px; }
+        /* Вікно чату */
+        .chat-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 20px; position: relative; word-wrap: break-word; }
+        .msg.my { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+        .msg.other { align-self: flex-start; background: #1a1a1a; border-bottom-left-radius: 4px; }
+        .msg-time { font-size: 10px; opacity: 0.7; margin-top: 5px; text-align: right; display: block; }
+        
+        .chat-input-area { padding: 15px 20px; background: #000; border-top: 1px solid #1a1a1a; display: flex; gap: 10px; align-items: center; }
+        .chat-input-area input { flex: 1; margin: 0; border-radius: 30px; }
 
-        /* Модальне вікно додавання */
-        #add-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-box { background: #0a0a0a; border: 1px solid #1a1a1a; padding: 30px; border-radius: 25px; width: 90%; max-width: 380px; text-align: center; }
+        /* Модальні вікна */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal { background: var(--panel); padding: 25px; border-radius: 20px; width: 90%; max-width: 350px; border: 1px solid #222; }
+        
+        /* Налаштування */
+        .lang-switch { display: flex; gap: 10px; margin-top: 15px; }
+        .lang-btn { flex: 1; padding: 10px; border-radius: 10px; background: #111; border: 1px solid #333; cursor: pointer; text-align: center; }
+        .lang-btn.active { background: var(--accent); border-color: var(--accent); }
     </style>
 </head>
 <body>
 
-<div id="gate" style="display: none;">
-    <div class="g-card">
-        <h1 style="margin-bottom: 10px;">DOVEGRAM</h1>
-        <p style="color: #555; margin-bottom: 30px; font-size: 14px;">Система генерації ID</p>
-        <input type="text" id="n-in" class="g-in" placeholder="Твоє ім'я">
-        <input type="text" id="p-in" class="g-in" placeholder="+380 ...">
-        <button class="g-btn" onclick="reg()">СТВОРИТИ ПРОФІЛЬ</button>
+<div id="auth-screen" class="screen">
+    <div class="auth-card">
+        <h2 style="margin-bottom: 5px;">DoveGram</h2>
+        <p style="color: #777; margin-bottom: 25px; font-size: 14px;" data-i18n="auth_desc">Создание профиля</p>
+        <input type="text" id="reg-name" class="input-text" placeholder="Имя профиля" data-i18n-ph="ph_name">
+        <input type="text" id="reg-phone" class="input-text" placeholder="+380 ..." data-i18n-ph="ph_phone">
+        <button class="btn-primary" onclick="app.register()" data-i18n="btn_enter">ВОЙТИ</button>
     </div>
 </div>
 
-<div id="main-view">
-    <div class="h-title">
-        Чати
-        <button class="add-chat-btn" onclick="openAddModal()"><i class="fas fa-plus"></i> Додати</button>
-    </div>
-    
-    <div id="chat-list">
+<div id="main-screen" class="screen">
+    <div class="header">
+        <h2 data-i18n="title_chats">Чаты</h2>
+        <div>
+            <button class="add-btn" onclick="app.showModal('add-modal')" data-i18n="btn_add">+ Добавить</button>
+            <button class="btn-icon" style="margin-left: 15px;" onclick="app.showModal('settings-modal')"><i class="fas fa-cog"></i></button>
         </div>
-    
-    <div id="empty-state" style="text-align: center; margin-top: 50px; color: #444; display: none;">
-        <i class="fas fa-ghost" style="font-size: 40px; margin-bottom: 15px;"></i>
-        <p>У тебе ще немає чатів.</p>
-        <p style="font-size: 12px; margin-top: 5px;">Натисни "Додати", щоб почати.</p>
     </div>
+    <div class="chat-list" id="chat-list-container"></div>
 </div>
 
-<img src="https://i.imgur.com/6VBx3io.png" id="avatar" class="my-av" onclick="openSet()">
-
-<div id="nav">
-    <div class="nav-btn" onclick="location.reload()"><i class="fas fa-home" style="font-size: 26px;"></i></div>
-    <div class="nav-btn" onclick="openSet()"><i class="fas fa-id-card" style="font-size: 26px;"></i></div>
-    <div class="nav-btn" style="margin-top:auto; margin-bottom:40px;" onclick="exit()"><i class="fas fa-power-off" style="color:#300; font-size: 26px;"></i></div>
-</div>
-
-<div id="profile">
-    <i class="fas fa-arrow-left" style="font-size: 24px; cursor: pointer;" onclick="closeSet()"></i>
-    <div style="margin-top: 40px; text-align: center;">
-        <input type="file" id="up" hidden onchange="changeAv(this)">
-        <img src="" id="p-pre" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; cursor: pointer;" onclick="document.getElementById('up').click()">
-        <h2 id="u-name" style="margin-top: 15px;">---</h2>
-        <div class="uid-badge" id="u-id">ID: ---</div>
-    </div>
-    <div style="background: #080808; padding: 25px; border-radius: 20px; margin-top: 30px;">
-        <p style="color: #888;">Телефон</p>
-        <p style="margin-top: 5px; font-size: 18px;"><b id="u-phone"></b></p>
-    </div>
-</div>
-
-<div id="add-modal">
-    <div class="modal-box">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3>Новий чат</h3>
-            <i class="fas fa-times" style="cursor: pointer; color: #555; font-size: 20px;" onclick="closeAddModal()"></i>
+<div id="chat-screen" class="screen">
+    <div class="header">
+        <button class="btn-icon" onclick="app.navigate('main-screen')"><i class="fas fa-chevron-left"></i></button>
+        <div style="text-align: center;">
+            <b id="active-chat-name" style="font-size: 16px;">Name</b>
+            <div style="font-size: 12px; color: var(--accent);" id="active-chat-id">ID</div>
         </div>
-        <p style="color: #666; font-size: 13px; margin-bottom: 15px; text-align: left;">Введіть унікальний ID або номер телефону користувача:</p>
-        <input type="text" id="new-chat-input" class="g-in" placeholder="ID (напр. DG-A1B2) або +380...">
-        <input type="text" id="new-chat-name" class="g-in" placeholder="Ім'я контакту (як підписати)">
-        <button class="g-btn" style="background: var(--accent); color: #fff;" onclick="addNewChat()">ДОДАТИ КОНТАКТ</button>
+        <button class="btn-icon" style="opacity: 0;"><i class="fas fa-ellipsis-v"></i></button> </div>
+    <div class="chat-area" id="chat-messages"></div>
+    <div style="text-align: center; font-size: 12px; color: #555; padding-bottom: 5px;" data-i18n="hint_delete">Двойной клик по сообщению для удаления</div>
+    <div class="chat-input-area">
+        <input type="text" id="msg-input" class="input-text" placeholder="Сообщение..." data-i18n-ph="ph_msg">
+        <button class="btn-icon" style="color: var(--accent);" onclick="app.sendMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+</div>
+
+<div id="add-modal" class="modal-overlay">
+    <div class="modal">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3 data-i18n="title_new_chat">Новый чат</h3>
+            <i class="fas fa-times" style="cursor: pointer;" onclick="app.closeModal('add-modal')"></i>
+        </div>
+        <input type="text" id="add-id" class="input-text" placeholder="ID (DG-...) или номер" data-i18n-ph="ph_id">
+        <input type="text" id="add-name" class="input-text" placeholder="Имя контакта" data-i18n-ph="ph_contact">
+        <button class="btn-primary" onclick="app.addChat()" data-i18n="btn_add_contact">Добавить контакт</button>
+    </div>
+</div>
+
+<div id="settings-modal" class="modal-overlay">
+    <div class="modal">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <h3 data-i18n="title_settings">Настройки</h3>
+            <i class="fas fa-times" style="cursor: pointer;" onclick="app.closeModal('settings-modal')"></i>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <img src="https://i.imgur.com/6VBx3io.png" id="my-avatar" class="avatar" style="margin: 0 auto; width: 80px; height: 80px; cursor: pointer;" onclick="document.getElementById('file-upload').click()">
+            <input type="file" id="file-upload" hidden onchange="app.changeAvatar(this)">
+            <h3 id="my-name" style="margin-top: 10px;">---</h3>
+            <div style="background: #111; padding: 5px 10px; border-radius: 8px; display: inline-block; margin-top: 5px; font-family: monospace; color: var(--accent);" id="my-id">---</div>
+        </div>
+
+        <p style="font-size: 14px; color: #888;" data-i18n="lbl_lang">Язык / Мова</p>
+        <div class="lang-switch">
+            <div class="lang-btn" id="lang-ru" onclick="app.setLang('ru')">Русский</div>
+            <div class="lang-btn" id="lang-uk" onclick="app.setLang('uk')">Українська</div>
+        </div>
+
+        <button class="btn-primary" style="background: #300; margin-top: 25px;" onclick="app.logout()" data-i18n="btn_logout">Выйти из аккаунта</button>
     </div>
 </div>
 
 <script>
-    // Генерація унікального ID
-    function generateUID() {
-        return 'DG-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+// --- СЛОВНИК ЛОКАЛІЗАЦІЇ ---
+const dict = {
+    ru: {
+        auth_desc: "Создание профиля", ph_name: "Имя профиля", ph_phone: "+380 ...", btn_enter: "ВОЙТИ",
+        title_chats: "Чаты", btn_add: "+ Добавить", title_new_chat: "Новый чат", ph_id: "ID (DG-...) или номер",
+        ph_contact: "Имя контакта", btn_add_contact: "Добавить контакт", title_settings: "Настройки",
+        lbl_lang: "Язык интерфейса", btn_logout: "Выйти из аккаунта", ph_msg: "Сообщение...", hint_delete: "Двойной клик по сообщению для удаления"
+    },
+    uk: {
+        auth_desc: "Створення профілю", ph_name: "Ім'я профілю", ph_phone: "+380 ...", btn_enter: "УВІЙТИ",
+        title_chats: "Чати", btn_add: "+ Додати", title_new_chat: "Новий чат", ph_id: "ID (DG-...) або номер",
+        ph_contact: "Ім'я контакту", btn_add_contact: "Додати контакт", title_settings: "Налаштування",
+        lbl_lang: "Мова інтерфейсу", btn_logout: "Вийти з акаунту", ph_msg: "Повідомлення...", hint_delete: "Подвійний клік по повідомленню для видалення"
     }
+};
 
-    function reg() {
-        const n = document.getElementById('n-in').value;
-        const p = document.getElementById('p-in').value;
-        if(n && p) {
-            localStorage.setItem('dg_u', n);
-            localStorage.setItem('dg_p', p);
-            localStorage.setItem('dg_uid', generateUID());
-            localStorage.setItem('dg_a', 'https://i.imgur.com/6VBx3io.png');
-            localStorage.setItem('dg_chats', JSON.stringify([])); // Порожній масив чатів
+// --- ОСНОВНА ЛОГІКА ДОДАТКУ ---
+const app = {
+    data: { user: null, chats: [], lang: 'ru' },
+    activeChatId: null,
+
+    init() {
+        const saved = localStorage.getItem('dg_app_data');
+        if (saved) this.data = JSON.parse(saved);
+        
+        // Встановлення мови за замовчуванням
+        if(!this.data.lang) this.data.lang = 'ru';
+        this.applyLang();
+
+        if (!this.data.user) {
+            this.navigate('auth-screen');
+        } else {
+            this.updateProfileUI();
+            this.renderChats();
+            this.navigate('main-screen');
+        }
+
+        // Обробник Enter для повідомлень
+        document.getElementById('msg-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+    },
+
+    save() { localStorage.setItem('dg_app_data', JSON.stringify(this.data)); },
+
+    navigate(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.getElementById(screenId).classList.add('active-screen');
+    },
+
+    showModal(id) { document.getElementById(id).style.display = 'flex'; },
+    closeModal(id) { document.getElementById(id).style.display = 'none'; },
+
+    // --- АВТОРИЗАЦІЯ ---
+    register() {
+        const n = document.getElementById('reg-name').value.trim();
+        const p = document.getElementById('reg-phone').value.trim();
+        if (!n || !p) return alert("Заполните поля!");
+        
+        this.data.user = {
+            name: n, phone: p, id: 'DG-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+            avatar: 'https://i.imgur.com/6VBx3io.png'
+        };
+        this.save();
+        this.init();
+    },
+
+    logout() {
+        if(confirm("Точно выйти?")) {
+            localStorage.removeItem('dg_app_data');
             location.reload();
         }
-    }
+    },
 
-    function check() {
-        const u = localStorage.getItem('dg_u');
-        if(!u) { 
-            document.getElementById('gate').style.display = 'flex'; 
-        } else {
-            document.getElementById('gate').style.display = 'none';
-            document.getElementById('u-name').innerText = u;
-            document.getElementById('u-phone').innerText = localStorage.getItem('dg_p');
-            document.getElementById('u-id').innerText = 'ID: ' + localStorage.getItem('dg_uid');
-            document.getElementById('avatar').src = localStorage.getItem('dg_a');
-            document.getElementById('p-pre').src = localStorage.getItem('dg_a');
-            loadChats();
-        }
-    }
+    // --- ЧАТИ ТА КОНТАКТИ ---
+    addChat() {
+        const id = document.getElementById('add-id').value.trim();
+        const name = document.getElementById('add-name').value.trim();
+        if (!id || !name) return;
+        if (this.data.chats.find(c => c.id === id)) return alert("Уже добавлен!");
 
-    function loadChats() {
-        const chats = JSON.parse(localStorage.getItem('dg_chats') || '[]');
-        const list = document.getElementById('chat-list');
+        this.data.chats.push({ id, name, history: [] });
+        this.save();
+        this.closeModal('add-modal');
+        document.getElementById('add-id').value = '';
+        document.getElementById('add-name').value = '';
+        this.renderChats();
+    },
+
+    renderChats() {
+        const list = document.getElementById('chat-list-container');
         list.innerHTML = '';
+        this.data.chats.forEach(c => {
+            const initial = c.name.charAt(0).toUpperCase();
+            const lastMsg = c.history.length > 0 ? c.history[c.history.length-1].text : '...';
+            
+            const div = document.createElement('div');
+            div.className = 'chat-item';
+            div.innerHTML = `
+                <div class="avatar">${initial}</div>
+                <div style="flex:1; overflow:hidden;">
+                    <b>${c.name}</b>
+                    <p style="font-size: 13px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lastMsg}</p>
+                </div>
+            `;
+            div.onclick = () => this.openChat(c.id);
+            list.appendChild(div);
+        });
+    },
 
-        if(chats.length === 0) {
-            document.getElementById('empty-state').style.display = 'block';
-        } else {
-            document.getElementById('empty-state').style.display = 'none';
-            chats.forEach(chat => {
-                const initial = chat.name.charAt(0).toUpperCase();
-                list.innerHTML += `
-                    <div class="c-item" onclick="openChat('${chat.name}', '${chat.identifier}')">
-                        <div class="c-icon">${initial}</div>
-                        <div style="flex:1">
-                            <b>${chat.name}</b><br>
-                            <small style="color:#555">${chat.identifier}</small>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-    }
+    // --- ВІКНО ПОВІДОМЛЕНЬ ---
+    openChat(chatId) {
+        this.activeChatId = chatId;
+        const chat = this.data.chats.find(c => c.id === chatId);
+        document.getElementById('active-chat-name').innerText = chat.name;
+        document.getElementById('active-chat-id').innerText = chat.id;
+        this.renderMessages();
+        this.navigate('chat-screen');
+    },
 
-    function openAddModal() { document.getElementById('add-modal').style.display = 'flex'; }
-    function closeAddModal() { document.getElementById('add-modal').style.display = 'none'; }
+    sendMessage() {
+        const inp = document.getElementById('msg-input');
+        const text = inp.value.trim();
+        if(!text) return;
 
-    function addNewChat() {
-        const identifier = document.getElementById('new-chat-input').value.trim();
-        const name = document.getElementById('new-chat-name').value.trim();
+        const chat = this.data.chats.find(c => c.id === this.activeChatId);
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         
-        if(!identifier || !name) return alert("Заповніть всі поля!");
+        chat.history.push({ id: Date.now(), text, time, sender: 'my' });
+        this.save();
+        inp.value = '';
+        this.renderMessages();
+        this.renderChats(); // Оновлюємо останнє повідомлення в списку
+    },
 
-        let chats = JSON.parse(localStorage.getItem('dg_chats') || '[]');
-        // Перевірка чи вже є такий чат
-        if(chats.find(c => c.identifier === identifier)) {
-            alert("Цей контакт вже додано!"); return;
-        }
+    deleteMessage(msgId) {
+        if(!confirm("Удалить сообщение? / Видалити повідомлення?")) return;
+        const chat = this.data.chats.find(c => c.id === this.activeChatId);
+        chat.history = chat.history.filter(m => m.id !== msgId);
+        this.save();
+        this.renderMessages();
+        this.renderChats();
+    },
 
-        chats.push({ identifier, name });
-        localStorage.setItem('dg_chats', JSON.stringify(chats));
+    renderMessages() {
+        const box = document.getElementById('chat-messages');
+        box.innerHTML = '';
+        const chat = this.data.chats.find(c => c.id === this.activeChatId);
         
-        closeAddModal();
-        document.getElementById('new-chat-input').value = '';
-        document.getElementById('new-chat-name').value = '';
-        loadChats();
-    }
+        chat.history.forEach(m => {
+            const div = document.createElement('div');
+            div.className = `msg ${m.sender}`;
+            div.innerHTML = `${m.text} <span class="msg-time">${m.time}</span>`;
+            // Видалення по подвійному кліку
+            div.ondblclick = () => this.deleteMessage(m.id);
+            box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+    },
 
-    function openChat(name, id) {
-        // Зберігаємо інфо про те, з ким відкриваємо чат, щоб chat.html знав
-        localStorage.setItem('dg_active_chat_name', name);
-        localStorage.setItem('dg_active_chat_id', id);
-        location.href = 'chat.html';
-    }
+    // --- НАЛАШТУВАННЯ ТА ЛОКАЛІЗАЦІЯ ---
+    updateProfileUI() {
+        document.getElementById('my-name').innerText = this.data.user.name;
+        document.getElementById('my-id').innerText = 'ID: ' + this.data.user.id;
+        document.getElementById('my-avatar').src = this.data.user.avatar;
+    },
 
-    function changeAv(i) {
-        if(i.files[0]) {
+    changeAvatar(input) {
+        if(input.files[0]) {
             const r = new FileReader();
             r.onload = (e) => {
-                localStorage.setItem('dg_a', e.target.result);
-                document.getElementById('avatar').src = e.target.result;
-                document.getElementById('p-pre').src = e.target.result;
+                this.data.user.avatar = e.target.result;
+                this.save();
+                this.updateProfileUI();
             };
-            r.readAsDataURL(i.files[0]);
+            r.readAsDataURL(input.files[0]);
         }
-    }
+    },
 
-    function openSet() { document.getElementById('profile').style.display = 'block'; }
-    function closeSet() { document.getElementById('profile').style.display = 'none'; }
-    function exit() { localStorage.clear(); location.reload(); }
-    
-    window.onload = check;
+    setLang(langCode) {
+        this.data.lang = langCode;
+        this.save();
+        this.applyLang();
+    },
+
+    applyLang() {
+        const l = this.data.lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('lang-' + l).classList.add('active');
+
+        // Переклад тексту
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if(dict[l][key]) el.innerText = dict[l][key];
+        });
+        // Переклад плейсхолдерів
+        document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+            const key = el.getAttribute('data-i18n-ph');
+            if(dict[l][key]) el.placeholder = dict[l][key];
+        });
+    }
+};
+
+window.onload = () => app.init();
 </script>
 </body>
 </html>
