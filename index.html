@@ -5,26 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DoveChat | Login</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background: #0e1621; display: flex; justify-content: center; align-items: center; height: 100vh; color: #fff; }
-        .login-box { background: #17212b; padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h1 { color: #5288c1; margin-bottom: 20px; font-size: 28px; }
-        input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #2b3e51; background: #242f3d; color: #fff; outline: none; margin-bottom: 20px; font-size: 16px; }
-        input:focus { border-color: #5288c1; }
-        button { width: 100%; padding: 14px; border-radius: 10px; border: none; background: #5288c1; color: #fff; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.2s; }
-        button:hover { background: #4676a8; }
+        body { background: #0e1621; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #17212b; padding: 40px; border-radius: 20px; text-align: center; width: 90%; max-width: 350px; }
+        h1 { color: #5288c1; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #2b3e51; background: #242f3d; color: #fff; outline: none; margin-bottom: 20px; }
+        button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: #5288c1; color: #fff; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="login-box">
+    <div class="card">
         <h1>DoveChat</h1>
-        <input type="text" id="u" placeholder="Ваше имя" autocomplete="off">
-        <button onclick="l()">Начать общение</button>
+        <input type="text" id="u" placeholder="Ваш ник..." autocomplete="off">
+        <button onclick="l()">Войти</button>
     </div>
     <script>
         function l() {
             const n = document.getElementById('u').value.trim();
-            if(n) { localStorage.setItem('du', n); window.location.href = 'chat.html'; }
+            if(n) { localStorage.setItem('du', n); window.location.href = '/chat.html'; }
         }
     </script>
 </body>
