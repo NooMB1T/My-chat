@@ -1,42 +1,25 @@
-const e = require('express'), h = require('http'), { Server: S } = require('socket.io'), p = require('path');
-const a = e(), s = h.createServer(a), o = new S(s, { cors: { origin: "*" } });
-a.use(e.static(__dirname));
+const express = require('express'), http = require('http'), { Server } = require('socket.io');
+const app = express(), server = http.createServer(app), io = new Server(server);
 
-let _h = [], _u = {}, _db = {}; 
+app.use(express.static(__dirname));
+let messages = [], users = {};
 
-o.on('connection', (k) => {
-    k.on('j', (d) => {
-        if(!d.ph) return;
-        
-        // Фікс дублів: Видаляємо старий нік, якщо номер той самий
-        for (let name in _db) {
-            if (_db[name].ph === d.ph && name !== d.u) {
-                delete _db[name]; delete _u[name];
-            }
-        }
-
-        k.u = d.u;
-        _u[d.u] = { id: k.id, av: d.av };
-        _db[d.u] = { av: d.av, ph: d.ph }; 
-        
-        o.emit('ul', { online: _u, all: _db });
-        
-        // Синхронізація: Відправляємо історію
-        k.emit('hs', _h);
+io.on('connection', (socket) => {
+    socket.on('join', (data) => {
+        socket.username = data.u;
+        users[data.u] = { id: socket.id, av: data.av, ph: data.ph };
+        io.emit('ul', users);
+        socket.emit('hs', messages);
     });
 
-    k.on('m', (d) => {
-        d.id = 'm_' + Date.now();
-        if(d.to) {
-            const t = _u[d.to];
-            if(t) o.to(t.id).to(k.id).emit('m', d);
-        } else {
-            _h.push(d); if(_h.length > 100) _h.shift();
-            o.emit('m', d);
-        }
+    socket.on('msg', (m) => {
+        messages.push(m);
+        if (messages.length > 50) messages.shift();
+        io.emit('msg', m);
     });
 
-    k.on('d', (i) => { _h = _h.filter(x => x.id !== i); o.emit('d', i); });
-    k.on('disconnect', () => { if(k.u) delete _u[k.u]; o.emit('ul', { online: _u, all: _db }); });
+    socket.on('disconnect', () => {
+        if (socket.username) { delete users[socket.username]; io.emit('ul', users); }
+    });
 });
-s.listen(process.env.PORT || 3000);
+server.listen(3000, () => console.log('DoveGram Live!'));
