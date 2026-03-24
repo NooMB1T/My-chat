@@ -3,81 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DoveGram 6.0 | Core</title>
+    <title>DoveGram 6.5 | Core</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #050505; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; color: #fff; }
         body { background: var(--bg); height: 100vh; display: flex; overflow: hidden; }
 
-        /* Авторизація */
+        /* Экран для незалогиненных */
+        #guest-screen { position: fixed; inset: 0; background: #000; z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        
+        /* Авторизация */
         #gate { position: fixed; inset: 0; background: #000; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .gate-card { width: 90%; max-width: 360px; text-align: center; }
-        .g-input { width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; background: #0a0a0a; border: 1px solid #1a1a1a; outline: none; transition: 0.3s; }
-        .g-input:focus { border-color: var(--accent); }
+        .g-input { width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; background: #0a0a0a; border: 1px solid #1a1a1a; outline: none; }
         .g-btn { width: 100%; padding: 18px; margin-top: 20px; border-radius: 15px; background: #fff; color: #000; font-weight: 800; border: none; cursor: pointer; }
 
-        /* Контент */
+        /* Основной интерфейс */
         #main-side { flex: 1; border-right: 2px solid var(--accent); display: flex; flex-direction: column; background: var(--panel); }
-        .h-title { padding: 35px 25px; font-size: 28px; font-weight: 900; }
+        .h-title { padding: 35px 25px; font-size: 28px; font-weight: 900; display: flex; justify-content: space-between; }
+        .chat-list { flex: 1; overflow-y: auto; }
         .c-item { padding: 20px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.02); }
-        .c-item:hover { background: rgba(255,255,255,0.03); }
-        .c-icon { width: 60px; height: 60px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 24px; }
 
-        /* Бокове меню та Аватарка (БЕЗ КОНТУРУ, на лінії) */
+        /* Навигация */
         #nav-bar { width: 90px; display: flex; flex-direction: column; align-items: center; padding-top: 150px; gap: 40px; position: relative; background: #000; }
-        .main-av { position: absolute; top: 25px; right: 38px; width: 105px; height: 105px; border-radius: 50%; z-index: 100; object-fit: cover; background: #111; cursor: pointer; }
-        .nav-btn { font-size: 26px; color: #1a1a1a; cursor: pointer; transition: 0.3s; }
-        .nav-btn.active, .nav-btn:hover { color: #fff; }
+        .main-av { position: absolute; top: 25px; right: 38px; width: 105px; height: 105px; border-radius: 50%; z-index: 100; object-fit: cover; background: #111; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
 
-        /* Профіль */
         #prof-ui { position: fixed; inset: 0; background: #000; z-index: 8000; display: none; padding: 40px 20px; }
-        .prof-box { background: #050505; padding: 25px; border-radius: 20px; border: 1px solid #111; margin-top: 30px; }
-        .p-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #111; }
     </style>
 </head>
 <body>
 
-<div id="gate">
+<div id="guest-screen">
+    <h2 style="margin-bottom: 20px;">Эй, почему ты до сих пор не здесь?</h2>
+    <p style="color: #444; margin-bottom: 30px;">Присоединяйся к DoveGram 6.5</p>
+    <a href="#" onclick="showGate()" style="color: var(--accent); text-decoration: none; font-weight: bold; font-size: 20px;">Зарегистрироваться</a>
+</div>
+
+<div id="gate" style="display: none;">
     <div class="gate-card">
-        <h1 style="font-size: 36px; margin-bottom: 30px; letter-spacing: -1px;">DOVEGRAM 6.0</h1>
-        <input type="text" id="in-name" class="g-input" placeholder="Введите имя">
+        <h1>DOVEGRAM 6.5</h1>
+        <input type="text" id="in-name" class="g-input" placeholder="Имя профиля">
         <input type="text" id="in-phone" class="g-input" placeholder="+380 ...">
-        <button class="g-btn" onclick="save()">ВХОД</button>
+        <button class="g-btn" onclick="save()">ВОЙТИ</button>
     </div>
 </div>
 
 <div id="main-side">
-    <div class="h-title">Чаты</div>
-    <div class="c-item" onclick="location.href='chat.html'">
-        <div class="c-icon"><i class="fas fa-bolt"></i></div>
-        <div style="flex:1">
-            <div style="display:flex; justify-content:space-between"><b>Глобальное ядро</b> <small style="color:#222">online</small></div>
-            <p style="color:#444; font-size:14px; margin-top:4px;">(Начало общения)</p>
+    <div class="h-title">Чаты <i class="fas fa-users" style="font-size: 18px; color: #222;" title="Синхронизация контактов"></i></div>
+    <div class="chat-list">
+        <div class="c-item" onclick="location.href='chat.html'">
+            <div style="width: 55px; height: 55px; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; color: var(--accent);"><i class="fas fa-bolt"></i></div>
+            <div style="flex:1"><b>Глобальное ядро</b><br><small style="color:#333" id="typing-status">никто не пишет...</small></div>
         </div>
     </div>
 </div>
 
-<img src="https://i.imgur.com/6VBx3io.png" class="main-av" onclick="openP()">
+<img src="https://i.imgur.com/6VBx3io.png" id="user-avatar" class="main-av" onclick="openP()">
 
 <div id="nav-bar">
-    <div class="nav-btn active"><i class="fas fa-comment-dots"></i></div>
+    <div class="nav-btn" onclick="location.reload()"><i class="fas fa-home"></i></div>
     <div class="nav-btn" onclick="openP()"><i class="fas fa-cog"></i></div>
-    <div class="nav-btn" onclick="theme()"><i class="fas fa-palette"></i></div>
-    <div class="nav-btn" style="margin-top:auto; margin-bottom:40px;" onclick="exit()">
-        <i class="fas fa-power-off" style="color:#300"></i>
-    </div>
+    <div class="nav-btn" style="margin-top:auto; margin-bottom:40px;" onclick="exit()"><i class="fas fa-power-off" style="color:#300"></i></div>
 </div>
 
 <div id="prof-ui">
-    <div style="display:flex; align-items:center; gap:20px;">
-        <i class="fas fa-arrow-left" style="font-size:24px;" onclick="closeP()"></i>
-        <h2>Настройки</h2>
+    <i class="fas fa-arrow-left" onclick="closeP()"></i>
+    <div style="margin-top: 40px; text-align: center;">
+        <input type="file" id="av-change" hidden onchange="updateAv(this)">
+        <img src="" id="p-av-preview" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; cursor: pointer;" onclick="document.getElementById('av-change').click()">
+        <p style="margin-top: 10px; color: #555;">Нажмите на фото, чтобы изменить</p>
     </div>
-    <div class="prof-box">
-        <div class="p-row"><span>Имя</span> <b id="p-n">---</b></div>
-        <div class="p-row"><span>Телефон</span> <b id="p-p">---</b></div>
-        <div class="p-row" style="border:none; color:#ff4d4d; margin-top:20px; cursor:pointer" onclick="exit()"><b>Выйти из аккаунта</b></div>
+    <div style="background: #080808; padding: 20px; border-radius: 20px; margin-top: 30px;">
+        <p>Имя: <b id="p-n"></b></p>
+        <p style="margin-top: 15px;">Телефон: <b id="p-p"></b></p>
     </div>
 </div>
 
@@ -85,26 +84,40 @@
     function save() {
         const n = document.getElementById('in-name').value;
         const p = document.getElementById('in-phone').value;
-        if(!n || !p) return;
-        localStorage.setItem('dg_user', n);
-        localStorage.setItem('dg_phone', p);
-        location.reload();
+        if(n && p) {
+            localStorage.setItem('dg_user', n);
+            localStorage.setItem('dg_phone', p);
+            localStorage.setItem('dg_av', 'https://i.imgur.com/6VBx3io.png');
+            location.reload();
+        }
+    }
+    function updateAv(input) {
+        if(input.files[0]) {
+            const r = new FileReader();
+            r.onload = (e) => {
+                localStorage.setItem('dg_av', e.target.result);
+                document.getElementById('user-avatar').src = e.target.result;
+                document.getElementById('p-av-preview').src = e.target.result;
+            };
+            r.readAsDataURL(input.files[0]);
+        }
     }
     function check() {
         const u = localStorage.getItem('dg_user');
-        if(u) {
+        if(!u) {
+            document.getElementById('guest-screen').style.display = 'flex';
+        } else {
             document.getElementById('gate').style.display = 'none';
             document.getElementById('p-n').innerText = u;
             document.getElementById('p-p').innerText = localStorage.getItem('dg_phone');
+            document.getElementById('user-avatar').src = localStorage.getItem('dg_av');
+            document.getElementById('p-av-preview').src = localStorage.getItem('dg_av');
         }
     }
-    function exit() { localStorage.clear(); location.reload(); }
+    function showGate() { document.getElementById('guest-screen').style.display = 'none'; document.getElementById('gate').style.display = 'flex'; }
     function openP() { document.getElementById('prof-ui').style.display = 'block'; }
     function closeP() { document.getElementById('prof-ui').style.display = 'none'; }
-    function theme() {
-        const c = ['#3b82f6', '#ff4d4d', '#4ade80', '#eab308'];
-        document.documentElement.style.setProperty('--accent', c[Math.floor(Math.random()*c.length)]);
-    }
+    function exit() { localStorage.clear(); location.reload(); }
     window.onload = check;
 </script>
 </body>
