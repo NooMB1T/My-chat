@@ -3,136 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DoveGram 0.25</title>
+    <title>DoveGram 0.26</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; --msg-my: #2563eb; --msg-other: #1a1a1a; --border: #111; }
         body.light { --bg: #f0f2f5; --panel: #fff; --text: #000; --msg-other: #e4e6eb; --border: #ddd; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Интерфейс */
+        /* Sidebar */
         #app-core { display: none; flex: 1; width: 100vw; flex-direction: row; }
         .main-view { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
-        .side-icons { width: 70px; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 30px; background: var(--panel); border-left: 1px solid var(--border); }
-        .side-icons i { font-size: 22px; color: #666; cursor: pointer; padding: 10px; transition: 0.2s; }
-        .side-icons i:hover { color: var(--accent); }
+        .side-icons { width: 65px; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 25px; background: var(--panel); border-left: 1px solid var(--border); }
+        .side-icons i { font-size: 20px; color: #555; cursor: pointer; padding: 10px; transition: 0.2s; }
+        .side-icons i:hover { color: var(--accent); transform: scale(1.1); }
+        .side-icons i.active { color: var(--accent); }
 
-        /* Экраны */
-        .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; overflow-y: auto; }
+        /* Screens */
+        .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; }
         .screen.active { display: flex; }
 
-        /* UI Элементы */
-        .input-ui { width: 100%; padding: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--text); outline: none; margin-bottom: 12px; }
+        /* UI */
+        .input-ui { width: 100%; padding: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--text); outline: none; margin-bottom: 10px; }
         .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; color: #fff; cursor: pointer; }
         
-        /* Список пользователей */
         .user-row { padding: 12px 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
         .user-row:hover { background: var(--panel); }
-        .user-row img, .user-row .ava-plug { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .global-tag { background: #f59e0b; color: #000; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; }
+        .user-row img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--border); }
+        .ava-plug { width: 45px; height: 45px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
 
-        /* Сообщения */
+        /* Chat */
         #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; line-height: 1.4; }
+        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; }
         .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
         .bubble.other { align-self: flex-start; background: var(--msg-other); border-bottom-left-radius: 4px; }
-        .msg-info { font-size: 10px; opacity: 0.6; margin-top: 4px; text-align: right; }
-        .msg-author { font-size: 11px; font-weight: bold; color: var(--accent); margin-bottom: 4px; }
         .react-badge { position: absolute; bottom: -10px; right: 10px; background: var(--panel); border: 1px solid var(--border); padding: 2px 5px; border-radius: 10px; font-size: 12px; }
+        .msg-author { font-size: 11px; font-weight: bold; color: var(--accent); margin-bottom: 3px; }
     </style>
 </head>
 <body class="dark">
 
 <div id="scr-auth" class="screen active" style="justify-content: center; align-items: center;">
-    <div style="width: 100%; max-width: 320px; text-align: center;">
-        <h1 style="margin-bottom:30px; letter-spacing: -1px;">DoveGram <span style="color:var(--accent)">0.25</span></h1>
-        <input type="text" id="reg-id" class="input-ui" placeholder="@ID (латиница)">
-        <input type="text" id="reg-name" class="input-ui" placeholder="Ваше Имя">
-        <input type="text" id="reg-phone" class="input-ui" placeholder="Номер телефона">
+    <div style="width: 100%; max-width: 300px; text-align: center;">
+        <h1 style="margin-bottom:25px;">DoveGram <span style="color:var(--accent)">0.26</span></h1>
+        <input type="text" id="reg-id" class="input-ui" placeholder="@ID">
+        <input type="text" id="reg-name" class="input-ui" placeholder="Имя">
+        <input type="text" id="reg-phone" class="input-ui" placeholder="Номер">
         <button onclick="app.fastAuth()" class="btn-ui">ВОЙТИ</button>
     </div>
 </div>
 
 <div id="app-core">
     <div class="main-view">
-        <div style="padding: 15px; border-bottom: 1px solid var(--border); display: flex; gap: 10px;">
-            <input type="text" id="search-input" class="input-ui" style="margin:0" placeholder="Поиск по ID или имени..." oninput="app.search()">
+        <div style="padding: 15px; border-bottom: 1px solid var(--border);">
+            <input type="text" id="search-input" class="input-ui" style="margin:0" placeholder="Поиск..." oninput="app.search()">
         </div>
         <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
     </div>
-    
     <div class="side-icons">
-        <i class="fas fa-cog" onclick="app.nav('scr-settings')"></i>
+        <i class="fas fa-home" onclick="app.nav('close')" title="Главная"></i>
+        <i class="fas fa-globe" onclick="app.openChat({id:'global', name:'Глобальный чат'})" title="Глобал"></i>
         <i class="fas fa-search" onclick="document.getElementById('search-input').focus()"></i>
-        <i class="fas fa-shield-alt" id="dev-btn" style="display:none; color: #ef4444;" onclick="app.showAdmin()"></i>
+        <i class="fas fa-cog" onclick="app.nav('scr-settings')"></i>
+        <i class="fas fa-shield-alt" id="dev-btn" style="display:none; color:#ef4444" onclick="app.showAdmin()"></i>
         <i class="fas fa-user-circle" onclick="app.showMe()"></i>
     </div>
 </div>
 
-<div id="scr-profile" class="screen">
-    <i class="fas fa-chevron-left" onclick="app.nav('close')" style="font-size: 20px; cursor:pointer;"></i>
-    <div style="text-align: center; margin-top: 30px;">
-        <img id="prof-ava" src="" style="width:130px; height:130px; border-radius:50%; object-fit:cover; border: 4px solid var(--accent); background: var(--panel);">
-        <h2 id="prof-name" style="margin-top:15px;">Имя</h2>
-        <p id="prof-id" style="opacity: 0.5; font-size: 14px;"></p>
-        <p id="prof-phone" style="margin-top:10px; font-weight: bold; color: var(--accent);"></p>
-    </div>
-</div>
-
+<div id="scr-profile" class="screen"><i class="fas fa-times" onclick="app.nav('close')"></i><div id="prof-cont" style="text-align:center;margin-top:40px"></div></div>
 <div id="scr-settings" class="screen">
-    <div style="display:flex; align-items:center; gap: 15px; margin-bottom: 30px;">
-        <i class="fas fa-chevron-left" onclick="app.nav('close')" style="cursor:pointer;"></i>
-        <h2>Настройки</h2>
+    <i class="fas fa-times" onclick="app.nav('close')" style="margin-bottom:20px"></i>
+    <h2>Настройки</h2>
+    <div style="text-align:center; margin: 20px 0;">
+        <img id="set-ava" style="width:100px; height:100px; border-radius:50%; object-fit:cover; background:var(--panel);">
+        <br><button class="btn-ui" style="width:auto; margin-top:10px;" onclick="document.getElementById('f-ava').click()">Сменить фото</button>
+        <input type="file" id="f-ava" hidden accept="image/*" onchange="app.updAva(this)">
     </div>
-    <div style="text-align: center; margin-bottom: 30px;">
-        <img id="set-ava-preview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; background: var(--panel);">
-        <br><br>
-        <button class="btn-ui" style="background: var(--panel); border: 1px solid var(--border); width: auto; padding: 10px 20px;" onclick="document.getElementById('ava-upload').click()">Сменить аватар</button>
-        <input type="file" id="ava-upload" hidden accept="image/*" onchange="app.updateAva(this)">
-    </div>
-    <button class="btn-ui" style="background: var(--panel); border: 1px solid var(--border); margin-bottom: 12px;" onclick="app.toggleTheme()">Переключить тему</button>
-    <button class="btn-ui" style="background: #ef4444;" onclick="app.logout()">Выйти из системы</button>
+    <button class="btn-ui" style="background:var(--panel); border:1px solid var(--border); margin-bottom:10px" onclick="app.theme()">Сменить тему</button>
+    <button class="btn-ui" style="background:#ef4444" onclick="app.logout()">Выйти</button>
 </div>
+<div id="scr-admin" class="screen"><i class="fas fa-times" onclick="app.nav('close')"></i><h2 style="color:#ef4444; margin:20px 0">Пользователи</h2><div id="admin-list"></div></div>
 
 <div id="scr-chat" class="screen" style="padding:0; overflow:hidden;">
     <div style="padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border);">
-        <i class="fas fa-chevron-left" onclick="app.closeChat()" style="cursor:pointer; font-size: 20px;"></i>
-        <img id="chat-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background: var(--bg);">
-        <div>
-            <b id="chat-name">Имя</b>
-            <div id="chat-status" style="font-size: 11px; color: var(--accent);"></div>
-        </div>
+        <i class="fas fa-chevron-left" onclick="app.closeChat()" style="cursor:pointer;"></i>
+        <img id="chat-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+        <b id="chat-name">Чат</b>
     </div>
-    
     <div id="msg-box"></div>
-    
-    <div id="react-panel" style="display:none; padding:12px; justify-content:center; gap:25px; background:var(--panel); border-top: 1px solid var(--border);">
-        <span onclick="app.react('❤️‍🔥')" style="font-size: 24px; cursor:pointer;">❤️‍🔥</span>
-        <span onclick="app.react('💔')" style="font-size: 24px; cursor:pointer;">💔</span>
-        <span onclick="app.react('👍')" style="font-size: 24px; cursor:pointer;">👍</span>
-        <span onclick="app.react('🤣')" style="font-size: 24px; cursor:pointer;">🤣</span>
+    <div id="react-panel" style="display:none; padding:10px; justify-content:center; gap:30px; background:var(--panel); border-top:1px solid var(--border);">
+        <span onclick="app.react('❤️‍🔥')" style="font-size:24px; cursor:pointer;">❤️‍🔥</span>
+        <span onclick="app.react('💔')" style="font-size:24px; cursor:pointer;">💔</span>
+        <span onclick="app.react('❤️')" style="font-size:24px; cursor:pointer;">❤️</span>
     </div>
-
     <div style="padding:15px; display:flex; gap:12px; align-items:center; background:var(--panel); border-top: 1px solid var(--border);">
-        <i class="fas fa-image" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="document.getElementById('img-send').click()"></i>
-        <input type="file" id="img-send" hidden accept="image/*" onchange="app.sendImg(this)">
-        <input type="text" id="msg-input" class="input-ui" style="margin:0; flex:1;" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') app.sendMsg()">
-        <i class="fas fa-paper-plane" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="app.sendMsg()"></i>
+        <i class="fas fa-camera" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="document.getElementById('f-img').click()"></i>
+        <input type="file" id="f-img" hidden accept="image/*" onchange="app.sendImg(this)">
+        <input type="text" id="msg-in" class="input-ui" style="margin:0; flex:1;" placeholder="Текст..." onkeydown="if(event.key==='Enter') app.sendT()">
+        <i class="fas fa-paper-plane" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="app.sendT()"></i>
     </div>
-</div>
-
-<div id="scr-admin" class="screen">
-    <i class="fas fa-chevron-left" onclick="app.nav('close')" style="cursor:pointer; margin-bottom:20px;"></i>
-    <h2 style="color:#ef4444; margin-bottom:20px;">Все пользователи (@dev)</h2>
-    <div id="admin-list"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, update, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const firebaseConfig = {
+const cfg = {
     apiKey: "AIzaSyCuo7GtLDVE6ERb8MOke97mFa08M3oZoV8",
     authDomain: "dove-7ea6d.firebaseapp.com",
     projectId: "dove-7ea6d",
@@ -140,64 +116,54 @@ const firebaseConfig = {
     appId: "1:747559004808:web:f80e792795e5b3b4758d3d"
 };
 
-const f_app = initializeApp(firebaseConfig);
+const f_app = initializeApp(cfg);
 const db = getDatabase(f_app);
 
 window.app = {
     user: null, peer: null, lastM: null, chatRef: null,
     
     init() {
-        const saved = localStorage.getItem('dove_v25');
-        if(saved) { this.user = JSON.parse(saved); this.launch(); }
+        const s = localStorage.getItem('dv_26');
+        if(s) { this.user = JSON.parse(s); this.start(); }
     },
 
     fastAuth() {
         const id = document.getElementById('reg-id').value.trim().toLowerCase();
         const nm = document.getElementById('reg-name').value.trim();
-        const ph = document.getElementById('reg-phone').value.replace(/\D/g, ''); // Только цифры
-
-        if(!id || !nm || !ph) return alert("Заполни все поля!");
-
-        if(id === 'dev' && ph !== '380685244936') {
-            return alert("ID @dev зарезервирован для владельца.");
-        }
-
+        const ph = document.getElementById('reg-phone').value.replace(/\D/g, '');
+        if(!id || !nm || !ph) return alert("Заполни всё!");
+        if(id === 'dev' && ph !== '380685244936') return alert("Доступ закрыт.");
+        
         this.user = { id, name: nm, phone: ph, ava: '', theme: 'dark' };
         set(ref(db, 'users/' + id), this.user);
-        localStorage.setItem('dove_v25', JSON.stringify(this.user));
-        this.launch();
+        localStorage.setItem('dv_26', JSON.stringify(this.user));
+        this.start();
     },
 
-    launch() {
+    start() {
         document.getElementById('scr-auth').classList.remove('active');
         document.getElementById('app-core').style.display = 'flex';
         if(this.user.id === 'dev') document.getElementById('dev-btn').style.display = 'block';
         document.body.className = this.user.theme || 'dark';
-        this.loadList();
+        this.loadUsers();
     },
 
-    loadList() {
+    loadUsers() {
         onValue(ref(db, 'users'), (snap) => {
             const list = document.getElementById('contacts-list');
-            list.innerHTML = '';
-            
-            // Глобальный чат (всегда сверху)
-            const gRow = document.createElement('div');
-            gRow.className = 'user-row';
-            gRow.onclick = () => this.openChat({ id: 'global', name: 'Глобальный чат' });
-            gRow.innerHTML = `<div class="ava-plug" style="background:var(--accent); color:#fff"><i class="fas fa-globe"></i></div>
-                              <div><b>Глобальный чат</b><span class="global-tag">LIVE</span><br><small style="color:#777">Видно всем</small></div>`;
-            list.appendChild(gRow);
-
+            list.innerHTML = `<div class="user-row" onclick="app.openChat({id:'global', name:'Глобальный чат'})">
+                <div class="ava-plug"><i class="fas fa-globe"></i></div>
+                <div><b>Глобальный чат</b><br><small style="color:var(--accent)">Виден всем</small></div>
+            </div>`;
             const data = snap.val() || {};
             Object.values(data).forEach(u => {
                 if(u.id !== this.user.id) {
-                    const row = document.createElement('div');
-                    row.className = 'user-row';
-                    row.onclick = () => this.openChat(u);
-                    row.innerHTML = `<img src="${u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}">
-                                     <div><b>${u.name}</b><br><small style="color:#777">@${u.id}</small></div>`;
-                    list.appendChild(row);
+                    const r = document.createElement('div');
+                    r.className = 'user-row';
+                    r.onclick = () => this.openChat(u);
+                    r.innerHTML = `<img src="${u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}">
+                                   <div><b>${u.name}</b><br><small style="color:#777">@${u.id}</small></div>`;
+                    list.appendChild(r);
                 }
             });
         });
@@ -208,17 +174,13 @@ window.app = {
         document.getElementById('chat-name').innerText = u.name;
         document.getElementById('chat-ava').src = u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
         this.nav('scr-chat');
-
         if (this.chatRef) off(this.chatRef);
-        
-        // Путь для чата: или 'global', или отсортированные ID для лички
         const path = u.id === 'global' ? 'global' : [this.user.id, u.id].sort().join('_');
         this.chatRef = ref(db, 'msgs/' + path);
-        
-        onValue(this.chatRef, (s) => this.render(s.val()));
+        onValue(this.chatRef, (s) => this.draw(s.val()));
     },
 
-    render(data) {
+    draw(data) {
         const box = document.getElementById('msg-box');
         box.innerHTML = ''; if(!data) return;
         Object.entries(data).forEach(([key, m]) => {
@@ -226,44 +188,39 @@ window.app = {
             const b = document.createElement('div');
             b.className = `bubble ${isMe ? 'my' : 'other'}`;
             b.onclick = () => { this.lastM = key; document.getElementById('react-panel').style.display='flex'; };
-            
-            let html = '';
-            if(this.peer.id === 'global' && !isMe) html += `<div class="msg-author">${m.sn || 'User'}</div>`;
-            if(m.img) html += `<img src="${m.img}" style="width:100%; border-radius:12px; margin-bottom:5px;">`;
-            if(m.t) html += `<div>${m.t}</div>`;
-            html += `<div class="msg-info">${m.time}</div>`;
-            if(m.r) html += `<div class="react-badge">${m.r}</div>`;
-            
-            b.innerHTML = html;
-            box.appendChild(b);
+            let h = '';
+            if(this.peer.id === 'global' && !isMe) h += `<div class="msg-author">${m.sn}</div>`;
+            if(m.img) h += `<img src="${m.img}" style="width:100%; border-radius:10px; margin-bottom:5px;">`;
+            if(m.t) h += `<div>${m.t}</div>`;
+            h += `<div style="font-size:9px; opacity:0.5; text-align:right;">${m.time}</div>`;
+            if(m.r) h += `<div class="react-badge">${m.r}</div>`;
+            b.innerHTML = h; box.appendChild(b);
         });
         box.scrollTop = box.scrollHeight;
     },
 
-    sendMsg() {
-        const i = document.getElementById('msg-input');
+    sendT() {
+        const i = document.getElementById('msg-in');
         if(!i.value.trim()) return;
-        this.pushMsg({ t: i.value });
-        i.value = '';
+        this.push({ t: i.value }); i.value = '';
     },
 
     sendImg(input) {
         if(input.files[0]) {
             const r = new FileReader();
-            r.onload = (e) => this.pushMsg({ img: e.target.result });
+            r.onload = (e) => this.push({ img: e.target.result });
             r.readAsDataURL(input.files[0]);
         }
     },
 
-    pushMsg(obj) {
+    push(obj) {
         const path = this.peer.id === 'global' ? 'global' : [this.user.id, this.peer.id].sort().join('_');
-        const m = { ...obj, s: this.user.id, sn: this.user.name, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-        push(ref(db, 'msgs/' + path), m);
+        push(ref(db, 'msgs/' + path), { ...obj, s: this.user.id, sn: this.user.name, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
     },
 
-    react(emoji) {
+    react(e) {
         const path = this.peer.id === 'global' ? 'global' : [this.user.id, this.peer.id].sort().join('_');
-        update(ref(db, `msgs/${path}/${this.lastM}`), { r: emoji });
+        update(ref(db, `msgs/${path}/${this.lastM}`), { r: e });
         document.getElementById('react-panel').style.display = 'none';
     },
 
@@ -275,37 +232,35 @@ window.app = {
     closeChat() { if(this.chatRef) off(this.chatRef); this.nav('close'); },
 
     showMe() {
-        document.getElementById('prof-ava').src = this.user.ava || '';
-        document.getElementById('prof-name').innerText = this.user.name;
-        document.getElementById('prof-id').innerText = '@' + this.user.id;
-        document.getElementById('prof-phone').innerText = '+' + this.user.phone;
+        document.getElementById('prof-cont').innerHTML = `
+            <img src="${this.user.ava}" style="width:120px;height:120px;border-radius:50%;border:3px solid var(--accent)">
+            <h2>${this.user.name}</h2><p>@${this.user.id}</p><p>${this.user.phone}</p>`;
         this.nav('scr-profile');
     },
 
-    updateAva(input) {
+    updAva(input) {
         if(input.files[0]) {
             const r = new FileReader();
             r.onload = (e) => {
                 this.user.ava = e.target.result;
-                document.getElementById('set-ava-preview').src = e.target.result;
                 update(ref(db, 'users/' + this.user.id), { ava: e.target.result });
-                localStorage.setItem('dove_v25', JSON.stringify(this.user));
+                localStorage.setItem('dv_26', JSON.stringify(this.user));
+                document.getElementById('set-ava').src = e.target.result;
             };
             r.readAsDataURL(input.files[0]);
         }
     },
 
-    toggleTheme() {
+    theme() {
         this.user.theme = this.user.theme === 'dark' ? 'light' : 'dark';
         document.body.className = this.user.theme;
         update(ref(db, 'users/' + this.user.id), { theme: this.user.theme });
-        localStorage.setItem('dove_v25', JSON.stringify(this.user));
+        localStorage.setItem('dv_26', JSON.stringify(this.user));
     },
 
     search() {
         const q = document.getElementById('search-input').value.toLowerCase();
-        const rows = document.querySelectorAll('.user-row');
-        rows.forEach(r => {
+        document.querySelectorAll('.user-row').forEach(r => {
             r.style.display = r.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
         });
     },
@@ -320,13 +275,12 @@ window.app = {
                 r.innerHTML = `<img src="${u.ava || ''}"><div><b>${u.name}</b> (@${u.id})<br><small>${u.phone}</small></div>`;
                 list.appendChild(r);
             });
-        }, {onlyOnce: true});
+        });
         this.nav('scr-admin');
     },
 
     logout() { localStorage.clear(); location.reload(); }
 };
-
 app.init();
 </script>
 </body>
