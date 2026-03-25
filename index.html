@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DoveGram 0.27</title>
+    <title>DoveGram 0.28</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; --msg-my: #2563eb; --msg-other: #1a1a1a; --border: #111; }
-        body.light { --bg: #f0f2f5; --panel: #fff; --text: #000; --msg-other: #e4e6eb; --border: #ddd; }
+        body.light { --bg: #f5f5f5; --panel: #fff; --text: #000; --msg-other: #e4e6eb; --border: #ddd; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; transition: 0.3s; }
 
         /* Sidebar & Layout */
-        #app-core { display: none; flex: 1; width: 100vw; flex-direction: row; }
+        #app-core { display: none; flex: 1; height: 100vh; flex-direction: row; }
         .main-view { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
-        .side-icons { width: 65px; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 25px; background: var(--panel); border-left: 1px solid var(--border); }
-        .side-icons i { font-size: 20px; color: #555; cursor: pointer; padding: 10px; transition: 0.2s; }
-        .side-icons i:hover { color: var(--accent); }
+        .side-icons { width: 65px; display: flex; flex-direction: column; align-items: center; padding-top: 25px; gap: 30px; background: var(--panel); border-left: 1px solid var(--border); }
+        .side-icons i { font-size: 20px; color: #444; cursor: pointer; transition: 0.2s; }
+        .side-icons i:hover, .side-icons i.active { color: var(--accent); }
 
         /* Screens */
-        .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; }
+        .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; }
         .screen.active { display: flex; }
 
         /* UI */
@@ -27,83 +27,93 @@
         .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; color: #fff; cursor: pointer; }
         
         .user-row { padding: 12px 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
-        .user-row:hover { background: var(--panel); }
-        .user-row img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--border); }
-        .ava-plug { width: 45px; height: 45px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; }
+        .user-row img, .ava-p { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--border); }
+        .ava-p { background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; }
 
-        /* Chat */
-        #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; }
+        /* Chat Components */
+        #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; animation: pop 0.2s ease-out; }
+        @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
         .bubble.other { align-self: flex-start; background: var(--msg-other); border-bottom-left-radius: 4px; }
-        .react-badge { position: absolute; bottom: -10px; right: 10px; background: var(--panel); border: 1px solid var(--border); padding: 2px 5px; border-radius: 10px; font-size: 11px; }
-        .msg-author { font-size: 11px; font-weight: bold; color: var(--accent); margin-bottom: 3px; }
+        .react-badge { position: absolute; bottom: -10px; right: 8px; background: var(--panel); border: 1px solid var(--border); padding: 2px 6px; border-radius: 12px; font-size: 12px; }
+        .msg-author { font-size: 10px; font-weight: bold; color: var(--accent); margin-bottom: 3px; }
         
-        #typing-status { font-size: 11px; color: var(--accent); height: 14px; font-style: italic; }
+        #type-info { font-size: 11px; color: var(--accent); font-style: italic; height: 14px; }
     </style>
 </head>
 <body class="dark">
 
-<div id="scr-auth" class="screen active" style="justify-content: center; align-items: center;">
-    <div style="width: 100%; max-width: 300px; text-align: center;">
-        <h1 style="margin-bottom:25px;">DoveGram <span style="color:var(--accent)">0.27</span></h1>
-        <input type="text" id="reg-id" class="input-ui" placeholder="@ID">
-        <input type="text" id="reg-name" class="input-ui" placeholder="Имя">
-        <input type="text" id="reg-phone" class="input-ui" placeholder="Номер">
-        <button onclick="app.fastAuth()" class="btn-ui">ВОЙТИ</button>
+<div id="scr-auth" class="screen active" style="justify-content: center; align-items: center; padding: 20px;">
+    <div style="width: 100%; max-width: 320px; text-align: center;">
+        <h1 style="margin-bottom:30px; letter-spacing: -1px;">DoveGram <span style="color:var(--accent)">0.28</span></h1>
+        <input type="text" id="reg-id" class="input-ui" placeholder="@id_пользователя">
+        <input type="text" id="reg-name" class="input-ui" placeholder="Ваше Имя">
+        <input type="text" id="reg-phone" class="input-ui" placeholder="Номер телефона">
+        <button onclick="app.auth()" class="btn-ui">ВОЙТИ В СИСТЕМУ</button>
     </div>
 </div>
 
 <div id="app-core">
     <div class="main-view">
         <div style="padding: 15px; border-bottom: 1px solid var(--border);">
-            <input type="text" id="search-input" class="input-ui" style="margin:0" placeholder="Поиск друга..." oninput="app.search()">
+            <input type="text" id="srch" class="input-ui" style="margin:0" placeholder="Поиск по контактам..." oninput="app.search()">
         </div>
-        <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
+        <div id="u-list" style="flex: 1; overflow-y: auto;"></div>
     </div>
+    
     <div class="side-icons">
-        <i class="fas fa-home" onclick="app.nav('close')"></i>
-        <i class="fas fa-globe" onclick="app.openChat({id:'global', name:'Глобальный чат'})"></i>
-        <i class="fas fa-comment-dots" onclick="app.nav('close')"></i>
-        <i class="fas fa-cog" onclick="app.nav('scr-settings')"></i>
-        <i class="fas fa-shield-alt" id="dev-btn" style="display:none; color:#ef4444" onclick="app.showAdmin()"></i>
-        <i class="fas fa-user-circle" onclick="app.showMe()"></i>
+        <i class="fas fa-home" onclick="app.nav('close')" title="Главная"></i>
+        <i class="fas fa-globe" onclick="app.openChat({id:'global', name:'Глобальный чат'})" title="Глобальный"></i>
+        <i class="fas fa-cog" onclick="app.nav('scr-set')" title="Настройки"></i>
+        <i class="fas fa-shield-alt" id="dev-btn" style="display:none; color:#ef4444" onclick="app.showAdmin()" title="Админ"></i>
+        <i class="fas fa-user-circle" onclick="app.showMe()" title="Профиль"></i>
     </div>
 </div>
 
-<div id="scr-profile" class="screen"><i class="fas fa-times" onclick="app.nav('close')"></i><div id="prof-cont" style="text-align:center;margin-top:40px"></div></div>
-<div id="scr-settings" class="screen">
-    <i class="fas fa-times" onclick="app.nav('close')" style="margin-bottom:20px"></i>
-    <h2>Настройки</h2>
-    <div style="text-align:center; margin: 20px 0;">
-        <img id="set-ava" style="width:100px; height:100px; border-radius:50%; object-fit:cover; background:var(--panel);">
-        <br><button class="btn-ui" style="width:auto; margin-top:10px;" onclick="document.getElementById('f-ava').click()">Сменить фото</button>
+<div id="scr-prof" class="screen" style="padding:20px;">
+    <i class="fas fa-times" onclick="app.nav('close')" style="cursor:pointer; font-size:20px;"></i>
+    <div id="prof-ui" style="text-align:center; margin-top:50px;"></div>
+</div>
+
+<div id="scr-set" class="screen" style="padding:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <h2>Настройки</h2><i class="fas fa-times" onclick="app.nav('close')" style="cursor:pointer;"></i>
+    </div>
+    <div style="text-align:center; margin-bottom:30px;">
+        <img id="set-ava-img" style="width:110px; height:110px; border-radius:50%; object-fit:cover; background:var(--panel);">
+        <br><button class="btn-ui" style="width:auto; margin-top:15px; padding:10px 20px;" onclick="document.getElementById('f-ava').click()">Изменить аватар</button>
         <input type="file" id="f-ava" hidden accept="image/*" onchange="app.updAva(this)">
     </div>
-    <button class="btn-ui" style="background:var(--panel); border:1px solid var(--border); margin-bottom:10px" onclick="app.theme()">Сменить тему</button>
-    <button class="btn-ui" style="background:#ef4444" onclick="app.logout()">Выйти</button>
+    <button class="btn-ui" style="background:var(--panel); border:1px solid var(--border); margin-bottom:12px;" onclick="app.theme()">Сменить тему оформления</button>
+    <button class="btn-ui" style="background:#ef4444;" onclick="app.logout()">Выйти из аккаунта</button>
 </div>
-<div id="scr-admin" class="screen"><i class="fas fa-times" onclick="app.nav('close')"></i><h2 style="color:#ef4444; margin:20px 0">Пользователи</h2><div id="admin-list"></div></div>
+
+<div id="scr-admin" class="screen" style="padding:20px;">
+    <i class="fas fa-times" onclick="app.nav('close')" style="cursor:pointer; margin-bottom:20px;"></i>
+    <h2 style="color:#ef4444; margin-bottom:15px;">Управление пользователями</h2>
+    <div id="adm-list" style="overflow-y:auto; flex:1;"></div>
+</div>
 
 <div id="scr-chat" class="screen" style="padding:0; overflow:hidden;">
     <div style="padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border);">
-        <i class="fas fa-chevron-left" onclick="app.closeChat()" style="cursor:pointer;"></i>
-        <img id="chat-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-        <div style="flex:1">
-            <b id="chat-name">Чат</b>
-            <div id="typing-status"></div>
+        <i class="fas fa-arrow-left" onclick="app.closeChat()" style="cursor:pointer;"></i>
+        <img id="c-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+        <div>
+            <b id="c-name">Чат</b>
+            <div id="type-info"></div>
         </div>
     </div>
     <div id="msg-box"></div>
-    <div id="react-panel" style="display:none; padding:10px; justify-content:center; gap:30px; background:var(--panel); border-top:1px solid var(--border);">
-        <span onclick="app.react('❤️‍🔥')" style="font-size:24px; cursor:pointer;">❤️‍🔥</span>
-        <span onclick="app.react('💔')" style="font-size:24px; cursor:pointer;">💔</span>
-        <span onclick="app.react('❤️')" style="font-size:24px; cursor:pointer;">❤️</span>
+    <div id="reacts" style="display:none; padding:12px; justify-content:center; gap:40px; background:var(--panel); border-top:1px solid var(--border);">
+        <span onclick="app.react('❤️‍🔥')" style="font-size:26px; cursor:pointer;">❤️‍🔥</span>
+        <span onclick="app.react('💔')" style="font-size:26px; cursor:pointer;">💔</span>
+        <span onclick="app.react('❤️')" style="font-size:26px; cursor:pointer;">❤️</span>
     </div>
     <div style="padding:15px; display:flex; gap:12px; align-items:center; background:var(--panel); border-top: 1px solid var(--border);">
-        <i class="fas fa-camera" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="document.getElementById('f-img').click()"></i>
-        <input type="file" id="f-img" hidden accept="image/*" onchange="app.sendImg(this)">
-        <input type="text" id="msg-in" class="input-ui" style="margin:0; flex:1;" placeholder="Текст..." oninput="app.type()" onkeydown="if(event.key==='Enter') app.sendT()">
+        <i class="fas fa-camera" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="document.getElementById('f-msg-img').click()"></i>
+        <input type="file" id="f-msg-img" hidden accept="image/*" onchange="app.sendImg(this)">
+        <input type="text" id="m-in" class="input-ui" style="margin:0; flex:1;" placeholder="Напишите сообщение..." oninput="app.typing()" onkeydown="if(event.key==='Enter') app.sendT()">
         <i class="fas fa-paper-plane" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="app.sendT()"></i>
     </div>
 </div>
@@ -112,7 +122,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, update, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const cfg = {
+const config = {
     apiKey: "AIzaSyCuo7GtLDVE6ERb8MOke97mFa08M3oZoV8",
     authDomain: "dove-7ea6d.firebaseapp.com",
     projectId: "dove-7ea6d",
@@ -120,44 +130,44 @@ const cfg = {
     appId: "1:747559004808:web:f80e792795e5b3b4758d3d"
 };
 
-const f_app = initializeApp(cfg);
+const f_app = initializeApp(config);
 const db = getDatabase(f_app);
 
 window.app = {
-    user: null, peer: null, lastM: null, chatRef: null, typeTimer: null,
+    user: null, peer: null, curRef: null, lastId: null, tTimer: null,
     
     init() {
-        const s = localStorage.getItem('dv_27');
-        if(s) { this.user = JSON.parse(s); this.start(); }
+        const s = localStorage.getItem('dg_v28');
+        if(s) { this.user = JSON.parse(s); this.launch(); }
     },
 
-    fastAuth() {
+    auth() {
         const id = document.getElementById('reg-id').value.trim().toLowerCase();
         const nm = document.getElementById('reg-name').value.trim();
         const ph = document.getElementById('reg-phone').value.replace(/\D/g, '');
         if(!id || !nm || !ph) return alert("Заполни всё!");
-        if(id === 'dev' && ph !== '380685244936') return alert("Доступ закрыт.");
+        if(id === 'dev' && ph !== '380685244936') return alert("Доступ запрещен.");
         
         this.user = { id, name: nm, phone: ph, ava: '', theme: 'dark' };
         set(ref(db, 'users/' + id), this.user);
-        localStorage.setItem('dv_27', JSON.stringify(this.user));
-        this.start();
+        localStorage.setItem('dg_v28', JSON.stringify(this.user));
+        this.launch();
     },
 
-    start() {
+    launch() {
         document.getElementById('scr-auth').classList.remove('active');
         document.getElementById('app-core').style.display = 'flex';
         if(this.user.id === 'dev') document.getElementById('dev-btn').style.display = 'block';
         document.body.className = this.user.theme || 'dark';
-        this.loadUsers();
+        this.loadList();
     },
 
-    loadUsers() {
+    loadList() {
         onValue(ref(db, 'users'), (snap) => {
-            const list = document.getElementById('contacts-list');
+            const list = document.getElementById('u-list');
             list.innerHTML = `<div class="user-row" onclick="app.openChat({id:'global', name:'Глобальный чат'})">
-                <div class="ava-plug"><i class="fas fa-globe"></i></div>
-                <div><b>Глобальный чат</b><br><small style="color:var(--accent)">Виден всем</small></div>
+                <div class="ava-p"><i class="fas fa-globe"></i></div>
+                <div><b>Глобальный чат</b><br><small style="color:var(--accent)">Общий канал</small></div>
             </div>`;
             const data = snap.val() || {};
             Object.values(data).forEach(u => {
@@ -166,7 +176,7 @@ window.app = {
                     r.className = 'user-row';
                     r.onclick = () => this.openChat(u);
                     r.innerHTML = `<img src="${u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}">
-                                   <div><b>${u.name}</b><br><small style="color:#777">@${u.id}</small></div>`;
+                                   <div><b>${u.name}</b><br><small style="color:#666">@${u.id}</small></div>`;
                     list.appendChild(r);
                 }
             });
@@ -175,69 +185,62 @@ window.app = {
 
     openChat(u) {
         this.peer = u;
-        document.getElementById('chat-name').innerText = u.name;
-        document.getElementById('chat-ava').src = u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+        document.getElementById('c-name').innerText = u.name;
+        document.getElementById('c-ava').src = u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
         this.nav('scr-chat');
         
         const path = u.id === 'global' ? 'global' : [this.user.id, u.id].sort().join('_');
-        if (this.chatRef) off(this.chatRef);
-        this.chatRef = ref(db, 'msgs/' + path);
-        onValue(this.chatRef, (s) => this.draw(s.val()));
+        if (this.curRef) off(this.curRef);
+        this.curRef = ref(db, 'msgs/' + path);
+        onValue(this.curRef, (s) => this.render(s.val()));
 
-        // Слушатель "Печатает"
-        const statusRef = ref(db, `typing/${path}/${u.id}`);
-        onValue(statusRef, (s) => {
-            document.getElementById('typing-status').innerText = s.val() ? 'печатает...' : '';
+        // Typing Sync
+        onValue(ref(db, `typing/${path}/${u.id}`), (s) => {
+            document.getElementById('type-info').innerText = s.val() ? 'печатает...' : '';
         });
     },
 
-    draw(data) {
+    render(data) {
         const box = document.getElementById('msg-box');
         box.innerHTML = ''; if(!data) return;
-        Object.entries(data).forEach(([key, m]) => {
+        Object.entries(data).forEach(([kid, m]) => {
             const isMe = m.s === this.user.id;
             const b = document.createElement('div');
             b.className = `bubble ${isMe ? 'my' : 'other'}`;
-            b.onclick = (e) => { 
-                e.stopPropagation();
-                this.lastM = key; 
-                document.getElementById('react-panel').style.display='flex'; 
-            };
+            b.onclick = (e) => { e.stopPropagation(); this.lastId = kid; document.getElementById('reacts').style.display='flex'; };
             let h = '';
             if(this.peer.id === 'global' && !isMe) h += `<div class="msg-author">${m.sn}</div>`;
             if(m.img) h += `<img src="${m.img}" style="width:100%; border-radius:10px; margin-bottom:5px;">`;
             if(m.t) h += `<div>${m.t}</div>`;
-            h += `<div style="font-size:9px; opacity:0.5; text-align:right;">${m.time}</div>`;
+            h += `<div style="font-size:9px; opacity:0.4; text-align:right; margin-top:4px;">${m.time}</div>`;
             if(m.r) h += `<div class="react-badge">${m.r}</div>`;
             b.innerHTML = h; box.appendChild(b);
         });
         box.scrollTop = box.scrollHeight;
     },
 
-    type() {
+    typing() {
         const path = this.peer.id === 'global' ? 'global' : [this.user.id, this.peer.id].sort().join('_');
         set(ref(db, `typing/${path}/${this.user.id}`), true);
-        clearTimeout(this.typeTimer);
-        this.typeTimer = setTimeout(() => {
-            set(ref(db, `typing/${path}/${this.user.id}`), false);
-        }, 1500);
+        clearTimeout(this.tTimer);
+        this.tTimer = setTimeout(() => set(ref(db, `typing/${path}/${this.user.id}`), false), 2000);
     },
 
     sendT() {
-        const i = document.getElementById('msg-in');
+        const i = document.getElementById('m-in');
         if(!i.value.trim()) return;
-        this.push({ t: i.value }); i.value = '';
+        this.pushMsg({ t: i.value }); i.value = '';
     },
 
     sendImg(input) {
         if(input.files[0]) {
             const r = new FileReader();
-            r.onload = (e) => this.push({ img: e.target.result });
+            r.onload = (e) => this.pushMsg({ img: e.target.result });
             r.readAsDataURL(input.files[0]);
         }
     },
 
-    push(obj) {
+    pushMsg(obj) {
         const path = this.peer.id === 'global' ? 'global' : [this.user.id, this.peer.id].sort().join('_');
         const m = { ...obj, s: this.user.id, sn: this.user.name, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
         push(ref(db, 'msgs/' + path), m);
@@ -246,8 +249,8 @@ window.app = {
 
     react(e) {
         const path = this.peer.id === 'global' ? 'global' : [this.user.id, this.peer.id].sort().join('_');
-        update(ref(db, `msgs/${path}/${this.lastM}`), { r: e });
-        document.getElementById('react-panel').style.display = 'none';
+        update(ref(db, `msgs/${path}/${this.lastId}`), { r: e });
+        document.getElementById('reacts').style.display = 'none';
     },
 
     nav(id) {
@@ -256,16 +259,18 @@ window.app = {
     },
 
     closeChat() { 
-        if(this.chatRef) off(this.chatRef); 
-        document.getElementById('react-panel').style.display='none';
+        if(this.curRef) off(this.curRef); 
+        document.getElementById('reacts').style.display = 'none';
         this.nav('close'); 
     },
 
     showMe() {
-        document.getElementById('prof-cont').innerHTML = `
+        document.getElementById('prof-ui').innerHTML = `
             <img src="${this.user.ava}" style="width:120px;height:120px;border-radius:50%;border:3px solid var(--accent)">
-            <h2>${this.user.name}</h2><p>@${this.user.id}</p><p>${this.user.phone}</p>`;
-        this.nav('scr-profile');
+            <h2 style="margin-top:15px">${this.user.name}</h2>
+            <p style="opacity:0.5">@${this.user.id}</p>
+            <p style="color:var(--accent);font-weight:bold;margin-top:10px">${this.user.phone}</p>`;
+        this.nav('scr-prof');
     },
 
     updAva(input) {
@@ -274,8 +279,8 @@ window.app = {
             r.onload = (e) => {
                 this.user.ava = e.target.result;
                 update(ref(db, 'users/' + this.user.id), { ava: e.target.result });
-                localStorage.setItem('dv_27', JSON.stringify(this.user));
-                document.getElementById('set-ava').src = e.target.result;
+                localStorage.setItem('dg_v28', JSON.stringify(this.user));
+                document.getElementById('set-ava-img').src = e.target.result;
             };
             r.readAsDataURL(input.files[0]);
         }
@@ -285,19 +290,19 @@ window.app = {
         this.user.theme = this.user.theme === 'dark' ? 'light' : 'dark';
         document.body.className = this.user.theme;
         update(ref(db, 'users/' + this.user.id), { theme: this.user.theme });
-        localStorage.setItem('dv_27', JSON.stringify(this.user));
+        localStorage.setItem('dg_v28', JSON.stringify(this.user));
     },
 
     search() {
-        const q = document.getElementById('search-input').value.toLowerCase();
-        document.querySelectorAll('.user-row').forEach(r => {
+        const q = document.getElementById('srch').value.toLowerCase();
+        document.querySelectorAll('#u-list .user-row').forEach(r => {
             r.style.display = r.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
         });
     },
 
     showAdmin() {
         onValue(ref(db, 'users'), (snap) => {
-            const list = document.getElementById('admin-list');
+            const list = document.getElementById('adm-list');
             list.innerHTML = '';
             Object.values(snap.val() || {}).forEach(u => {
                 const r = document.createElement('div');
