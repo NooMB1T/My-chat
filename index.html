@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DoveGram 0.22</title>
+    <title>DoveGram 0.23</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; --msg-my: #2563eb; --msg-other: #1a1a1a; --border: #111; }
@@ -11,26 +11,28 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
 
-        /* Головна структура */
+        /* Архитектура интерфейса */
         #app-core { display: none; flex: 1; width: 100vw; flex-direction: row; }
         .main-view { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); background: var(--bg); }
         .side-icons { width: 75px; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 35px; background: var(--panel); border-left: 1px solid var(--border); }
         .side-icons i { font-size: 24px; color: #777; cursor: pointer; padding: 10px; transition: 0.2s; }
         .side-icons i:hover { color: var(--accent); transform: scale(1.1); }
 
-        /* Екрани */
+        /* Экраны */
         .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; overflow-y: auto; }
         .screen.active { display: flex; }
 
-        /* UI Елементи */
+        /* UI Компоненты */
         .input-ui { width: 100%; padding: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--text); outline: none; transition: border 0.2s; }
         .input-ui:focus { border-color: var(--accent); }
         .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; color: #fff; cursor: pointer; transition: 0.2s; }
         .btn-ui:active { transform: scale(0.98); opacity: 0.9; }
         
-        /* Чат та Списки */
-        .user-row { padding: 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
+        /* Списки и чат */
+        .user-row { padding: 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+        .user-row:hover { background: var(--panel); }
         .user-row img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--border); }
+        
         #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 6px; }
         .bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; }
         .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
@@ -42,28 +44,27 @@
 
 <div id="scr-auth" class="screen active" style="justify-content: center; align-items: center;">
     <div style="width: 100%; max-width: 320px; text-align: center;">
-        <h2 style="margin-bottom:25px; font-size: 28px;">DoveGram <span style="color:var(--accent)">0.22</span></h2>
-        <input type="text" id="reg-id" class="input-ui" placeholder="@ID (унікальний)" style="margin-bottom:12px">
-        <input type="text" id="reg-name" class="input-ui" placeholder="Ім'я" style="margin-bottom:12px">
+        <h2 style="margin-bottom:25px; font-size: 28px;">DoveGram <span style="color:var(--accent)">0.23</span></h2>
+        <input type="text" id="reg-id" class="input-ui" placeholder="@ID (уникальный)" style="margin-bottom:12px">
+        <input type="text" id="reg-name" class="input-ui" placeholder="Ваше имя" style="margin-bottom:12px">
         <input type="text" id="reg-phone" class="input-ui" placeholder="+380..." style="margin-bottom:20px">
-        <button id="auth-btn" onclick="app.authenticate()" class="btn-ui">УВІЙТИ</button>
-        <p id="auth-status" style="margin-top: 15px; font-size: 14px; color: var(--accent); height: 20px;"></p>
+        <button id="auth-btn" onclick="app.authenticate()" class="btn-ui">ВОЙТИ</button>
     </div>
 </div>
 
 <div id="app-core">
     <div class="main-view">
         <div style="padding: 15px; border-bottom: 1px solid var(--border);">
-            <input type="text" id="search-input" class="input-ui" placeholder="Пошук (введіть ім'я або ID)..." oninput="app.search()">
+            <input type="text" id="search-input" class="input-ui" placeholder="Поиск (имя или ID)..." oninput="app.search()">
         </div>
         <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
     </div>
     
     <div class="side-icons">
-        <i class="fas fa-cog" onclick="app.nav('scr-settings')" title="Налаштування"></i>
-        <i class="fas fa-search" onclick="document.getElementById('search-input').focus()" title="Пошук"></i>
-        <i class="fas fa-users" id="dev-btn" style="display:none; color: #ef4444;" onclick="app.showAdminPanel()" title="Адмін Панель"></i>
-        <i class="fas fa-user-circle" onclick="app.showMyProfile()" title="Профіль"></i>
+        <i class="fas fa-cog" onclick="app.nav('scr-settings')" title="Настройки"></i>
+        <i class="fas fa-search" onclick="document.getElementById('search-input').focus()" title="Поиск"></i>
+        <i class="fas fa-users" id="dev-btn" style="display:none; color: #ef4444;" onclick="app.showAdminPanel()" title="Админ Панель"></i>
+        <i class="fas fa-user-circle" onclick="app.showMyProfile()" title="Профиль"></i>
     </div>
 </div>
 
@@ -71,7 +72,7 @@
     <i class="fas fa-arrow-left" onclick="app.nav('close')" style="font-size: 22px; cursor:pointer; margin-bottom: 20px;"></i>
     <div style="text-align: center; margin-top: 20px;">
         <img id="prof-ava" src="" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border: 3px solid var(--accent); margin-bottom: 15px; background: var(--panel);">
-        <h2 id="prof-name">Ім'я</h2>
+        <h2 id="prof-name">Имя</h2>
         <p id="prof-id" style="font-size: 16px; opacity: 0.6; margin-top: 5px;"></p>
         <p id="prof-phone" style="font-size: 18px; font-weight: bold; color: var(--accent); margin-top: 10px;"></p>
     </div>
@@ -80,28 +81,26 @@
 <div id="scr-settings" class="screen">
     <div style="display:flex; align-items:center; gap: 15px; margin-bottom: 25px;">
         <i class="fas fa-arrow-left" onclick="app.nav('close')" style="font-size: 22px; cursor:pointer;"></i>
-        <h2 id="lang-s-title">Налаштування</h2>
+        <h2>Настройки</h2>
     </div>
     
     <div style="text-align: center; margin-bottom: 30px;">
         <img id="set-ava-preview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border: 2px solid var(--border); margin-bottom:10px; background: var(--panel);">
         <br>
         <button class="btn-ui" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); width: auto; padding: 10px 20px;" onclick="document.getElementById('ava-upload').click()">
-            <i class="fas fa-camera"></i> Змінити фото
+            <i class="fas fa-camera"></i> Изменить фото
         </button>
         <input type="file" id="ava-upload" hidden accept="image/*" onchange="app.updateAvatar(this)">
     </div>
 
-    <button class="btn-ui" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); margin-bottom: 15px;" onclick="app.toggleTheme()">🌓 Змінити тему</button>
-    <button class="btn-ui" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); margin-bottom: 30px;" onclick="app.toggleLang()">🌍 Мова: <span id="set-lang-btn">UA</span></button>
-
-    <button class="btn-ui" style="background: #ef4444;" onclick="app.logout()">Вийти з акаунта</button>
+    <button class="btn-ui" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); margin-bottom: 30px;" onclick="app.toggleTheme()">🌓 Изменить тему (Светлая/Темная)</button>
+    <button class="btn-ui" style="background: #ef4444;" onclick="app.logout()">Выйти из аккаунта</button>
 </div>
 
 <div id="scr-admin" class="screen">
     <div style="display:flex; align-items:center; gap: 15px; margin-bottom: 20px;">
         <i class="fas fa-arrow-left" onclick="app.nav('close')" style="font-size: 22px; cursor:pointer;"></i>
-        <h2 style="color:#ef4444">База користувачів (@dev)</h2>
+        <h2 style="color:#ef4444">База пользователей</h2>
     </div>
     <div id="admin-list" style="flex:1; overflow-y:auto;"></div>
 </div>
@@ -111,7 +110,7 @@
         <i class="fas fa-arrow-left" onclick="app.closeChat()" style="font-size: 20px; cursor:pointer;"></i>
         <img id="chat-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background:var(--bg)">
         <div style="flex:1">
-            <b id="chat-name" style="font-size: 16px;">Ім'я</b>
+            <b id="chat-name" style="font-size: 16px;">Имя</b>
             <div id="typing-indicator" style="font-size: 11px; color: var(--accent); height: 12px;"></div>
         </div>
     </div>
@@ -127,7 +126,7 @@
     <div style="padding:14px; display:flex; gap:12px; align-items:center; background:var(--panel); border-top:1px solid var(--border);">
         <i class="fas fa-camera" style="font-size:24px; color:var(--accent); cursor:pointer; padding:5px;" onclick="document.getElementById('img-upload').click()"></i>
         <input type="file" id="img-upload" hidden accept="image/*" onchange="app.sendPhoto(this)">
-        <input type="text" id="msg-input" class="input-ui" style="margin:0; flex:1;" placeholder="Повідомлення..." oninput="app.handleTyping()" onkeydown="if(event.key==='Enter') app.sendText()">
+        <input type="text" id="msg-input" class="input-ui" style="margin:0; flex:1;" placeholder="Сообщение..." oninput="app.handleTyping()" onkeydown="if(event.key==='Enter') app.sendText()">
         <i class="fas fa-paper-plane" style="font-size:24px; color:var(--accent); cursor:pointer; padding:5px;" onclick="app.sendText()"></i>
     </div>
 </div>
@@ -151,7 +150,7 @@ window.app = {
     user: null, peer: null, lastM: null, chatRef: null,
     
     init() {
-        const sess = localStorage.getItem('dove_v22');
+        const sess = localStorage.getItem('dove_v23');
         if(sess) {
             this.user = JSON.parse(sess);
             this.launch();
@@ -163,41 +162,41 @@ window.app = {
         const nm = document.getElementById('reg-name').value.trim();
         const ph = document.getElementById('reg-phone').value.trim();
         const btn = document.getElementById('auth-btn');
-        const st = document.getElementById('auth-status');
 
-        if(!id || !nm || !ph) return alert("Заповніть усі поля!");
-        if(id === 'dev' && ph !== '+380') return alert("ID @dev зарезервовано.");
+        if(!id || !nm || !ph) return alert("Заполните все поля!");
+        
+        // Жесткая проверка для dev аккаунта
+        if(id === 'dev' && !ph.includes('380685244936')) {
+            return alert("Отказано в доступе. ID @dev зарезервирован для администратора.");
+        }
 
         btn.disabled = true;
-        st.innerText = "Синхронізація...";
+        btn.innerText = "ПРОВЕРКА...";
 
         try {
-            const snap = await get(ref(db, 'users'));
-            const allUsers = snap.exists() ? snap.val() : {};
+            // Точечный запрос - никакой долгой синхронизации
+            const snap = await get(ref(db, 'users/' + id));
 
-            if (allUsers[id]) {
-                if (allUsers[id].phone === ph) {
-                    this.user = allUsers[id]; // Вхід успішний
+            if (snap.exists()) {
+                const existingData = snap.val();
+                if (existingData.phone === ph) {
+                    this.user = existingData;
                 } else {
-                    btn.disabled = false; st.innerText = "";
-                    return alert("Помилка: Цей ID зайнятий іншим користувачем!");
+                    btn.disabled = false;
+                    btn.innerText = "ВОЙТИ";
+                    return alert("Ошибка: Неверный номер телефона для этого ID!");
                 }
             } else {
-                for(let key in allUsers) {
-                    if(allUsers[key].phone === ph) {
-                        btn.disabled = false; st.innerText = "";
-                        return alert("Помилка: Цей номер телефону вже зареєстровано!");
-                    }
-                }
-                this.user = { id, name: nm, phone: ph, ava: '', lang: 'uk', theme: 'dark' };
+                this.user = { id, name: nm, phone: ph, ava: '', theme: 'dark' };
                 await set(ref(db, 'users/' + id), this.user);
             }
 
-            localStorage.setItem('dove_v22', JSON.stringify(this.user));
-            this.launch(); // Перехід без перезавантаження
+            localStorage.setItem('dove_v23', JSON.stringify(this.user));
+            this.launch();
         } catch(e) {
-            st.innerText = "Помилка бази даних!";
+            alert("Ошибка сети. Проверьте соединение с интернетом.");
             btn.disabled = false;
+            btn.innerText = "ВОЙТИ";
         }
     },
 
@@ -206,7 +205,7 @@ window.app = {
         document.getElementById('app-core').style.display = 'flex';
         if(this.user.id === 'dev') document.getElementById('dev-btn').style.display = 'block';
         
-        this.applySettings();
+        document.body.className = this.user.theme || 'dark';
         this.loadContactList();
     },
 
@@ -246,15 +245,12 @@ window.app = {
 
         const path = [this.user.id, u.id].sort().join('_');
         
-        // Відключаємо попередній чат, якщо був
         if (this.chatRef) off(this.chatRef);
-        
         this.chatRef = ref(db, 'msgs/' + path);
         onValue(this.chatRef, (s) => this.renderMessages(s.val()));
 
         onValue(ref(db, `status/${path}/${u.id}`), (s) => {
-            const st = this.user.lang === 'uk' ? 'Цвіркоче...' : 'Печатает...';
-            document.getElementById('typing-indicator').innerText = s.val() ? st : '';
+            document.getElementById('typing-indicator').innerText = s.val() ? 'Печатает...' : '';
         });
     },
 
@@ -319,14 +315,13 @@ window.app = {
         setTimeout(() => set(ref(db, `status/${path}/${this.user.id}`), false), 1500);
     },
 
-    /* UI та Навігація */
+    /* Навигация и UI */
     nav(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         if(id !== 'close') {
             document.getElementById(id).classList.add('active');
             if(id === 'scr-settings') {
                 document.getElementById('set-ava-preview').src = this.user.ava || '';
-                document.getElementById('set-lang-btn').innerText = this.user.lang.toUpperCase();
             }
         }
     },
@@ -346,7 +341,7 @@ window.app = {
                 this.user.ava = e.target.result;
                 document.getElementById('set-ava-preview').src = this.user.ava;
                 update(ref(db, 'users/' + this.user.id), { ava: this.user.ava });
-                localStorage.setItem('dove_v22', JSON.stringify(this.user));
+                localStorage.setItem('dove_v23', JSON.stringify(this.user));
             };
             reader.readAsDataURL(input.files[0]);
         }
@@ -354,34 +349,9 @@ window.app = {
 
     toggleTheme() {
         this.user.theme = this.user.theme === 'dark' ? 'light' : 'dark';
-        this.saveUserPref();
-        this.applySettings();
-    },
-
-    toggleLang() {
-        this.user.lang = this.user.lang === 'uk' ? 'ru' : 'uk';
-        document.getElementById('set-lang-btn').innerText = this.user.lang.toUpperCase();
-        this.saveUserPref();
-        this.applySettings();
-    },
-
-    saveUserPref() {
-        update(ref(db, 'users/' + this.user.id), { theme: this.user.theme, lang: this.user.lang });
-        localStorage.setItem('dove_v22', JSON.stringify(this.user));
-    },
-
-    applySettings() {
         document.body.className = this.user.theme;
-        const msgInp = document.getElementById('msg-input');
-        const searchInp = document.getElementById('search-input');
-        
-        if (this.user.lang === 'ru') {
-            if(msgInp) msgInp.placeholder = "Сообщение...";
-            if(searchInp) searchInp.placeholder = "Поиск (имя или ID)...";
-        } else {
-            if(msgInp) msgInp.placeholder = "Повідомлення...";
-            if(searchInp) searchInp.placeholder = "Пошук (введіть ім'я або ID)...";
-        }
+        update(ref(db, 'users/' + this.user.id), { theme: this.user.theme });
+        localStorage.setItem('dove_v23', JSON.stringify(this.user));
     },
 
     showAdminPanel() {
@@ -398,7 +368,7 @@ window.app = {
         this.nav('scr-admin');
     },
 
-    logout() { localStorage.removeItem('dove_v22'); location.reload(); }
+    logout() { localStorage.removeItem('dove_v23'); location.reload(); }
 };
 
 app.init();
