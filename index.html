@@ -285,119 +285,72 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');set
 function autoH(){const t=$('mIn');if(!t)return;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px'}
 function showScr(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('act'));$(id).classList.add('act')}
 
-/* ===== TIMEOUT WRAPPER ===== */
-function fbGet(path,ms=6000){
-return new Promise((resolve,reject)=>{
-const timer=setTimeout(()=>reject(new Error('Timeout')),ms);
-get(ref(db,path)).then(snap=>{clearTimeout(timer);resolve(snap)}).catch(e=>{clearTimeout(timer);reject(e)});
-});
-}
-
-/* ===== AUTH ===== */
-(async function init(){
-const s=localStorage.getItem('dg_redemption');
-if(s){
+/* ===== AUTH — МИТТЄВИЙ ВХІД БЕЗ ПЕРЕВІРКИ ===== */
+(function init(){
+const saved=localStorage.getItem('dg_user');
+if(saved){
 try{
-const u=JSON.parse(s);
-if(u&&u.id){
-showScr('auth');
-$('aBtn').disabled=true;
-$('aBtn').innerHTML='<i class="fas fa-circle-notch spin"></i> Подключение...';
-try{
-await doLogin(u.id);
+const u=JSON.parse(saved);
+if(u&&u.uid){
+S.user=u;
+showScr('app');
+startApp();
+// Фоново оновлюємо Firebase — не чекаємо
+firebaseSyncUser(u.uid,u.name);
 return;
-}catch(e){
-console.warn('Auto-login failed:',e);
-localStorage.removeItem('dg_redemption');
-}
 }
 }catch(e){}
 }
 showScr('auth');
-resetAuthBtn();
 })();
 
-function resetAuthBtn(){
-$('aBtn').disabled=false;
-$('aBtn').innerHTML='<i class="fas fa-arrow-right"></i> Войти';
+function firebaseSyncUser(uid,name){
+// Просто записуємо/оновлюємо — fire and forget
+set(ref(db,'users/'+uid),{
+id:'@'+uid,
+name:name||uid,
+phone:'',
+bio:'',
+online:true,
+joined:Date.now(),
+lastSeen:Date.now()
+}).catch(()=>{});
 }
 
-$('aBtn').addEventListener('click',async()=>{
+$('aBtn').addEventListener('click',()=>{
 const id=$('aId').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
 const nm=$('aNm').value.trim();
-$('aErr').textContent='';
-if(!id||id.length<2){$('aErr').textContent='Минимум 2 символа, латиница';return}
-if(id.length>20){$('aErr').textContent='Максимум 20 символов';return}
+if(!id||id.length<2){$('aErr').textContent='Мінімум 2 символи, латиниця';return}
 
-$('aBtn').disabled=true;
-$('aBtn').innerHTML='<i class="fas fa-circle-notch spin"></i> Подключение...';
+// Миттєво зберігаємо локально і заходимо
+const userData={uid:id,name:nm||id,phone:'',bio:'',id:'@'+id};
+S.user=userData;
+localStorage.setItem('dg_user',JSON.stringify(userData));
 
-try{
-let exists=false;
-try{
-const snap=await fbGet('users/'+id,5000);
-exists=snap.exists();
-}catch(e){
-// Timeout — try set anyway
-}
+showScr('app');
+startApp();
 
-if(!exists){
-await set(ref(db,'users/'+id),{
-id:'@'+id,name:nm||id,phone:'',bio:'',
-online:true,joined:Date.now(),lastSeen:Date.now()
-});
-}else{
-await update(ref(db,'users/'+id),{online:true,lastSeen:Date.now()});
-}
-
-localStorage.setItem('dg_redemption',JSON.stringify({id}));
-await doLogin(id);
-}catch(e){
-$('aErr').textContent='Ошибка: '+e.message;
-resetAuthBtn();
-}
+// Фоново синхронізуємо з Firebase
+firebaseSyncUser(id,nm||id);
 });
 
 $('aId').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('aNm').focus()}});
 $('aNm').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('aBtn').click()}});
 
-async function doLogin(id){
-let userData;
-try{
-const snap=await fbGet('users/'+id,5000);
-if(!snap.exists()){
-localStorage.removeItem('dg_redemption');
-showScr('auth');resetAuthBtn();
-$('aErr').textContent='Пользователь не найден';
-throw new Error('not found');
-}
-userData=snap.val();
-}catch(e){
-if(e.message==='not found')throw e;
-// Timeout fallback — proceed with minimal data
-userData={id:'@'+id,name:id,phone:'',bio:'',online:true,lastSeen:Date.now()};
-}
-
-S.user={uid:id,...userData};
-
-try{await update(ref(db,'users/'+id),{online:true,lastSeen:Date.now()})}catch(e){}
-
-showScr('app');
-startApp();
-}
-
 /* ===== APP START ===== */
-let usersC={},msgsC={},dataReady=false;
+let usersC={},msgsC={};
 
 function startApp(){
-// Presence
-const uRef=ref(db,'users/'+S.user.uid);
-try{update(uRef,{online:true,lastSeen:Date.now()})}catch(e){}
-window.addEventListener('beforeunload',()=>{try{update(uRef,{online:false,lastSeen:Date.now()})}catch(e){}});
-setInterval(()=>{try{update(uRef,{lastSeen:Date.now()})}catch(e){}},25000);
+if(!S.user)return;
 
-// Listen
-onValue(ref(db,'users'),s=>{usersC=s.val()||{};dataReady=true;renderCL()},{});
+// Presence — fire and forget
+const uRef=ref(db,'users/'+S.user.uid);
+update(uRef,{online:true,lastSeen:Date.now()}).catch(()=>{});
+window.addEventListener('beforeunload',()=>{try{update(uRef,{online:false,lastSeen:Date.now()})}catch(e){}});
+setInterval(()=>{update(uRef,{lastSeen:Date.now()}).catch(()=>{})},25000);
+
+// Listen — дані підтягнуться коли Firebase підключиться
+onValue(ref(db,'users'),s=>{usersC=s.val()||{};renderCL()},{});
 onValue(ref(db,'msgs'),s=>{msgsC=s.val()||{};renderCL()},{});
 
 if(S.mob){$('sidebar').classList.remove('hid');$('chatArea').classList.add('hid')}
@@ -418,7 +371,6 @@ if(!S.user)return;
 const q=$('searchIn').value.toLowerCase();
 let h='';
 
-// Global
 if(S.tab==='all'||S.tab==='global'){
 const gm=msgsC.global?Object.values(msgsC.global):[];
 const gl=gm.length?gm[gm.length-1]:null;
@@ -432,7 +384,6 @@ gl?fmtT(gl.time):'',
 );
 }}
 
-// Private
 if(S.tab==='all'||S.tab==='private'){
 const uids=Object.keys(usersC).filter(u=>u!==S.user.uid);
 const items=uids.map(uid=>{
@@ -613,8 +564,23 @@ $('fscr').addEventListener('click',e=>{if(e.target===$('fscr')){$('fscr').classL
 
 /* ===== PROFILE ===== */
 function openProf(){$('pId').value='@'+S.user.uid;$('pNm').value=S.user.name||'';$('pPh').value=S.user.phone||'';$('pBio').value=S.user.bio||'';$('profM').classList.add('show')}
-async function saveProf(){const d={name:$('pNm').value.trim()||S.user.uid,phone:$('pPh').value.trim(),bio:$('pBio').value.trim()};await update(ref(db,'users/'+S.user.uid),d);Object.assign(S.user,d);toast('Сохранено ✓');$('profM').classList.remove('show')}
-function logout(){try{update(ref(db,'users/'+S.user.uid),{online:false,lastSeen:Date.now()})}catch(e){}localStorage.removeItem('dg_redemption');S.user=null;S.chat=null;cleanL();showScr('auth');resetAuthBtn();$('aId').value='';$('aNm').value='';$('aErr').textContent=''}
+async function saveProf(){
+const d={name:$('pNm').value.trim()||S.user.uid,phone:$('pPh').value.trim(),bio:$('pBio').value.trim()};
+// Оновлюємо локально миттєво
+Object.assign(S.user,d);
+localStorage.setItem('dg_user',JSON.stringify(S.user));
+toast('Сохранено ✓');
+$('profM').classList.remove('show');
+// Фоново в Firebase
+update(ref(db,'users/'+S.user.uid),d).catch(()=>{});
+}
+function logout(){
+try{update(ref(db,'users/'+S.user.uid),{online:false,lastSeen:Date.now()})}catch(e){}
+localStorage.removeItem('dg_user');
+S.user=null;S.chat=null;cleanL();
+showScr('auth');
+$('aId').value='';$('aNm').value='';$('aErr').textContent='';
+}
 
 /* ===== BIND ===== */
 function bindAll(){
