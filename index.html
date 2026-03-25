@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DoveGram 0.26</title>
+    <title>DoveGram 0.27</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; --msg-my: #2563eb; --msg-other: #1a1a1a; --border: #111; }
@@ -11,13 +11,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
         body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Sidebar */
+        /* Sidebar & Layout */
         #app-core { display: none; flex: 1; width: 100vw; flex-direction: row; }
         .main-view { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
         .side-icons { width: 65px; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 25px; background: var(--panel); border-left: 1px solid var(--border); }
         .side-icons i { font-size: 20px; color: #555; cursor: pointer; padding: 10px; transition: 0.2s; }
-        .side-icons i:hover { color: var(--accent); transform: scale(1.1); }
-        .side-icons i.active { color: var(--accent); }
+        .side-icons i:hover { color: var(--accent); }
 
         /* Screens */
         .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; }
@@ -37,15 +36,17 @@
         .bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; }
         .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
         .bubble.other { align-self: flex-start; background: var(--msg-other); border-bottom-left-radius: 4px; }
-        .react-badge { position: absolute; bottom: -10px; right: 10px; background: var(--panel); border: 1px solid var(--border); padding: 2px 5px; border-radius: 10px; font-size: 12px; }
+        .react-badge { position: absolute; bottom: -10px; right: 10px; background: var(--panel); border: 1px solid var(--border); padding: 2px 5px; border-radius: 10px; font-size: 11px; }
         .msg-author { font-size: 11px; font-weight: bold; color: var(--accent); margin-bottom: 3px; }
+        
+        #typing-status { font-size: 11px; color: var(--accent); height: 14px; font-style: italic; }
     </style>
 </head>
 <body class="dark">
 
 <div id="scr-auth" class="screen active" style="justify-content: center; align-items: center;">
     <div style="width: 100%; max-width: 300px; text-align: center;">
-        <h1 style="margin-bottom:25px;">DoveGram <span style="color:var(--accent)">0.26</span></h1>
+        <h1 style="margin-bottom:25px;">DoveGram <span style="color:var(--accent)">0.27</span></h1>
         <input type="text" id="reg-id" class="input-ui" placeholder="@ID">
         <input type="text" id="reg-name" class="input-ui" placeholder="Имя">
         <input type="text" id="reg-phone" class="input-ui" placeholder="Номер">
@@ -56,14 +57,14 @@
 <div id="app-core">
     <div class="main-view">
         <div style="padding: 15px; border-bottom: 1px solid var(--border);">
-            <input type="text" id="search-input" class="input-ui" style="margin:0" placeholder="Поиск..." oninput="app.search()">
+            <input type="text" id="search-input" class="input-ui" style="margin:0" placeholder="Поиск друга..." oninput="app.search()">
         </div>
         <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
     </div>
     <div class="side-icons">
-        <i class="fas fa-home" onclick="app.nav('close')" title="Главная"></i>
-        <i class="fas fa-globe" onclick="app.openChat({id:'global', name:'Глобальный чат'})" title="Глобал"></i>
-        <i class="fas fa-search" onclick="document.getElementById('search-input').focus()"></i>
+        <i class="fas fa-home" onclick="app.nav('close')"></i>
+        <i class="fas fa-globe" onclick="app.openChat({id:'global', name:'Глобальный чат'})"></i>
+        <i class="fas fa-comment-dots" onclick="app.nav('close')"></i>
         <i class="fas fa-cog" onclick="app.nav('scr-settings')"></i>
         <i class="fas fa-shield-alt" id="dev-btn" style="display:none; color:#ef4444" onclick="app.showAdmin()"></i>
         <i class="fas fa-user-circle" onclick="app.showMe()"></i>
@@ -88,7 +89,10 @@
     <div style="padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border);">
         <i class="fas fa-chevron-left" onclick="app.closeChat()" style="cursor:pointer;"></i>
         <img id="chat-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-        <b id="chat-name">Чат</b>
+        <div style="flex:1">
+            <b id="chat-name">Чат</b>
+            <div id="typing-status"></div>
+        </div>
     </div>
     <div id="msg-box"></div>
     <div id="react-panel" style="display:none; padding:10px; justify-content:center; gap:30px; background:var(--panel); border-top:1px solid var(--border);">
@@ -99,7 +103,7 @@
     <div style="padding:15px; display:flex; gap:12px; align-items:center; background:var(--panel); border-top: 1px solid var(--border);">
         <i class="fas fa-camera" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="document.getElementById('f-img').click()"></i>
         <input type="file" id="f-img" hidden accept="image/*" onchange="app.sendImg(this)">
-        <input type="text" id="msg-in" class="input-ui" style="margin:0; flex:1;" placeholder="Текст..." onkeydown="if(event.key==='Enter') app.sendT()">
+        <input type="text" id="msg-in" class="input-ui" style="margin:0; flex:1;" placeholder="Текст..." oninput="app.type()" onkeydown="if(event.key==='Enter') app.sendT()">
         <i class="fas fa-paper-plane" style="font-size:22px; color:var(--accent); cursor:pointer;" onclick="app.sendT()"></i>
     </div>
 </div>
@@ -120,10 +124,10 @@ const f_app = initializeApp(cfg);
 const db = getDatabase(f_app);
 
 window.app = {
-    user: null, peer: null, lastM: null, chatRef: null,
+    user: null, peer: null, lastM: null, chatRef: null, typeTimer: null,
     
     init() {
-        const s = localStorage.getItem('dv_26');
+        const s = localStorage.getItem('dv_27');
         if(s) { this.user = JSON.parse(s); this.start(); }
     },
 
@@ -136,7 +140,7 @@ window.app = {
         
         this.user = { id, name: nm, phone: ph, ava: '', theme: 'dark' };
         set(ref(db, 'users/' + id), this.user);
-        localStorage.setItem('dv_26', JSON.stringify(this.user));
+        localStorage.setItem('dv_27', JSON.stringify(this.user));
         this.start();
     },
 
@@ -174,10 +178,17 @@ window.app = {
         document.getElementById('chat-name').innerText = u.name;
         document.getElementById('chat-ava').src = u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
         this.nav('scr-chat');
-        if (this.chatRef) off(this.chatRef);
+        
         const path = u.id === 'global' ? 'global' : [this.user.id, u.id].sort().join('_');
+        if (this.chatRef) off(this.chatRef);
         this.chatRef = ref(db, 'msgs/' + path);
         onValue(this.chatRef, (s) => this.draw(s.val()));
+
+        // Слушатель "Печатает"
+        const statusRef = ref(db, `typing/${path}/${u.id}`);
+        onValue(statusRef, (s) => {
+            document.getElementById('typing-status').innerText = s.val() ? 'печатает...' : '';
+        });
     },
 
     draw(data) {
@@ -187,7 +198,11 @@ window.app = {
             const isMe = m.s === this.user.id;
             const b = document.createElement('div');
             b.className = `bubble ${isMe ? 'my' : 'other'}`;
-            b.onclick = () => { this.lastM = key; document.getElementById('react-panel').style.display='flex'; };
+            b.onclick = (e) => { 
+                e.stopPropagation();
+                this.lastM = key; 
+                document.getElementById('react-panel').style.display='flex'; 
+            };
             let h = '';
             if(this.peer.id === 'global' && !isMe) h += `<div class="msg-author">${m.sn}</div>`;
             if(m.img) h += `<img src="${m.img}" style="width:100%; border-radius:10px; margin-bottom:5px;">`;
@@ -197,6 +212,15 @@ window.app = {
             b.innerHTML = h; box.appendChild(b);
         });
         box.scrollTop = box.scrollHeight;
+    },
+
+    type() {
+        const path = this.peer.id === 'global' ? 'global' : [this.user.id, this.peer.id].sort().join('_');
+        set(ref(db, `typing/${path}/${this.user.id}`), true);
+        clearTimeout(this.typeTimer);
+        this.typeTimer = setTimeout(() => {
+            set(ref(db, `typing/${path}/${this.user.id}`), false);
+        }, 1500);
     },
 
     sendT() {
@@ -215,7 +239,9 @@ window.app = {
 
     push(obj) {
         const path = this.peer.id === 'global' ? 'global' : [this.user.id, this.peer.id].sort().join('_');
-        push(ref(db, 'msgs/' + path), { ...obj, s: this.user.id, sn: this.user.name, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+        const m = { ...obj, s: this.user.id, sn: this.user.name, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
+        push(ref(db, 'msgs/' + path), m);
+        set(ref(db, `typing/${path}/${this.user.id}`), false);
     },
 
     react(e) {
@@ -229,7 +255,11 @@ window.app = {
         if(id !== 'close') document.getElementById(id).classList.add('active');
     },
 
-    closeChat() { if(this.chatRef) off(this.chatRef); this.nav('close'); },
+    closeChat() { 
+        if(this.chatRef) off(this.chatRef); 
+        document.getElementById('react-panel').style.display='none';
+        this.nav('close'); 
+    },
 
     showMe() {
         document.getElementById('prof-cont').innerHTML = `
@@ -244,7 +274,7 @@ window.app = {
             r.onload = (e) => {
                 this.user.ava = e.target.result;
                 update(ref(db, 'users/' + this.user.id), { ava: e.target.result });
-                localStorage.setItem('dv_26', JSON.stringify(this.user));
+                localStorage.setItem('dv_27', JSON.stringify(this.user));
                 document.getElementById('set-ava').src = e.target.result;
             };
             r.readAsDataURL(input.files[0]);
@@ -255,7 +285,7 @@ window.app = {
         this.user.theme = this.user.theme === 'dark' ? 'light' : 'dark';
         document.body.className = this.user.theme;
         update(ref(db, 'users/' + this.user.id), { theme: this.user.theme });
-        localStorage.setItem('dv_26', JSON.stringify(this.user));
+        localStorage.setItem('dv_27', JSON.stringify(this.user));
     },
 
     search() {
