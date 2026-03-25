@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>DoveGram PRO</title>
+<title>DoveGram</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
-/* Зберігаємо твій дизайн без змін */
+/* Твій оригінальний дизайн та колірна палітра */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
 --bg:#17212b;--sb:#0e1621;--inp:#242f3d;--hov:#202b36;
@@ -18,74 +18,42 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .scr{display:none;height:100%;width:100%;position:absolute;top:0;left:0}.scr.act{display:flex}
 .inp{width:100%;padding:14px 18px;border-radius:12px;border:2px solid var(--brd);background:var(--inp);color:var(--txt);font-size:15px;outline:none;margin-bottom:12px;transition:border .2s;font-family:inherit}
 .inp:focus{border-color:var(--acc)}
-.ib{width:42px;height:42px;border:none;border-radius:50%;background:transparent;color:var(--txt2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
-.ib:hover{background:var(--hov);color:var(--txt)}
 
-/* ПАНЕЛЬ ВІДПОВІДІ (Нове) */
-.reply-bar { display:none; align-items:center; gap:10px; padding:8px 15px; background:var(--sb); border-left:3px solid var(--acc); margin:0 10px 5px 10px; border-radius:4px; }
-.reply-bar.show { display:flex; }
-.reply-info { flex:1; font-size:12px; overflow:hidden; }
-.reply-info b { color:var(--acc); }
-
-/* ПАНЕЛЬ ЗАПИСУ ГОЛОСУ (Нове) */
-.voice-rec { display:none; align-items:center; gap:10px; flex:1; color:var(--red); font-weight:600; }
-.voice-rec.show { display:flex; }
-.pulse { animation: pulse-red 1.5s infinite; }
-@keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-/* Звичайні стилі DoveGram */
+/* Стилі для авторизації, чатів та повідомлень з твого файлу index (25).html */
 #auth{flex-direction:column;align-items:center;justify-content:center;background:var(--sb)}
 .auth-box{width:90%;max-width:380px;text-align:center}
 .btn-main{width:100%;padding:14px;border:none;border-radius:12px;background:var(--acc);color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
 
 #app{flex-direction:row}
 .sb{width:320px;min-width:320px;height:100%;display:flex;flex-direction:column;background:var(--sb);border-right:1px solid var(--brd)}
-.sb-top{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--brd)}
-.search-w{flex:1;position:relative}
-.search-w i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt3)}
-.search-w input{width:100%;padding:10px 14px 10px 40px;border-radius:22px;border:none;background:var(--inp);color:var(--txt);outline:none}
-
 .cl{flex:1;overflow-y:auto}
 .ci{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:.12s}
 .ci:hover{background:var(--hov)}.ci.active{background:var(--acc)}.ci.active *{color:#fff!important}
-.av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;position:relative}
-.av.gl{background:linear-gradient(135deg,#5eaae8,#43b87a)}
-.av .dot{position:absolute;bottom:2px;right:2px;width:12px;height:12px;background:var(--grn);border-radius:50%;border:2px solid var(--sb)}
+.av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;position:relative;flex-shrink:0}
+.av .dot{position:absolute;bottom:1px;right:1px;width:13px;height:13px;background:var(--grn);border-radius:50%;border:2px solid var(--sb)}
 
 .cha{flex:1;display:flex;flex-direction:column;background:var(--bg)}
-.ch-h{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--sb);border-bottom:1px solid var(--brd);position:relative}
-.ch-nm{font-size:15px;font-weight:600}.ch-st{font-size:12px;color:var(--txt2)}
+.ch-h{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--sb);border-bottom:1px solid var(--brd)}
+.msgs{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+.mg{max-width:70%;display:flex;flex-direction:column}.mg.s{align-self:flex-end}.mg.r{align-self:flex-start}
+.bbl{padding:7px 12px;border-radius:12px;font-size:14.5px;position:relative}
+.mg.s .bbl{background:var(--sent);border-top-right-radius:4px}
+.mg.r .bbl{background:var(--recv);border-top-left-radius:4px}
 
-.msgs{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:4px}
-.mg{max-width:75%;display:flex;flex-direction:column;position:relative}.mg.s{align-self:flex-end}.mg.r{align-self:flex-start}
-.bbl{padding:8px 12px;border-radius:14px;font-size:14.5px;position:relative; transition: background 0.3s;}
-.mg.s .bbl{background:var(--sent);border-bottom-right-radius:4px}
-.mg.r .bbl{background:var(--recv);border-bottom-left-radius:4px}
-.mg.highlight .bbl { background: var(--acc2) !important; }
+.in-bar{display:flex;align-items:center;gap:8px;padding:10px;background:var(--sb);border-top:1px solid var(--brd)}
+#mIn{flex:1;background:var(--inp);border:none;border-radius:20px;padding:10px 15px;color:var(--txt);outline:none;resize:none}
 
-/* Редагування мітки */
-.edited-label { font-size: 10px; opacity: 0.6; margin-left: 5px; }
+.tdot span{width:5px;height:5px;background:var(--acc);border-radius:50%;display:inline-block;animation:bounce .6s infinite alternate}
+@keyframes bounce{to{opacity:.3;transform:translateY(-3px)}}
 
-.in-bar{display:flex;flex-direction:column;background:var(--sb);border-top:1px solid var(--brd)}
-.in-controls { display:flex; align-items:center; padding:10px; gap:8px; }
-#mIn{flex:1;background:var(--inp);border:none;border-radius:20px;padding:10px 15px;color:var(--txt);outline:none;resize:none;max-height:150px;}
-
-/* КОНТЕКСТНЕ МЕНЮ (Нове) */
-.ctx-menu { position:fixed; display:none; background:var(--sb); border:1px solid var(--brd); border-radius:12px; padding:5px; z-index:5000; box-shadow:0 8px 24px rgba(0,0,0,.5); }
-.ctx-menu button { display:flex; align-items:center; gap:10px; width:100%; padding:10px 15px; background:none; border:none; color:var(--txt); cursor:pointer; border-radius:8px; font-size:13px; }
-.ctx-menu button:hover { background:var(--hov); }
-
-.rpop{position:fixed;display:none;background:var(--sb);border:1px solid var(--brd);border-radius:20px;padding:5px;gap:5px;z-index:3000}
-.rpop.show{display:flex}
-
-@media(max-width:768px){ .sb.hid{display:none} .cha.hid{display:none} .back{display:flex!important} }
+@media(max-width:768px){ .sb.hid{display:none} .cha.hid{display:none} }
 </style>
 </head>
 <body>
 
 <div id="auth" class="scr act">
     <div class="auth-box">
-        <h1 style="margin-bottom:20px">DoveGram PRO</h1>
+        <h1 style="margin-bottom:20px">DoveGram</h1>
         <input class="inp" id="aId" placeholder="@username">
         <input class="inp" id="aNm" placeholder="Ваше ім'я">
         <button class="btn-main" id="aBtn">Увійти</button>
@@ -94,63 +62,32 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 <div id="app" class="scr">
     <aside id="sidebar" class="sb">
-        <div class="sb-top">
-            <button class="ib" id="menuBtn"><i class="fas fa-bars"></i></button>
-            <div class="search-w"><i class="fas fa-search"></i><input id="searchIn" placeholder="Пошук людей або повідомлень..."></div>
+        <div style="padding:10px; border-bottom:1px solid var(--brd)">
+            <input class="inp" id="searchIn" placeholder="Пошук..." style="margin-bottom:0; padding:8px 14px; border-radius:20px">
         </div>
         <div class="cl" id="chatList"></div>
     </aside>
 
     <main id="chatArea" class="cha hid">
         <header class="ch-h">
-            <button class="ib back" style="display:none" id="backBtn"><i class="fas fa-arrow-left"></i></button>
-            <div class="av gl" id="hAv" style="width:40px;height:40px"><i class="fas fa-globe"></i></div>
+            <button class="ib" id="backBtn" style="display:none"><i class="fas fa-arrow-left"></i></button>
+            <div class="av" id="hAv" style="width:40px;height:40px;background:var(--acc2)"><i class="fas fa-user"></i></div>
             <div style="flex:1">
                 <div class="ch-nm" id="hNm">Оберіть чат</div>
                 <div class="ch-st" id="hSt"></div>
             </div>
-            <button class="ib" id="ciBtn"><i class="fas fa-ellipsis-v"></i></button>
         </header>
-        
         <div class="msgs" id="msgs"></div>
-
         <div class="in-bar" id="inBar" style="display:none">
-            <div class="reply-bar" id="replyBar">
-                <div class="reply-info" id="replyInfo"></div>
-                <button class="ib" style="font-size:14px" id="cancelReply"><i class="fas fa-times"></i></button>
-            </div>
-            
-            <div class="in-controls">
-                <button class="ib" id="attBtn"><i class="fas fa-paperclip"></i></button>
-                
-                <div class="voice-rec" id="voiceRec">
-                    <i class="fas fa-microphone pulse"></i> <span id="voiceTimer">0:00</span>
-                </div>
-
-                <textarea id="mIn" rows="1" placeholder="Повідомлення..."></textarea>
-                
-                <button class="ib" id="voiceBtn"><i class="fas fa-microphone"></i></button>
-                <button class="ib" id="sndBtn" style="color:var(--acc); display:none;"><i class="fas fa-paper-plane"></i></button>
-            </div>
+            <textarea id="mIn" rows="1" placeholder="Повідомлення..."></textarea>
+            <button id="sndBtn" style="background:none; border:none; color:var(--acc); cursor:pointer; font-size:20px"><i class="fas fa-paper-plane"></i></button>
         </div>
     </main>
 </div>
 
-<div class="ctx-menu" id="ctxMsg">
-    <button id="ctxReply"><i class="fas fa-reply"></i> Відповісти</button>
-    <button id="ctxEdit"><i class="fas fa-pen"></i> Редагувати</button>
-    <button id="ctxForward"><i class="fas fa-share"></i> Переслати</button>
-    <button id="ctxCopy"><i class="fas fa-copy"></i> Копіювати текст</button>
-    <button id="ctxDelete" style="color:var(--red)"><i class="fas fa-trash"></i> Видалити</button>
-</div>
-
-<div class="rpop" id="rPop">
-    <button data-r="❤️">❤️</button><button data-r="💔">💔</button><button data-r="❤️‍🔥">❤️‍🔥</button>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, off, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, off, onChildAdded, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const fb = initializeApp({
     apiKey: "AIzaSyCuo7GtLDVE6ERb8MOke97mFa08M3oZoV8",
@@ -162,23 +99,16 @@ const fb = initializeApp({
 });
 const db = getDatabase(fb);
 
-/* STATE */
-let S = { 
-    user: null, chat: null, users: {}, 
-    replyingTo: null, editingMid: null,
-    recorder: null, audioChunks: [],
-    listeners: [] 
-};
-
+const S = { user: null, chat: null, users: {}, listeners: [], mob: window.innerWidth <= 768 };
 const $ = id => document.getElementById(id);
 const cid = (a, b) => [a, b].sort().join('_');
 
-/* AUTH & INITIALIZATION */
+/* АВТОРИЗАЦІЯ */
 const saved = localStorage.getItem('dg_user');
 if(saved) { S.user = JSON.parse(saved); startApp(); }
 
 $('aBtn').onclick = () => {
-    const id = $('aId').value.trim().toLowerCase().replace('@','');
+    const id = $('aId').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
     const nm = $('aNm').value.trim();
     if(id.length < 2) return alert('ID мін. 2 символи');
     S.user = { uid: id, name: nm || id };
@@ -190,201 +120,108 @@ $('aBtn').onclick = () => {
 function startApp() {
     $('auth').classList.remove('act');
     $('app').classList.add('act');
-    onValue(ref(db, 'users'), snap => { S.users = snap.val() || {}; renderSidebar(); });
+    
+    // Синхронізація списку користувачів
+    onValue(ref(db, 'users'), snap => {
+        S.users = snap.val() || {};
+        renderSidebar();
+    });
+
+    // Оновлення статусу "Online" кожні 25 сек
+    setInterval(() => {
+        if(S.user) update(ref(db, 'users/' + S.user.uid), { lastSeen: Date.now(), online: true });
+    }, 25000);
 }
 
-/* SIDEBAR RENDER (Search Logic) */
 function renderSidebar() {
     const q = $('searchIn').value.toLowerCase();
     let h = '';
-    
-    // Global Chat item
-    h += `<div class="ci ${S.chat==='global'?'active':''}" onclick="openChat('global')">
-        <div class="av gl"><i class="fas fa-globe"></i></div>
-        <div style="margin-left:12px"><b>Глобальний чат</b><br><small>Всі учасники</small></div>
-    </div>`;
-
     Object.values(S.users).forEach(u => {
         if(u.uid === S.user.uid) return;
-        if(q && !u.name.toLowerCase().includes(q) && !u.uid.toLowerCase().includes(q)) return;
-        h += `<div class="ci ${S.chat===u.uid?'active':''}" onclick="openChat('${u.uid}')">
+        if(q && !u.name.toLowerCase().includes(q)) return;
+        const act = S.chat === u.uid ? 'active' : '';
+        h += `<div class="ci ${act}" onclick="openChat('${u.uid}')">
             <div class="av" style="background:var(--acc)"><i class="fas fa-user"></i>${u.online?'<div class="dot"></div>':''}</div>
-            <div style="margin-left:12px"><b>${u.name}</b><br><small>@${u.uid}</small></div>
+            <div style="flex:1"><b>${u.name}</b><br><small>${u.online?'в мережі':'не в мережі'}</small></div>
         </div>`;
     });
     $('chatList').innerHTML = h;
 }
-$('searchIn').oninput = renderSidebar;
 
-/* OPEN CHAT LOGIC */
+/* СИНХРОНІЗАЦІЯ ПОВІДОМЛЕНЬ ТА СТАТУСІВ */
 window.openChat = (id) => {
     S.chat = id;
     S.listeners.forEach(off); S.listeners = [];
+    if(S.mob) { $('sidebar').classList.add('hid'); $('chatArea').classList.remove('hid'); $('backBtn').style.display='block'; }
     $('chatArea').classList.remove('hid');
     $('inBar').style.display = 'flex';
     
-    const isG = id === 'global';
-    const path = isG ? 'msgs/global' : 'msgs/' + cid(S.user.uid, id);
-    const target = isG ? {name: 'Глобал'} : S.users[id];
+    const u = S.users[id] || {};
+    $('hNm').textContent = u.name || id;
+    $('hSt').textContent = u.online ? 'в мережі' : 'був(ла) нещодавно';
     
-    $('hNm').textContent = target.name;
-    renderSidebar();
+    const path = 'msgs/' + cid(S.user.uid, id);
+    $('msgs').innerHTML = '';
 
-    const mRef = ref(db, path);
-    onValue(mRef, snap => {
-        $('msgs').innerHTML = '';
-        const data = snap.val() || {};
-        let lastSender = null;
-
-        Object.entries(data).forEach(([mid, m]) => {
-            const mine = m.sender === S.user.uid;
-            const div = document.createElement('div');
-            div.className = `mg ${mine?'s':'r'}`;
-            div.dataset.mid = mid;
-
-            // Reply section logic
-            let replyHtml = '';
-            if(m.replyTo) {
-                const rMsg = data[m.replyTo];
-                replyHtml = `<div class="reply-preview" style="border-left:2px solid var(--acc); padding-left:5px; margin-bottom:5px; font-size:11px; opacity:0.8;">
-                    <b>${rMsg?.senderName || 'Видалено'}</b><br>${rMsg?.text?.slice(0,30) || 'Аудіо/Фото'}...
-                </div>`;
-            }
-
-            // Audio logic
-            let content = m.text;
-            if(m.audio) {
-                content = `<audio controls src="${m.audio}" style="height:35px; width:200px;"></audio>`;
-            }
-
-            div.innerHTML = `
-                ${!mine && isG && lastSender !== m.sender ? `<div style="font-size:12px; color:var(--acc); font-weight:600; margin:5px 10px 0;">${m.senderName}</div>` : ''}
-                <div class="bbl" oncontextmenu="openMsgMenu(event, '${mid}')">
-                    ${replyHtml}
-                    <div>${content}</div>
-                    <div style="display:flex; justify-content:flex-end; gap:5px; font-size:10px; margin-top:3px; opacity:0.5;">
-                        ${m.edited ? '<span class="edited-label">ред.</span>' : ''}
-                        ${new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
-                        ${mine ? '<i class="fas fa-check"></i>' : ''}
-                    </div>
-                </div>
-            `;
-            $('msgs').appendChild(div);
-            lastSender = m.sender;
-        });
-        $('msgs').scrollTop = $('msgs').scrollHeight;
+    // Слухаємо нові повідомлення
+    const l1 = onChildAdded(ref(db, path), snap => {
+        const m = snap.val();
+        addMsgToUI(m);
     });
-    S.listeners.push(mRef);
+    S.listeners.push(l1);
+
+    // Слухаємо статус "Друкує..."
+    const l2 = onValue(ref(db, 'typing/' + cid(S.user.uid, id)), snap => {
+        const data = snap.val() || {};
+        const isTyping = Object.entries(data).some(([uid, val]) => uid !== S.user.uid && val === true);
+        if(isTyping) {
+            $('hSt').innerHTML = '<span class="tdot"><span></span><span></span><span></span></span> друкує...';
+        } else {
+            $('hSt').textContent = u.online ? 'в мережі' : 'був(ла) нещодавно';
+        }
+    });
+    S.listeners.push(l2);
+    renderSidebar();
 };
 
-/* CONTEXT MENU LOGIC */
-let currentContextMid = null;
-window.openMsgMenu = (e, mid) => {
-    e.preventDefault();
-    currentContextMid = mid;
-    const menu = $('ctxMsg');
-    menu.style.display = 'block';
-    menu.style.left = Math.min(e.pageX, innerWidth - 160) + 'px';
-    menu.style.top = Math.min(e.pageY, innerHeight - 200) + 'px';
-};
+function addMsgToUI(m) {
+    const mine = m.sender === S.user.uid;
+    const div = document.createElement('div');
+    div.className = `mg ${mine?'s':'r'}`;
+    div.innerHTML = `<div class="bbl">${m.text}<div style="font-size:10px; opacity:0.5; text-align:right; margin-top:3px">${new Date(m.time).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div></div>`;
+    $('msgs').appendChild(div);
+    $('msgs').scrollTop = $('msgs').scrollHeight;
+}
 
-document.onclick = () => $('ctxMsg').style.display = 'none';
-
-/* ACTIONS: DELETE, EDIT, REPLY */
-$('ctxDelete').onclick = async () => {
-    const path = (S.chat==='global'?'msgs/global':'msgs/'+cid(S.user.uid, S.chat)) + '/' + currentContextMid;
-    if(confirm('Видалити це повідомлення?')) await remove(ref(db, path));
-};
-
-$('ctxReply').onclick = async () => {
-    const path = (S.chat==='global'?'msgs/global':'msgs/'+cid(S.user.uid, S.chat)) + '/' + currentContextMid;
-    const snap = await get(ref(db, path));
-    const m = snap.val();
-    S.replyingTo = currentContextMid;
-    $('replyInfo').innerHTML = `<b>${m.senderName}</b><br>${m.text || 'Медіа'}`;
-    $('replyBar').classList.add('show');
-    $('mIn').focus();
-};
-
-$('ctxEdit').onclick = async () => {
-    const path = (S.chat==='global'?'msgs/global':'msgs/'+cid(S.user.uid, S.chat)) + '/' + currentContextMid;
-    const snap = await get(ref(db, path));
-    if(snap.val().sender !== S.user.uid) return alert('Можна редагувати лише свої повідомлення');
-    S.editingMid = currentContextMid;
-    $('mIn').value = snap.val().text;
-    $('mIn').focus();
-    $('sndBtn').innerHTML = '<i class="fas fa-check"></i>';
-};
-
-$('cancelReply').onclick = () => {
-    S.replyingTo = null;
-    $('replyBar').classList.remove('show');
-};
-
-/* SEND LOGIC */
-$('mIn').oninput = () => {
-    const hasVal = $('mIn').value.trim().length > 0;
-    $('sndBtn').style.display = hasVal ? 'flex' : 'none';
-    $('voiceBtn').style.display = hasVal ? 'none' : 'flex';
-};
-
-$('sndBtn').onclick = async () => {
+/* ВІДПРАВКА */
+$('sndBtn').onclick = () => {
     const txt = $('mIn').value.trim();
-    if(!txt) return;
-
-    const path = S.chat === 'global' ? 'msgs/global' : 'msgs/' + cid(S.user.uid, S.chat);
-    
-    if(S.editingMid) {
-        await update(ref(db, path + '/' + S.editingMid), { text: txt, edited: true });
-        S.editingMid = null;
-        $('sndBtn').innerHTML = '<i class="fas fa-paper-plane"></i>';
-    } else {
-        await push(ref(db, path), {
-            sender: S.user.uid, senderName: S.user.name,
-            text: txt, time: Date.now(),
-            replyTo: S.replyingTo
-        });
-    }
-    
+    if(!txt || !S.chat) return;
+    const path = 'msgs/' + cid(S.user.uid, S.chat);
+    push(ref(db, path), {
+        sender: S.user.uid,
+        text: txt,
+        time: Date.now()
+    });
     $('mIn').value = '';
-    $('mIn').dispatchEvent(new Event('input'));
-    S.replyingTo = null;
-    $('replyBar').classList.remove('show');
+    set(ref(db, 'typing/' + cid(S.user.uid, S.chat) + '/' + S.user.uid), false);
 };
 
-/* VOICE RECORDER LOGIC */
-$('voiceBtn').onclick = async () => {
-    if(!S.recorder) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        S.recorder = new MediaRecorder(stream);
-        S.recorder.ondataavailable = e => S.audioChunks.push(e.data);
-        S.recorder.onstop = async () => {
-            const blob = new Blob(S.audioChunks, { type: 'audio/ogg' });
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-                const base64audio = reader.result;
-                const path = S.chat === 'global' ? 'msgs/global' : 'msgs/' + cid(S.user.uid, S.chat);
-                push(ref(db, path), {
-                    sender: S.user.uid, senderName: S.user.name,
-                    audio: base64audio, time: Date.now()
-                });
-            };
-            S.audioChunks = [];
-        };
-        S.recorder.start();
-        $('voiceRec').classList.add('show');
-        $('mIn').style.display = 'none';
-    } else {
-        S.recorder.stop();
-        S.recorder = null;
-        $('voiceRec').classList.remove('show');
-        $('mIn').style.display = 'block';
-    }
+/* СТАТУС ДРУКУ */
+$('mIn').oninput = () => {
+    if(!S.chat) return;
+    set(ref(db, 'typing/' + cid(S.user.uid, S.chat) + '/' + S.user.uid), true);
+    clearTimeout(S.typeTimeout);
+    S.typeTimeout = setTimeout(() => {
+        set(ref(db, 'typing/' + cid(S.user.uid, S.chat) + '/' + S.user.uid), false);
+    }, 2000);
 };
 
-/* UI HELPERS */
-$('backBtn').onclick = () => { $('sidebar').classList.remove('hid'); $('chatArea').classList.add('hid'); };
+$('backBtn').onclick = () => {
+    $('sidebar').classList.remove('hid');
+    $('chatArea').classList.add('hid');
+    S.chat = null;
+};
 </script>
 </body>
 </html>
