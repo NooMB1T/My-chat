@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>DoveGram</title>
+<title>DoveGram 0.30 - God Mode</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -32,7 +32,6 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .btn-main:hover{background:var(--acc2)}.btn-main:disabled{opacity:.6;cursor:wait}
 .err{color:var(--red);font-size:13px;min-height:20px;margin-top:10px}
 .hint{color:var(--txt3);font-size:12px;margin-top:14px}
-.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ===== APP ===== */
 #app{flex-direction:row}
@@ -74,7 +73,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 /* Chat area */
 .cha{flex:1;display:flex;flex-direction:column;background:var(--bg)}
-.ch-h{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--sb);border-bottom:1px solid var(--brd);min-height:58px}
+.ch-h{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--sb);border-bottom:1px solid var(--brd);min-height:58px;position:relative}
 .back{display:none}
 .ch-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
 .ch-av i{font-size:18px}
@@ -110,12 +109,20 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .in-bar textarea::placeholder{color:var(--txt3)}
 .ib.snd{color:var(--acc);font-size:20px}.ib.snd:hover{color:var(--acc2)}
 
-/* Attach menu */
+/* Attach & Menus */
 .att-m{display:none;padding:10px 14px;background:var(--sb);border-top:1px solid var(--brd);gap:10px}
 .att-m.show{display:flex}
 .att-b{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:12px 18px;border-radius:14px;border:none;background:var(--inp);color:var(--txt);transition:.2s;font-size:12px;font-family:inherit}
 .att-b i{font-size:24px}.att-b:hover{background:var(--hov);transform:translateY(-2px)}
 .att-b.ph i{color:#5eaae8}.att-b.vi i{color:#e05555}
+
+/* Top Right Chat Menu (Three Dots Menu) */
+.ch-menu{position:absolute;top:55px;right:15px;background:var(--sb);border:1px solid var(--brd);border-radius:12px;padding:5px;z-index:2000;display:none;flex-direction:column;box-shadow:0 8px 24px rgba(0,0,0,.6);min-width:160px}
+.ch-menu.show{display:flex}
+.ch-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;background:none;border:none;color:var(--txt);font-size:14px;cursor:pointer;border-radius:8px;font-family:inherit;transition:.15s}
+.ch-menu button:hover{background:var(--hov)}
+.ch-menu .cm-del{color:var(--red)}
+.ch-menu .cm-del i{color:var(--red)}
 
 /* Preview */
 .prev{display:none;align-items:center;gap:10px;padding:8px 14px;background:var(--sb);border-top:1px solid var(--brd)}
@@ -134,7 +141,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .fscr.show{display:flex}.fscr img,.fscr video{max-width:95%;max-height:95%;border-radius:4px}
 .fscr .x{position:absolute;top:16px;right:16px;width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
-/* Modal */
+/* Modals */
 .mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1000}
 .mo.show{display:flex}
 .md{width:90%;max-width:400px;background:var(--sb);border-radius:16px;padding:24px;animation:fadeIn .25s ease}
@@ -144,11 +151,16 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .btn-out{width:100%;padding:13px;border:1px solid var(--red);border-radius:12px;background:transparent;color:var(--red);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
 .btn-out:hover{background:rgba(224,85,85,.1)}
 
+/* User Profile Card */
+.ucard{text-align:center;padding:10px 0 16px}
+.ucard .uav{width:80px;height:80px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff}
+.ucard .uname{font-size:20px;font-weight:700;margin-bottom:4px}
+.ucard .uid{font-size:14px;color:var(--acc);margin-bottom:8px}
+.ucard .ubio{font-size:14px;color:var(--txt2);background:var(--inp);padding:10px;border-radius:8px;margin-bottom:4px}
+
 /* Toast */
 .tt{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--inp);border:1px solid var(--brd);padding:10px 24px;border-radius:20px;font-size:14px;opacity:0;transition:.25s;z-index:9999;pointer-events:none;white-space:nowrap}
 .tt.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* Empty */
 .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--txt3)}
 .empty i{font-size:52px;margin-bottom:14px;opacity:.2}.empty p{font-size:15px}
 
@@ -177,7 +189,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div id="app" class="scr">
 <aside id="sidebar" class="sb">
 <div class="sb-top">
-<button class="ib" id="menuBtn" title="Профиль"><i class="fas fa-bars"></i></button>
+<button class="ib" id="menuBtn" title="Мой профиль"><i class="fas fa-bars"></i></button>
 <div class="search-w"><i class="fas fa-search"></i><input id="searchIn" placeholder="Поиск..."></div>
 </div>
 <div class="tabs">
@@ -193,7 +205,12 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <button class="ib back" id="backBtn"><i class="fas fa-arrow-left"></i></button>
 <div class="ch-av av gl" id="hAv"><i class="fas fa-globe-americas"></i></div>
 <div class="ch-info"><span class="ch-nm" id="hNm">DoveGram</span><span class="ch-st" id="hSt"></span></div>
-<button class="ib" id="ciBtn"><i class="fas fa-ellipsis-v"></i></button>
+<button class="ib" id="ciBtn" title="Опции чата"><i class="fas fa-ellipsis-v"></i></button>
+
+<div class="ch-menu" id="chMenu">
+    <button id="cmProf"><i class="fas fa-user"></i> Профиль</button>
+    <button id="cmClear" class="cm-del"><i class="fas fa-trash-alt"></i> Очистить чат</button>
+</div>
 </header>
 <div class="msgs" id="msgs"><div class="empty"><i class="fas fa-paper-plane"></i><p>Выберите чат для общения</p></div></div>
 <div class="att-m" id="attM">
@@ -215,7 +232,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 <div class="mo" id="profM">
 <div class="md">
-<div class="md-top"><h3><i class="fas fa-user-cog"></i> Профиль</h3><button class="ib" id="profX"><i class="fas fa-times"></i></button></div>
+<div class="md-top"><h3><i class="fas fa-user-cog"></i> Мой Профиль</h3><button class="ib" id="profX"><i class="fas fa-times"></i></button></div>
 <label class="fl">@ID</label><input class="inp" id="pId" disabled>
 <label class="fl">Имя</label><input class="inp" id="pNm">
 <label class="fl">Телефон</label><input class="inp" id="pPh" type="tel">
@@ -223,6 +240,18 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div class="md-btns">
 <button class="btn-main" id="pSave"><i class="fas fa-check"></i> Сохранить</button>
 <button class="btn-out" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+</div>
+</div>
+</div>
+
+<div class="mo" id="userProfM">
+<div class="md">
+<div class="md-top"><h3>Инфо</h3><button class="ib" id="userProfX"><i class="fas fa-times"></i></button></div>
+<div class="ucard">
+<div class="uav" id="upAv"></div>
+<div class="uname" id="upNm"></div>
+<div class="uid" id="upId"></div>
+<div class="ubio" id="upBio"></div>
 </div>
 </div>
 </div>
@@ -244,7 +273,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getDatabase,ref,set,get,push,onValue,onChildAdded,remove,update,off}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import{getDatabase,ref,set,get,push,onValue,onChildAdded,remove,update,off,query,limitToLast}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 /* ===== FIREBASE INIT ===== */
 let db;
@@ -279,19 +308,13 @@ function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');set
 function autoH(){const t=$('mIn');if(!t)return;t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px'}
 function showScr(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('act'));$(id).classList.add('act')}
 
-/* ===== AUTH — МИТТЄВИЙ ВХІД ===== */
+/* ===== AUTH ===== */
 (function init(){
 const saved=localStorage.getItem('dg_user');
 if(saved){
 try{
 const u=JSON.parse(saved);
-if(u&&u.uid){
-S.user=u;
-showScr('app');
-startApp();
-firebaseSyncUser(u.uid,u.name);
-return;
-}
+if(u&&u.uid){ S.user=u; showScr('app'); startApp(); firebaseSyncUser(u.uid,u.name); return; }
 }catch(e){}
 }
 showScr('auth');
@@ -299,13 +322,7 @@ showScr('auth');
 
 function firebaseSyncUser(uid,name){
 set(ref(db,'users/'+uid),{
-id:'@'+uid,
-name:name||uid,
-phone:'',
-bio:'',
-online:true,
-joined:Date.now(),
-lastSeen:Date.now()
+id:'@'+uid, name:name||uid, phone:'', bio:'', online:true, joined:Date.now(), lastSeen:Date.now()
 }).catch(()=>{});
 }
 
@@ -313,14 +330,10 @@ $('aBtn').addEventListener('click',()=>{
 const id=$('aId').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
 const nm=$('aNm').value.trim();
 if(!id||id.length<2){$('aErr').textContent='Мінімум 2 символи, латиниця';return}
-
 const userData={uid:id,name:nm||id,phone:'',bio:'',id:'@'+id};
 S.user=userData;
 localStorage.setItem('dg_user',JSON.stringify(userData));
-
-showScr('app');
-startApp();
-firebaseSyncUser(id,nm||id);
+showScr('app'); startApp(); firebaseSyncUser(id,nm||id);
 });
 
 $('aId').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('aNm').focus()}});
@@ -331,13 +344,13 @@ let usersC={},msgsC={};
 
 function startApp(){
 if(!S.user)return;
-
 const uRef=ref(db,'users/'+S.user.uid);
 update(uRef,{online:true,lastSeen:Date.now()}).catch(()=>{});
 window.addEventListener('beforeunload',()=>{try{update(uRef,{online:false,lastSeen:Date.now()})}catch(e){}});
 setInterval(()=>{update(uRef,{lastSeen:Date.now()}).catch(()=>{})},25000);
 
 onValue(ref(db,'users'),s=>{usersC=s.val()||{};renderCL()},{});
+// Зберігаємо onValue для msgs щоб працював renderCL() "останнє повідомлення", але для легковажності
 onValue(ref(db,'msgs'),s=>{msgsC=s.val()||{};renderCL()},{});
 
 if(S.mob){$('sidebar').classList.remove('hid');$('chatArea').classList.add('hid')}
@@ -362,13 +375,9 @@ if(S.tab==='all'||S.tab==='global'){
 const gm=msgsC.global?Object.values(msgsC.global):[];
 const gl=gm.length?gm[gm.length-1]:null;
 if(!q||'общий global'.includes(q)){
-h+=mkCI('global',
-'<i class="fas fa-globe-americas"></i>',
-'Общий чат',
+h+=mkCI('global', '<i class="fas fa-globe-americas"></i>', 'Общий чат',
 gl?esc(trn((gl.senderName||'')+': '+(gl.text||'📷'),30)):'Начните общение',
-gl?fmtT(gl.time):'',
-'gl',false
-);
+gl?fmtT(gl.time):'', 'gl', false);
 }}
 
 if(S.tab==='all'||S.tab==='private'){
@@ -398,41 +407,38 @@ const act=S.chat===id?' active':'';
 return`<div class="ci${act}" data-id="${id}"><div class="av ${cls}">${icon}${online?'<div class="dot"></div>':''}</div><div class="ci-body"><div class="ci-top"><span class="ci-name">${name}</span><span class="ci-time">${time}</span></div><div class="ci-msg">${msg}</div></div></div>`;
 }
 
-/* ===== OPEN CHAT ===== */
+/* ===== OPEN CHAT (З ВИПРАВЛЕНОЮ ПРОДУКТИВНІСТЮ) ===== */
 function openChat(id){
 cleanL();S.chat=id;
 const isG=id==='global';
 if(S.mob){$('sidebar').classList.add('hid');$('chatArea').classList.remove('hid')}
 $('chatArea').classList.remove('hid');$('inBar').style.display='flex';$('attM').classList.remove('show');clearPrev();renderCL();
+$('chMenu').classList.remove('show');
 
 if(isG){
 $('hAv').innerHTML='<i class="fas fa-globe-americas"></i>';$('hAv').className='ch-av av gl';
-$('hNm').textContent='Общий чат';$('hSt').textContent=Object.keys(usersC).length+' участников';$('hSt').className='ch-st';
+$('hNm').textContent='Общий чат';$('hSt').textContent=Object.keys(usersC).length+' участн.';$('hSt').className='ch-st';
+$('cmProf').style.display = 'none'; // Немає профілю в глобал
 }else{
 const u=usersC[id]||{};
 $('hAv').innerHTML=`<i class="fas ${getIcon(id)}"></i>`;$('hAv').className='ch-av av '+getC(id);
 $('hNm').textContent=u.name||id;updSt(id);
+$('cmProf').style.display = 'flex'; // Є профіль в особистих
 }
 
 $('msgs').innerHTML='';
 const path=isG?'msgs/global':'msgs/'+cid(S.user.uid,id);
-let lastDate='',initDone=false;
+let lastDate='';
 
-get(ref(db,path)).then(snap=>{
-const data=snap.val()||{};
-Object.entries(data).forEach(([k,v])=>{
-const dd=fmtD(v.time);if(dd!==lastDate){lastDate=dd;addDS(dd)}
-addM(k,v,isG);
-});
-scrollE();initDone=true;
+// Тільки останні 50 повідомлень для миттєвого відображення без дублювання
+const qRef = query(ref(db,path), limitToLast(50));
 
-const l1=onChildAdded(ref(db,path),s=>{
-if(!initDone)return;
+const l1=onChildAdded(qRef,s=>{
 if($('msgs').querySelector(`[data-k="${s.key}"]`))return;
 const v=s.val();const dd=fmtD(v.time);if(dd!==lastDate){lastDate=dd;addDS(dd)}
 addM(s.key,v,isG);scrollE();
 });
-S.listeners.push(l1);
+S.listeners.push(()=>off(qRef,'child_added',l1));
 
 const l2=onValue(ref(db,path),s2=>{
 const d2=s2.val()||{};
@@ -441,8 +447,7 @@ const el=$('msgs').querySelector(`[data-k="${k}"] .mg-rx`);
 if(el)el.innerHTML=rxHTML(k,v.reactions);
 });
 });
-S.listeners.push(l2);
-}).catch(e=>{$('msgs').innerHTML='<div class="empty"><i class="fas fa-exclamation-triangle"></i><p>Ошибка загрузки</p></div>'});
+S.listeners.push(()=>off(ref(db,path),'value',l2));
 
 if(!isG){
 const tp='typing/'+cid(S.user.uid,id);
@@ -452,7 +457,7 @@ if(Object.entries(d).some(([u,v])=>u!==S.user.uid&&v)){
 $('hSt').innerHTML='<span class="tdot"><span></span><span></span><span></span></span> печатает...';$('hSt').className='ch-st tp';
 }else updSt(id);
 });
-S.listeners.push(l3);
+S.listeners.push(()=>off(ref(db,tp),'value',l3));
 }
 }
 
@@ -499,7 +504,7 @@ if(media&&mt==='video')data.video=media;
 
 $('mIn').value='';clearPrev();autoH();$('attM').classList.remove('show');
 
-// Відправляємо без затримок у фоні
+// Миттєво відправляємо в базу
 push(ref(db,path),data).catch(e=>toast('Ошибка: '+e.message));
 
 if(!isG){
@@ -525,7 +530,7 @@ function clearPrev(){S.media=null;S.mediaType=null;$('prev').style.display='none
 $('fPh').addEventListener('change',e=>{const f=e.target.files[0];if(f)handleFile(f,'image');e.target.value=''});
 $('fVi').addEventListener('change',e=>{const f=e.target.files[0];if(f)handleFile(f,'video');e.target.value=''});
 
-/* ===== TYPING (THROTTLED - Усунуто зависання) ===== */
+/* ===== TYPING (THROTTLED - Запобіжник перевантаження) ===== */
 let isTyping = false;
 function onTyping(){
 if(!S.chat||S.chat==='global')return;
@@ -540,6 +545,36 @@ S.tyTO=setTimeout(()=>{
     set(ref(db,p),false).catch(()=>{});
 },2000);
 }
+
+/* ===== THREE DOTS MENU (Три крапки) ===== */
+$('ciBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    $('chMenu').classList.toggle('show');
+});
+
+$('cmClear').addEventListener('click', () => {
+    if(!confirm('Удалить всю историю этого чата?')) return;
+    const path = S.chat === 'global' ? 'msgs/global' : 'msgs/'+cid(S.user.uid,S.chat);
+    remove(ref(db, path)).then(() => {
+        $('msgs').innerHTML = '<div class="empty"><i class="fas fa-broom"></i><p>Чат очищен</p></div>';
+    }).catch(e => toast("Ошибка: " + e.message));
+    $('chMenu').classList.remove('show');
+});
+
+$('cmProf').addEventListener('click', () => {
+    if(S.chat === 'global') return;
+    const u = usersC[S.chat];
+    if(u) {
+        $('upAv').innerHTML = `<i class="fas ${getIcon(u.uid)}"></i>`;
+        $('upAv').className = 'uav ' + getC(u.uid);
+        $('upNm').textContent = u.name;
+        $('upId').textContent = u.id;
+        $('upBio').textContent = u.bio || 'Нет информации о себе';
+        $('userProfM').classList.add('show');
+    }
+    $('chMenu').classList.remove('show');
+});
+
 
 /* ===== REACTIONS ===== */
 let rKey=null;
@@ -600,10 +635,15 @@ $('backBtn').addEventListener('click',()=>{if(S.mob){$('sidebar').classList.remo
 $('searchIn').addEventListener('input',renderCL);
 $('menuBtn').addEventListener('click',openProf);
 $('profX').addEventListener('click',()=>$('profM').classList.remove('show'));
+$('userProfX').addEventListener('click',()=>$('userProfM').classList.remove('show'));
 $('pSave').addEventListener('click',saveProf);
 $('logoutBtn').addEventListener('click',logout);
 $('rPop').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>addR(b.dataset.r)));
-document.addEventListener('click',e=>{if(!e.target.closest('.rpop')&&!e.target.closest('.mg'))$('rPop').classList.remove('show');if(!e.target.closest('.att-m')&&!e.target.closest('#attBtn'))$('attM').classList.remove('show')});
+document.addEventListener('click',e=>{
+    if(!e.target.closest('.rpop')&&!e.target.closest('.mg'))$('rPop').classList.remove('show');
+    if(!e.target.closest('.att-m')&&!e.target.closest('#attBtn'))$('attM').classList.remove('show');
+    if(!e.target.closest('#chMenu')&&!e.target.closest('#ciBtn'))$('chMenu').classList.remove('show');
+});
 addEventListener('resize',()=>{S.mob=innerWidth<=768});
 }
 
