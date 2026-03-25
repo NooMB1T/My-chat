@@ -3,137 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DoveGram 0.23</title>
+    <title>DoveGram 0.24</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         :root { --accent: #3b82f6; --bg: #000; --panel: #0a0a0a; --text: #fff; --msg-my: #2563eb; --msg-other: #1a1a1a; --border: #111; }
         body.light { --bg: #f0f2f5; --panel: #fff; --text: #000; --msg-other: #e4e6eb; --border: #ddd; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: background 0.3s, color 0.3s; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Архитектура интерфейса */
+        /* Контейнеры */
         #app-core { display: none; flex: 1; width: 100vw; flex-direction: row; }
         .main-view { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--border); background: var(--bg); }
         .side-icons { width: 75px; display: flex; flex-direction: column; align-items: center; padding-top: 30px; gap: 35px; background: var(--panel); border-left: 1px solid var(--border); }
         .side-icons i { font-size: 24px; color: #777; cursor: pointer; padding: 10px; transition: 0.2s; }
-        .side-icons i:hover { color: var(--accent); transform: scale(1.1); }
+        .side-icons i:hover { color: var(--accent); }
 
         /* Экраны */
-        .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; overflow-y: auto; }
+        .screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; z-index: 1000; padding: 20px; }
         .screen.active { display: flex; }
 
-        /* UI Компоненты */
-        .input-ui { width: 100%; padding: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--text); outline: none; transition: border 0.2s; }
-        .input-ui:focus { border-color: var(--accent); }
-        .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; color: #fff; cursor: pointer; transition: 0.2s; }
-        .btn-ui:active { transform: scale(0.98); opacity: 0.9; }
+        /* UI */
+        .input-ui { width: 100%; padding: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--text); outline: none; }
+        .btn-ui { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; font-weight: bold; color: #fff; cursor: pointer; }
         
-        /* Списки и чат */
-        .user-row { padding: 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
-        .user-row:hover { background: var(--panel); }
+        .user-row { padding: 15px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid var(--border); cursor: pointer; }
         .user-row img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: var(--border); }
         
         #msg-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 6px; }
         .bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; position: relative; word-wrap: break-word; font-size: 15px; }
         .bubble.my { align-self: flex-end; background: var(--msg-my); color: #fff; border-bottom-right-radius: 4px; }
         .bubble.other { align-self: flex-start; background: var(--msg-other); border-bottom-left-radius: 4px; }
-        .react-badge { position: absolute; bottom: -12px; right: 5px; background: var(--panel); border-radius: 12px; padding: 2px 6px; font-size: 12px; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .react-badge { position: absolute; bottom: -12px; right: 5px; background: var(--panel); border-radius: 12px; padding: 2px 6px; font-size: 12px; border: 1px solid var(--border); }
     </style>
 </head>
 <body class="dark">
 
 <div id="scr-auth" class="screen active" style="justify-content: center; align-items: center;">
     <div style="width: 100%; max-width: 320px; text-align: center;">
-        <h2 style="margin-bottom:25px; font-size: 28px;">DoveGram <span style="color:var(--accent)">0.23</span></h2>
-        <input type="text" id="reg-id" class="input-ui" placeholder="@ID (уникальный)" style="margin-bottom:12px">
-        <input type="text" id="reg-name" class="input-ui" placeholder="Ваше имя" style="margin-bottom:12px">
+        <h2 style="margin-bottom:25px;">DoveGram 0.24</h2>
+        <input type="text" id="reg-id" class="input-ui" placeholder="@ID" style="margin-bottom:12px">
+        <input type="text" id="reg-name" class="input-ui" placeholder="Имя" style="margin-bottom:12px">
         <input type="text" id="reg-phone" class="input-ui" placeholder="+380..." style="margin-bottom:20px">
-        <button id="auth-btn" onclick="app.authenticate()" class="btn-ui">ВОЙТИ</button>
+        <button onclick="app.fastAuth()" class="btn-ui">ВОЙТИ МОМЕНТАЛЬНО</button>
     </div>
 </div>
 
 <div id="app-core">
     <div class="main-view">
         <div style="padding: 15px; border-bottom: 1px solid var(--border);">
-            <input type="text" id="search-input" class="input-ui" placeholder="Поиск (имя или ID)..." oninput="app.search()">
+            <input type="text" id="search-input" class="input-ui" placeholder="Поиск..." oninput="app.search()">
         </div>
         <div id="contacts-list" style="flex: 1; overflow-y: auto;"></div>
     </div>
-    
     <div class="side-icons">
-        <i class="fas fa-cog" onclick="app.nav('scr-settings')" title="Настройки"></i>
-        <i class="fas fa-search" onclick="document.getElementById('search-input').focus()" title="Поиск"></i>
-        <i class="fas fa-users" id="dev-btn" style="display:none; color: #ef4444;" onclick="app.showAdminPanel()" title="Админ Панель"></i>
-        <i class="fas fa-user-circle" onclick="app.showMyProfile()" title="Профиль"></i>
+        <i class="fas fa-cog" onclick="app.nav('scr-settings')"></i>
+        <i class="fas fa-search" onclick="document.getElementById('search-input').focus()"></i>
+        <i class="fas fa-users" id="dev-btn" style="display:none; color: #ef4444;" onclick="app.showAdminPanel()"></i>
+        <i class="fas fa-user-circle" onclick="app.showMyProfile()"></i>
     </div>
 </div>
 
 <div id="scr-profile" class="screen">
-    <i class="fas fa-arrow-left" onclick="app.nav('close')" style="font-size: 22px; cursor:pointer; margin-bottom: 20px;"></i>
-    <div style="text-align: center; margin-top: 20px;">
-        <img id="prof-ava" src="" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border: 3px solid var(--accent); margin-bottom: 15px; background: var(--panel);">
+    <i class="fas fa-arrow-left" onclick="app.nav('close')" style="margin-bottom: 20px; cursor:pointer;"></i>
+    <div style="text-align: center;">
+        <img id="prof-ava" src="" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border: 3px solid var(--accent); background: var(--panel); margin-bottom:10px;">
         <h2 id="prof-name">Имя</h2>
-        <p id="prof-id" style="font-size: 16px; opacity: 0.6; margin-top: 5px;"></p>
-        <p id="prof-phone" style="font-size: 18px; font-weight: bold; color: var(--accent); margin-top: 10px;"></p>
+        <p id="prof-id" style="opacity: 0.6;"></p>
+        <p id="prof-phone" style="font-weight: bold; color: var(--accent); margin-top: 10px;"></p>
     </div>
 </div>
 
 <div id="scr-settings" class="screen">
     <div style="display:flex; align-items:center; gap: 15px; margin-bottom: 25px;">
-        <i class="fas fa-arrow-left" onclick="app.nav('close')" style="font-size: 22px; cursor:pointer;"></i>
+        <i class="fas fa-arrow-left" onclick="app.nav('close')" style="cursor:pointer;"></i>
         <h2>Настройки</h2>
     </div>
-    
     <div style="text-align: center; margin-bottom: 30px;">
-        <img id="set-ava-preview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border: 2px solid var(--border); margin-bottom:10px; background: var(--panel);">
+        <img id="set-ava-preview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; background: var(--panel); margin-bottom:10px;">
         <br>
-        <button class="btn-ui" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); width: auto; padding: 10px 20px;" onclick="document.getElementById('ava-upload').click()">
-            <i class="fas fa-camera"></i> Изменить фото
-        </button>
+        <button class="btn-ui" style="background: var(--panel); border: 1px solid var(--border); width: auto; padding: 10px 20px;" onclick="document.getElementById('ava-upload').click()">Сменить фото</button>
         <input type="file" id="ava-upload" hidden accept="image/*" onchange="app.updateAvatar(this)">
     </div>
-
-    <button class="btn-ui" style="background: var(--panel); color: var(--text); border: 1px solid var(--border); margin-bottom: 30px;" onclick="app.toggleTheme()">🌓 Изменить тему (Светлая/Темная)</button>
-    <button class="btn-ui" style="background: #ef4444;" onclick="app.logout()">Выйти из аккаунта</button>
-</div>
-
-<div id="scr-admin" class="screen">
-    <div style="display:flex; align-items:center; gap: 15px; margin-bottom: 20px;">
-        <i class="fas fa-arrow-left" onclick="app.nav('close')" style="font-size: 22px; cursor:pointer;"></i>
-        <h2 style="color:#ef4444">База пользователей</h2>
-    </div>
-    <div id="admin-list" style="flex:1; overflow-y:auto;"></div>
+    <button class="btn-ui" style="background: var(--panel); border: 1px solid var(--border); margin-bottom: 15px;" onclick="app.toggleTheme()">Сменить тему</button>
+    <button class="btn-ui" style="background: #ef4444;" onclick="app.logout()">Выйти</button>
 </div>
 
 <div id="scr-chat" class="screen" style="padding:0;">
     <div style="padding: 15px; display: flex; align-items: center; gap: 15px; background: var(--panel); border-bottom: 1px solid var(--border);">
-        <i class="fas fa-arrow-left" onclick="app.closeChat()" style="font-size: 20px; cursor:pointer;"></i>
-        <img id="chat-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background:var(--bg)">
-        <div style="flex:1">
-            <b id="chat-name" style="font-size: 16px;">Имя</b>
-            <div id="typing-indicator" style="font-size: 11px; color: var(--accent); height: 12px;"></div>
-        </div>
+        <i class="fas fa-arrow-left" onclick="app.closeChat()" style="cursor:pointer;"></i>
+        <img id="chat-ava" src="" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+        <b id="chat-name">Имя</b>
     </div>
-    
     <div id="msg-box"></div>
-    
-    <div id="react-panel" style="display:none; padding:12px; justify-content:center; gap:30px; background:var(--panel); border-top:1px solid var(--border); box-shadow: 0 -5px 15px rgba(0,0,0,0.3); z-index: 10;">
-        <span onclick="app.react('❤️‍🔥')" style="font-size: 26px; cursor:pointer; transition:0.2s;">❤️‍🔥</span>
-        <span onclick="app.react('💔')" style="font-size: 26px; cursor:pointer; transition:0.2s;">💔</span>
-        <span onclick="app.react('❤️')" style="font-size: 26px; cursor:pointer; transition:0.2s;">❤️</span>
+    <div id="react-panel" style="display:none; padding:12px; justify-content:center; gap:30px; background:var(--panel);">
+        <span onclick="app.react('❤️‍🔥')" style="font-size: 26px; cursor:pointer;">❤️‍🔥</span>
+        <span onclick="app.react('💔')" style="font-size: 26px; cursor:pointer;">💔</span>
+        <span onclick="app.react('❤️')" style="font-size: 26px; cursor:pointer;">❤️</span>
     </div>
-
-    <div style="padding:14px; display:flex; gap:12px; align-items:center; background:var(--panel); border-top:1px solid var(--border);">
-        <i class="fas fa-camera" style="font-size:24px; color:var(--accent); cursor:pointer; padding:5px;" onclick="document.getElementById('img-upload').click()"></i>
+    <div style="padding:14px; display:flex; gap:12px; background:var(--panel); border-top:1px solid var(--border);">
+        <i class="fas fa-camera" style="font-size:24px; color:var(--accent); cursor:pointer;" onclick="document.getElementById('img-upload').click()"></i>
         <input type="file" id="img-upload" hidden accept="image/*" onchange="app.sendPhoto(this)">
-        <input type="text" id="msg-input" class="input-ui" style="margin:0; flex:1;" placeholder="Сообщение..." oninput="app.handleTyping()" onkeydown="if(event.key==='Enter') app.sendText()">
-        <i class="fas fa-paper-plane" style="font-size:24px; color:var(--accent); cursor:pointer; padding:5px;" onclick="app.sendText()"></i>
+        <input type="text" id="msg-input" class="input-ui" style="margin:0; flex:1;" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') app.sendText()">
+        <i class="fas fa-paper-plane" style="font-size:24px; color:var(--accent); cursor:pointer;" onclick="app.sendText()"></i>
     </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, get, update, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, update, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCuo7GtLDVE6ERb8MOke97mFa08M3oZoV8",
@@ -150,91 +127,52 @@ window.app = {
     user: null, peer: null, lastM: null, chatRef: null,
     
     init() {
-        const sess = localStorage.getItem('dove_v23');
-        if(sess) {
-            this.user = JSON.parse(sess);
-            this.launch();
-        }
+        const sess = localStorage.getItem('dove_v24');
+        if(sess) { this.user = JSON.parse(sess); this.launch(); }
     },
 
-    async authenticate() {
+    fastAuth() {
         const id = document.getElementById('reg-id').value.trim().toLowerCase();
         const nm = document.getElementById('reg-name').value.trim();
         const ph = document.getElementById('reg-phone').value.trim();
-        const btn = document.getElementById('auth-btn');
 
-        if(!id || !nm || !ph) return alert("Заполните все поля!");
-        
-        // Жесткая проверка для dev аккаунта
-        if(id === 'dev' && !ph.includes('380685244936')) {
-            return alert("Отказано в доступе. ID @dev зарезервирован для администратора.");
+        if(!id || !nm || !ph) return alert("Заполни всё!");
+
+        // Защита админки
+        if(id === 'dev' && ph !== '380685244936') {
+            return alert("Доступ к @dev запрещен.");
         }
 
-        btn.disabled = true;
-        btn.innerText = "ПРОВЕРКА...";
-
-        try {
-            // Точечный запрос - никакой долгой синхронизации
-            const snap = await get(ref(db, 'users/' + id));
-
-            if (snap.exists()) {
-                const existingData = snap.val();
-                if (existingData.phone === ph) {
-                    this.user = existingData;
-                } else {
-                    btn.disabled = false;
-                    btn.innerText = "ВОЙТИ";
-                    return alert("Ошибка: Неверный номер телефона для этого ID!");
-                }
-            } else {
-                this.user = { id, name: nm, phone: ph, ava: '', theme: 'dark' };
-                await set(ref(db, 'users/' + id), this.user);
-            }
-
-            localStorage.setItem('dove_v23', JSON.stringify(this.user));
-            this.launch();
-        } catch(e) {
-            alert("Ошибка сети. Проверьте соединение с интернетом.");
-            btn.disabled = false;
-            btn.innerText = "ВОЙТИ";
-        }
+        // Просто сохраняем и входим. Без проверок базы.
+        this.user = { id, name: nm, phone: ph, ava: '', theme: 'dark' };
+        set(ref(db, 'users/' + id), this.user);
+        localStorage.setItem('dove_v24', JSON.stringify(this.user));
+        this.launch();
     },
 
     launch() {
         document.getElementById('scr-auth').classList.remove('active');
         document.getElementById('app-core').style.display = 'flex';
         if(this.user.id === 'dev') document.getElementById('dev-btn').style.display = 'block';
-        
         document.body.className = this.user.theme || 'dark';
-        this.loadContactList();
+        this.loadUsers();
     },
 
-    loadContactList() {
+    loadUsers() {
         onValue(ref(db, 'users'), (snap) => {
             const list = document.getElementById('contacts-list');
             list.innerHTML = '';
-            const data = snap.val() || {};
-            
-            Object.values(data).forEach(u => {
+            Object.values(snap.val() || {}).forEach(u => {
                 if(u.id !== this.user.id) {
                     const row = document.createElement('div');
                     row.className = 'user-row';
                     row.onclick = () => this.openChat(u);
                     row.innerHTML = `<img src="${u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='}">
-                                     <div><b style="font-size:16px;">${u.name}</b><br><small style="color:#777">@${u.id}</small></div>`;
+                                     <div><b>${u.name}</b><br><small style="color:#777">@${u.id}</small></div>`;
                     list.appendChild(row);
                 }
             });
         });
-    },
-
-    search() {
-        const q = document.getElementById('search-input').value.toLowerCase();
-        const rows = document.getElementById('contacts-list').children;
-        for (let i = 0; i < rows.length; i++) {
-            const txt = rows[i].innerText.toLowerCase();
-            rows[i].style.display = txt.includes(q) ? 'flex' : 'none';
-        }
     },
 
     openChat(u) {
@@ -242,65 +180,44 @@ window.app = {
         document.getElementById('chat-name').innerText = u.name;
         document.getElementById('chat-ava').src = u.ava || 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
         this.nav('scr-chat');
-
         const path = [this.user.id, u.id].sort().join('_');
-        
         if (this.chatRef) off(this.chatRef);
         this.chatRef = ref(db, 'msgs/' + path);
-        onValue(this.chatRef, (s) => this.renderMessages(s.val()));
-
-        onValue(ref(db, `status/${path}/${u.id}`), (s) => {
-            document.getElementById('typing-indicator').innerText = s.val() ? 'Печатает...' : '';
-        });
+        onValue(this.chatRef, (s) => this.draw(s.val()));
     },
 
-    closeChat() {
-        if(this.chatRef) off(this.chatRef);
-        document.getElementById('react-panel').style.display = 'none';
-        this.nav('close');
-    },
-
-    renderMessages(data) {
+    draw(data) {
         const box = document.getElementById('msg-box');
-        box.innerHTML = ''; 
-        if(!data) return;
-
+        box.innerHTML = ''; if(!data) return;
         Object.entries(data).forEach(([key, m]) => {
             const isMe = m.s === this.user.id;
             const b = document.createElement('div');
             b.className = `bubble ${isMe ? 'my' : 'other'}`;
             b.onclick = () => { this.lastM = key; document.getElementById('react-panel').style.display='flex'; };
-
-            let content = m.img ? `<img src="${m.img}" style="width:100%; border-radius:12px; margin-bottom:5px;">` : m.t;
-            let timeStyle = isMe ? 'color: rgba(255,255,255,0.7)' : 'color: rgba(128,128,128,0.7)';
-            
-            b.innerHTML = `${content} <div style="font-size:10px; text-align:right; margin-top:4px; ${timeStyle}">${m.time}</div>`;
+            let content = m.img ? `<img src="${m.img}" style="width:100%; border-radius:12px;">` : m.t;
+            b.innerHTML = `${content} <div style="font-size:9px; opacity:0.5; text-align:right;">${m.time}</div>`;
             if(m.r) b.innerHTML += `<div class="react-badge">${m.r}</div>`;
-            
             box.appendChild(b);
         });
         box.scrollTop = box.scrollHeight;
     },
 
     sendText() {
-        const inp = document.getElementById('msg-input');
-        if(!inp.value.trim()) return;
-        this.pushMessage({ t: inp.value });
-        inp.value = '';
+        const val = document.getElementById('msg-input').value; if(!val) return;
+        this.push({ t: val }); document.getElementById('msg-input').value = '';
     },
 
     sendPhoto(input) {
-        if(input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => this.pushMessage({ img: e.target.result });
-            reader.readAsDataURL(input.files[0]);
+        if(input.files[0]) {
+            const r = new FileReader();
+            r.onload = (e) => this.push({ img: e.target.result });
+            r.readAsDataURL(input.files[0]);
         }
     },
 
-    pushMessage(obj) {
+    push(obj) {
         const path = [this.user.id, this.peer.id].sort().join('_');
-        const m = { ...obj, s: this.user.id, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
-        push(ref(db, 'msgs/' + path), m);
+        push(ref(db, 'msgs/' + path), { ...obj, s: this.user.id, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
     },
 
     react(emoji) {
@@ -309,22 +226,12 @@ window.app = {
         document.getElementById('react-panel').style.display = 'none';
     },
 
-    handleTyping() {
-        const path = [this.user.id, this.peer.id].sort().join('_');
-        set(ref(db, `status/${path}/${this.user.id}`), true);
-        setTimeout(() => set(ref(db, `status/${path}/${this.user.id}`), false), 1500);
-    },
-
-    /* Навигация и UI */
     nav(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        if(id !== 'close') {
-            document.getElementById(id).classList.add('active');
-            if(id === 'scr-settings') {
-                document.getElementById('set-ava-preview').src = this.user.ava || '';
-            }
-        }
+        if(id !== 'close') document.getElementById(id).classList.add('active');
     },
+
+    closeChat() { if(this.chatRef) off(this.chatRef); this.nav('close'); },
 
     showMyProfile() {
         document.getElementById('prof-ava').src = this.user.ava || '';
@@ -335,42 +242,25 @@ window.app = {
     },
 
     updateAvatar(input) {
-        if(input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
+        if(input.files[0]) {
+            const r = new FileReader();
+            r.onload = (e) => {
                 this.user.ava = e.target.result;
-                document.getElementById('set-ava-preview').src = this.user.ava;
                 update(ref(db, 'users/' + this.user.id), { ava: this.user.ava });
-                localStorage.setItem('dove_v23', JSON.stringify(this.user));
+                localStorage.setItem('dove_v24', JSON.stringify(this.user));
             };
-            reader.readAsDataURL(input.files[0]);
+            r.readAsDataURL(input.files[0]);
         }
     },
 
     toggleTheme() {
         this.user.theme = this.user.theme === 'dark' ? 'light' : 'dark';
         document.body.className = this.user.theme;
-        update(ref(db, 'users/' + this.user.id), { theme: this.user.theme });
-        localStorage.setItem('dove_v23', JSON.stringify(this.user));
+        localStorage.setItem('dove_v24', JSON.stringify(this.user));
     },
 
-    showAdminPanel() {
-        onValue(ref(db, 'users'), (snap) => {
-            const list = document.getElementById('admin-list');
-            list.innerHTML = '';
-            Object.values(snap.val() || {}).forEach(u => {
-                const row = document.createElement('div');
-                row.className = 'user-row';
-                row.innerHTML = `<img src="${u.ava || ''}"><div><b style="color:var(--text)">${u.name}</b> <span style="color:#ef4444">(@${u.id})</span><br><small style="color:#777">${u.phone}</small></div>`;
-                list.appendChild(row);
-            });
-        }, { onlyOnce: true });
-        this.nav('scr-admin');
-    },
-
-    logout() { localStorage.removeItem('dove_v23'); location.reload(); }
+    logout() { localStorage.clear(); location.reload(); }
 };
-
 app.init();
 </script>
 </body>
