@@ -6,7 +6,6 @@
 <title>DoveGram</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
-/* Стилі залишено без змін згідно з оригінальним кодом */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
 --bg:#17212b;--sb:#0e1621;--inp:#242f3d;--hov:#202b36;
@@ -28,58 +27,28 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .auth-box h1{font-size:28px;font-weight:700;margin-bottom:4px}
 .auth-box .sub{color:var(--txt2);font-size:14px;margin-bottom:28px}
 .btn-main{width:100%;padding:14px;border:none;border-radius:12px;background:var(--acc);color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-main:hover{background:var(--acc2)}.btn-main:disabled{opacity:.6;cursor:wait}
+.btn-main:hover{background:var(--acc2)}
 .err{color:var(--red);font-size:13px;min-height:20px;margin-top:10px}
-.hint{color:var(--txt3);font-size:12px;margin-top:14px}
 #app{flex-direction:row}
 .sb{width:320px;min-width:320px;height:100%;display:flex;flex-direction:column;background:var(--sb);border-right:1px solid var(--brd)}
 .sb-top{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--brd);min-height:58px}
 .search-w{flex:1;position:relative}
 .search-w i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:13px}
 .search-w input{width:100%;padding:10px 14px 10px 40px;border-radius:22px;border:none;background:var(--inp);color:var(--txt);font-size:13px;outline:none}
-.tabs{display:flex;border-bottom:1px solid var(--brd)}
-.tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;transition:.2s;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px}
-.tab.act{color:var(--acc);border-bottom-color:var(--acc)}
 .cl{flex:1;overflow-y:auto}
 .ci{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:background .12s}
-.ci:hover{background:var(--hov)}.ci.active{background:var(--acc)}.ci.active *{color:#fff!important}
-.av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0;position:relative}
+.ci:hover{background:var(--hov)}.ci.active{background:var(--acc)}
+.av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0}
 .av.gl{background:linear-gradient(135deg,#5eaae8,#43b87a)}
-.av .dot{position:absolute;bottom:1px;right:1px;width:13px;height:13px;background:var(--grn);border-radius:50%;border:2.5px solid var(--sb)}
-.ci-body{flex:1;min-width:0}
-.ci-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
-.ci-name{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt)}
-.ci-time{font-size:12px;color:var(--txt3)}
-.ci-msg{font-size:13px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cha{flex:1;display:flex;flex-direction:column;background:var(--bg)}
 .ch-h{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--sb);border-bottom:1px solid var(--brd);min-height:58px}
-.back{display:none}
-.ch-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
-.ch-info{flex:1;display:flex;flex-direction:column}.ch-nm{font-size:15px;font-weight:600}.ch-st{font-size:12px;color:var(--txt2)}.ch-st.on{color:var(--grn)}.ch-st.tp{color:var(--acc)}
-.msgs{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:1px}
-.mg{max-width:70%;display:flex;flex-direction:column}.mg.s{align-self:flex-end}.mg.r{align-self:flex-start}
-.bbl{padding:7px 12px 5px;border-radius:12px;font-size:14.5px;line-height:1.4;word-break:break-word}
-.mg.s .bbl{background:var(--sent);border-top-right-radius:4px}
-.mg.r .bbl{background:var(--recv);border-top-left-radius:4px}
-.mi{max-width:280px;max-height:300px;border-radius:8px;display:block;margin-bottom:4px;cursor:pointer}
-.in-bar{display:flex;align-items:flex-end;gap:4px;padding:8px 10px;background:var(--sb);border-top:1px solid var(--brd)}
-.in-bar textarea{flex:1;padding:10px 14px;border:none;border-radius:20px;background:var(--inp);color:var(--txt);font-size:14px;font-family:inherit;resize:none;outline:none;max-height:120px;line-height:1.35}
-.att-m{display:none;padding:10px 14px;background:var(--sb);border-top:1px solid var(--brd);gap:10px}
-.att-m.show{display:flex}
-.att-b{display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding:12px 18px;border-radius:14px;border:none;background:var(--inp);color:var(--txt);transition:.2s;font-size:12px}
-.att-b.ph i{color:#5eaae8}.att-b.vi i{color:#e05555}
-.prev{display:none;align-items:center;gap:10px;padding:8px 14px;background:var(--sb);border-top:1px solid var(--brd)}
-.rpop{position:fixed;display:none;background:var(--sb);border:1px solid var(--brd);border-radius:24px;padding:6px 10px;gap:4px;box-shadow:0 8px 30px rgba(0,0,0,.6);z-index:999}
-.rpop.show{display:flex}
-.rpop button{width:44px;height:44px;border:none;border-radius:50%;background:transparent;font-size:24px;cursor:pointer}
-.fscr{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:2000}
-.fscr.show{display:flex}
-.mo{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1000}
-.mo.show{display:flex}
-.md{width:90%;max-width:400px;background:var(--sb);border-radius:16px;padding:24px}
-.tt{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);background:var(--inp);padding:10px 24px;border-radius:20px;opacity:0;transition:.25s;z-index:9999}
-.tt.show{opacity:1}
-@media(max-width:768px){.sb{width:100%;position:absolute;z-index:10}.cha{width:100%}.sb.hid{display:none}.cha.hid{display:none}.back{display:flex!important}}
+.msgs{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:5px}
+.mg{max-width:75%;padding:8px 12px;border-radius:12px;font-size:14.5px;line-height:1.4;word-break:break-word}
+.mg.s{align-self:flex-end;background:var(--sent);border-top-right-radius:4px}
+.mg.r{align-self:flex-start;background:var(--recv);border-top-left-radius:4px}
+.in-bar{display:flex;align-items:center;gap:8px;padding:10px;background:var(--sb);border-top:1px solid var(--brd)}
+.in-bar textarea{flex:1;padding:10px 14px;border:none;border-radius:20px;background:var(--inp);color:var(--txt);font-size:14px;resize:none;outline:none;max-height:100px}
+@media(max-width:768px){.sb{width:100%}.cha.hid{display:none}.back{display:block!important}}
 </style>
 </head>
 <body>
@@ -89,189 +58,99 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div class="logo-icon"><i class="fas fa-dove"></i></div>
 <h1>DoveGram</h1>
 <p class="sub">Швидкий. Вільний. Безпечний.</p>
-<input class="inp" id="aId" placeholder="Придумайте @username" autocomplete="off" autofocus>
+<input class="inp" id="aId" placeholder="Ваш @username" autocomplete="off">
 <input class="inp" id="aNm" placeholder="Ваше ім'я">
-<button class="btn-main" id="aBtn"><i class="fas fa-arrow-right"></i> Увійти</button>
+<button class="btn-main" id="aBtn">Увійти</button>
 <div class="err" id="aErr"></div>
-<div class="hint">Введіть будь-який @id — акаунт створиться автоматично</div>
 </div>
 </div>
 
 <div id="app" class="scr">
-<aside id="sidebar" class="sb">
+<aside class="sb" id="sidebar">
 <div class="sb-top">
-<button class="ib" id="menuBtn" title="Профіль"><i class="fas fa-bars"></i></button>
 <div class="search-w"><i class="fas fa-search"></i><input id="searchIn" placeholder="Пошук..."></div>
-</div>
-<div class="tabs">
-<div class="tab act" data-tab="all"><i class="fas fa-layer-group"></i> Всі</div>
-<div class="tab" data-tab="global"><i class="fas fa-globe-americas"></i> Загальний</div>
-<div class="tab" data-tab="private"><i class="fas fa-user-friends"></i> Особисті</div>
 </div>
 <div class="cl" id="chatList"></div>
 </aside>
-
-<main id="chatArea" class="cha hid">
+<main class="cha">
 <header class="ch-h">
-<button class="ib back" id="backBtn"><i class="fas fa-arrow-left"></i></button>
-<div class="ch-av av gl" id="hAv"><i class="fas fa-globe-americas"></i></div>
-<div class="ch-info"><span class="ch-nm" id="hNm">DoveGram</span><span class="ch-st" id="hSt"></span></div>
-<button class="ib" id="ciBtn"><i class="fas fa-ellipsis-v"></i></button>
+<div class="ch-av av gl"><i class="fas fa-globe-americas"></i></div>
+<div class="ch-info"><span class="ch-nm">Загальний чат</span></div>
 </header>
 <div class="msgs" id="msgs"></div>
-<div class="att-m" id="attM">
-<button class="att-b ph" id="attPh"><i class="fas fa-camera"></i>Фото</button>
-<button class="att-b vi" id="attVi"><i class="fas fa-film"></i>Відео</button>
-</div>
-<div class="prev" id="prev">
-<img id="prvI" style="display:none"><video id="prvV" style="display:none" muted></video>
-<span class="pn" id="prvN"></span>
-<button class="pd" id="prvD"><i class="fas fa-times"></i></button>
-</div>
-<div class="in-bar" id="inBar" style="display:none">
-<button class="ib" id="attBtn"><i class="fas fa-paperclip"></i></button>
+<div class="in-bar">
 <textarea id="mIn" rows="1" placeholder="Повідомлення..."></textarea>
 <button class="ib snd" id="sndBtn"><i class="fas fa-paper-plane"></i></button>
 </div>
 </main>
 </div>
 
-<div class="mo" id="profM">
-<div class="md">
-<div class="md-top"><h3><i class="fas fa-user-cog"></i> Профіль</h3><button class="ib" id="profX"><i class="fas fa-times"></i></button></div>
-<label>@ID</label><input class="inp" id="pId" disabled>
-<label>Ім'я</label><input class="inp" id="pNm">
-<button class="btn-main" id="pSave">Зберегти</button>
-<button class="btn-out" id="logoutBtn" style="color:var(--red);margin-top:10px;background:none;border:none;cursor:pointer">Вийти</button>
-</div>
-</div>
-
-<div class="rpop" id="rPop">
-<button data-r="❤️">❤️</button><button data-r="💔">💔</button><button data-r="🔥">🔥</button>
-</div>
-
-<div class="fscr" id="fscr">
-<button class="ib" id="fsX" style="position:absolute;top:20px;right:20px;color:white"><i class="fas fa-times"></i></button>
-<img id="fsI" style="display:none"><video id="fsV" style="display:none" controls></video>
-</div>
-
-<div class="tt" id="toast"></div>
-<input type="file" id="fPh" accept="image/*" style="display:none">
-<input type="file" id="fVi" accept="video/*" style="display:none">
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, onChildAdded, remove, update, off } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* ===== ОНОВЛЕНА ІНІЦІАЛІЗАЦІЯ ПІД НОВИЙ ХОСТ ===== */
-let db;
-try {
-  const firebaseConfig = {
-    apiKey: "AIzaSyD6TqI7EIYNJ-dHFbqV9DNA87XJ24YNcLs",
-    authDomain: "dovegram-44d9e.firebaseapp.com",
-    databaseURL: "https://dovegram-44d9e-default-rtdb.firebaseio.com",
-    projectId: "dovegram-44d9e",
-    storageBucket: "dovegram-44d9e.firebasestorage.app",
-    messagingSenderId: "408738784468",
-    appId: "1:408738784468:web:6103c56117779abb4fc741",
-    measurementId: "G-DDLV1643PQ"
-  };
+/* ===== НОВІ ДАНІ З ТВОГО СКРІНШОТА ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyD6TqI7EIYNJ-dHFbqV9DNA87XJ24YNcLs",
+  authDomain: "dovegram-44d9e.firebaseapp.com",
+  projectId: "dovegram-44d9e",
+  storageBucket: "dovegram-44d9e.firebasestorage.app",
+  messagingSenderId: "408738784468",
+  appId: "1:408738784468:web:6103c56117779abb4fc741",
+  measurementId: "G-DDLV1643PQ",
+  databaseURL: "https://dovegram-44d9e-default-rtdb.firebaseio.com" // URL для Realtime Database
+};
 
-  const fb = initializeApp(firebaseConfig);
-  db = getDatabase(fb);
-} catch(e) {
-  document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#e05555">Firebase помилка: '+e.message+'</div>';
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const $ = id => document.getElementById(id);
+let user = JSON.parse(localStorage.getItem('dg_user'));
+
+if(user) { showApp(); }
+
+$('aBtn').onclick = () => {
+    const id = $('aId').value.trim();
+    const nm = $('aNm').value.trim();
+    if(id.length < 2) return $('aErr').textContent = "Надто короткий ID";
+    user = { uid: id, name: nm || id };
+    localStorage.setItem('dg_user', JSON.stringify(user));
+    showApp();
+};
+
+function showApp() {
+    $('auth').classList.remove('act');
+    $('app').classList.add('act');
+    loadMsgs();
 }
 
-/* ===== ЛОГІКА ДОДАТКУ ===== */
-const S={user:null,chat:null,media:null,mediaType:null,tyTO:null,listeners:[],tab:'all',mob:innerWidth<=768};
-const $=id=>document.getElementById(id);
-const esc=s=>{if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML};
-const cid=(a,b)=>[a,b].sort().join('_');
-const getIcon=s=>'fa-user'; 
-const getC=s=>'c1'; 
-const fmtT=ts=>{const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
-const fmtD=ts=>new Date(ts).toLocaleDateString('uk');
-const fmtAgo=ts=>'щойно';
-
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
-function autoH(){const t=$('mIn');t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px'}
-function showScr(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('act'));$(id).classList.add('act')}
-
-(function init(){
-const saved=localStorage.getItem('dg_user');
-if(saved){try{const u=JSON.parse(saved);if(u&&u.uid){S.user=u;showScr('app');startApp();firebaseSyncUser(u.uid,u.name);return;}}catch(e){}}
-showScr('auth');
-})();
-
-function firebaseSyncUser(uid,name){
-set(ref(db,'users/'+uid),{id:'@'+uid,name:name||uid,online:true,lastSeen:Date.now()}).catch(()=>{});
+function loadMsgs() {
+    onValue(ref(db, 'messages/global'), (snapshot) => {
+        $('msgs').innerHTML = '';
+        const data = snapshot.val();
+        if(data) {
+            Object.values(data).forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'mg ' + (m.sender === user.uid ? 's' : 'r');
+                div.innerHTML = `<b>${m.name}</b><br>${m.text}`;
+                $('msgs').appendChild(div);
+            });
+            $('msgs').scrollTop = $('msgs').scrollHeight;
+        }
+    });
 }
 
-$('aBtn').addEventListener('click',()=>{
-const id=$('aId').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
-const nm=$('aNm').value.trim();
-if(!id||id.length<2){$('aErr').textContent='Мінімум 2 символи';return}
-const userData={uid:id,name:nm||id,id:'@'+id};
-S.user=userData;
-localStorage.setItem('dg_user',JSON.stringify(userData));
-showScr('app');
-startApp();
-firebaseSyncUser(id,nm||id);
-});
-
-let usersC={},msgsC={};
-function startApp(){
-if(!S.user)return;
-onValue(ref(db,'users'),s=>{usersC=s.val()||{};renderCL()});
-onValue(ref(db,'msgs'),s=>{msgsC=s.val()||{};renderCL()});
-bindAll();
-}
-
-function renderCL(){
-const q=$('searchIn').value.toLowerCase();
-let h='';
-if(S.tab==='all'||S.tab==='global'){
-const gm=msgsC.global?Object.values(msgsC.global):[];
-const gl=gm.length?gm[gm.length-1]:null;
-h+=`<div class="ci" data-id="global"><div class="av gl"><i class="fas fa-globe-americas"></i></div><div class="ci-body"><b>Загальний чат</b><br><small>${gl?esc(gl.text):'Почніть спілкування'}</small></div></div>`;
-}
-$('chatList').innerHTML=h;
-$('chatList').querySelectorAll('.ci').forEach(el=>el.addEventListener('click',()=>openChat(el.dataset.id)));
-}
-
-function openChat(id){
-S.chat=id;
-if(S.mob){$('sidebar').classList.add('hid');$('chatArea').classList.remove('hid')}
-$('chatArea').classList.remove('hid');$('inBar').style.display='flex';
-$('msgs').innerHTML='';
-const path=id==='global'?'msgs/global':'msgs/'+cid(S.user.uid,id);
-onValue(ref(db,path),snap=>{
-$('msgs').innerHTML='';
-const data=snap.val()||{};
-Object.entries(data).forEach(([k,v])=>{
-const d=document.createElement('div');
-d.className='mg '+(v.sender===S.user.uid?'s':'r');
-d.innerHTML=`<div class="bbl">${esc(v.text)}<br><small style="opacity:0.5">${fmtT(v.time)}</small></div>`;
-$('msgs').appendChild(d);
-});
-$('msgs').scrollTop=$('msgs').scrollHeight;
-});
-}
-
-async function sendMsg(){
-const text=$('mIn').value.trim();
-if(!text)return;
-const path=S.chat==='global'?'msgs/global':'msgs/'+cid(S.user.uid,S.chat);
-await push(ref(db,path),{sender:S.user.uid,text,time:Date.now()});
-$('mIn').value='';autoH();
-}
-
-function bindAll(){
-$('sndBtn').addEventListener('click',sendMsg);
-$('mIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
-$('backBtn').addEventListener('click',()=>{if(S.mob){$('sidebar').classList.remove('hid');$('chatArea').classList.add('hid')}S.chat=null;renderCL()});
-}
+$('sndBtn').onclick = () => {
+    const text = $('mIn').value.trim();
+    if(!text) return;
+    push(ref(db, 'messages/global'), {
+        sender: user.uid,
+        name: user.name,
+        text: text,
+        time: Date.now()
+    });
+    $('mIn').value = '';
+};
 </script>
 </body>
 </html>
